@@ -71,3 +71,8 @@ report = writer.generate(result)
 - 森林图/漏斗图
 - 数据提取表
 - GRADE证据概要
+
+
+## 异常处理
+- 输入为空时返回友好提示
+- 处理超时时自动重试
