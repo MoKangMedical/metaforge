@@ -31,7 +31,15 @@ from agents.filter import ScreeningAgent
 from stats.engine import MetaAnalysisEngine, StudyInput, sensitivity_analysis
 from stats.prisma import generate_prisma_flowchart, generate_prisma_html
 
-app = FastAPI(title="MetaForge", description="AI循证医学研究平台")
+# v2.0 modules
+from engines.cochrane_engine import CochraneComplianceEngine, PICOSElements, ReviewStage
+from engines.report_generator import PRISMA2020Reporter
+from engines.extraction import DataExtractionEngine
+from engines.blind_screening import BlindScreeningEngine, ScreeningDecision
+from engines.visual_extract import PDFVisualEngine, ExtractedTable
+from assessment.rob2 import RoB2Engine, BiasJudgment, Domain
+
+app = FastAPI(title="MetaForge", description="AI循证医学研究平台 — 严格遵循Cochrane规范")
 
 # 静态文件和模板
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -511,9 +519,411 @@ async def get_project(project_id: str):
     return project
 
 
+# ============================================
+# v2.0 API: PICOS 提取
+# ============================================
+
+@app.post("/api/picos")
+async def api_picos(request: Request):
+    """
+    从自然语言研究问题中提取 PICOS 五要素
+    
+    Body:
+    {
+        "query": "PD-1抑制剂联合化疗治疗晚期NSCLC的RCT"
+    }
+    """
+    body = await request.json()
+    query = body.get("query", "")
+    
+    if not query:
+        return JSONResponse({"error": "研究问题不能为空"}, status_code=400)
+    
+    engine = CochraneComplianceEngine()
+    picos = engine.extract_picos_from_query(query)
+    
+    return {
+        "success": True,
+        "picos": {
+            "population": picos.population,
+            "population_include": picos.population_include,
+            "population_exclude": picos.population_exclude,
+            "intervention": picos.intervention,
+            "intervention_include": picos.intervention_include,
+            "comparison": picos.comparison,
+            "outcome_primary": picos.outcome_primary,
+            "outcome_secondary": picos.outcome_secondary,
+            "study_design": picos.study_design,
+            "study_design_include": picos.study_design_include,
+        },
+        "summary": picos.to_summary(),
+        "search_criteria": picos.to_search_criteria(),
+        "note": "⚠️ AI 辅助提取，请人工审核后确认",
+    }
+
+
+# ============================================
+# v2.0 API: Cochrane 合规检查
+# ============================================
+
+@app.post("/api/compliance/start")
+async def api_compliance_start(request: Request):
+    """
+    开始一个阶段的合规检查
+    
+    Body: {"stage": "search"}
+    """
+    body = await request.json()
+    stage_name = body.get("stage", "protocol")
+    
+    try:
+        stage = ReviewStage(stage_name)
+    except ValueError:
+        return JSONResponse({"error": f"无效阶段: {stage_name}"}, status_code=400)
+    
+    engine = CochraneComplianceEngine()
+    audit = engine.start_stage(stage)
+    
+    return {
+        "success": True,
+        "stage": stage.value,
+        "checkpoints": [
+            {
+                "name": cp.name,
+                "description": cp.description,
+                "cochrane_ref": cp.cochrane_reference,
+                "passed": cp.passed,
+            }
+            for cp in audit.checkpoints
+        ],
+    }
+
+
+@app.post("/api/compliance/check")
+async def api_compliance_check(request: Request):
+    """
+    通过一个检查点
+    
+    Body: {"stage": "search", "checkpoint": "多数据库检索", "details": "已检索PubMed+Cochrane"}
+    """
+    body = await request.json()
+    stage_name = body.get("stage", "")
+    checkpoint_name = body.get("checkpoint", "")
+    details = body.get("details", "")
+    
+    try:
+        stage = ReviewStage(stage_name)
+    except ValueError:
+        return JSONResponse({"error": f"无效阶段: {stage_name}"}, status_code=400)
+    
+    engine = CochraneComplianceEngine()
+    engine.start_stage(stage)
+    engine.pass_checkpoint(stage, checkpoint_name, details)
+    
+    return {"success": True, "checkpoint": checkpoint_name, "passed": True}
+
+
+# ============================================
+# v2.0 API: RoB 2.0 偏倚风险评估
+# ============================================
+
+@app.post("/api/rob/create")
+async def api_rob_create(request: Request):
+    """
+    创建偏倚风险评估
+    
+    Body: {"study_name": "Gandhi 2018", "pmid": "29658856"}
+    """
+    body = await request.json()
+    study_name = body.get("study_name", "")
+    pmid = body.get("pmid", "")
+    
+    if not study_name:
+        return JSONResponse({"error": "研究名称不能为空"}, status_code=400)
+    
+    rob = RoB2Engine()
+    assessment = rob.create_assessment(study_name, pmid)
+    
+    return {
+        "success": True,
+        "study_name": study_name,
+        "domains": [
+            {
+                "name": da.domain_name,
+                "questions": [
+                    {"id": q.question_id, "question": q.question, "answer": q.answer}
+                    for q in da.signaling_questions
+                ]
+            }
+            for da in assessment.domains
+        ],
+        "judgment_options": [j.value for j in BiasJudgment],
+    }
+
+
+@app.post("/api/rob/answer")
+async def api_rob_answer(request: Request):
+    """
+    回答信号问题
+    
+    Body: {"study_name": "Gandhi 2018", "question_id": "1.1", "answer": "Yes", "support": "..."}
+    """
+    body = await request.json()
+    study_name = body.get("study_name", "")
+    question_id = body.get("question_id", "")
+    answer = body.get("answer", "")
+    support = body.get("support", "")
+    
+    rob = RoB2Engine()
+    rob.assessments[study_name] = rob.create_assessment(study_name) if study_name not in rob.assessments else rob.assessments[study_name]
+    rob.answer_question(study_name, question_id, answer, support)
+    
+    return {"success": True}
+
+
+@app.post("/api/rob/judge")
+async def api_rob_judge(request: Request):
+    """
+    判断偏倚风险等级
+    
+    Body: {"study_name": "Gandhi 2018", "domain": "domain1", "judgment": "low", "rationale": "..."}
+    """
+    body = await request.json()
+    study_name = body.get("study_name", "")
+    domain_name = body.get("domain", "")
+    judgment_str = body.get("judgment", "low")
+    rationale = body.get("rationale", "")
+    
+    try:
+        domain = Domain(domain_name)
+        judgment = BiasJudgment(judgment_str)
+    except ValueError as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+    
+    rob = RoB2Engine()
+    if study_name in rob.assessments:
+        rob.judge_domain(study_name, domain, judgment, rationale)
+        rob.compute_overall(study_name)
+    
+    return {"success": True, "overall": rob.assessments[study_name].overall_judgment.value if study_name in rob.assessments else "unknown"}
+
+
+# ============================================
+# v2.0 API: 数据提取
+# ============================================
+
+@app.get("/api/extraction/template")
+async def api_extraction_template():
+    """
+    获取标准化数据提取模板
+    """
+    engine = DataExtractionEngine()
+    return {
+        "success": True,
+        "template": engine.get_template(),
+        "note": "基于 Cochrane 数据提取表标准设计",
+    }
+
+
+@app.post("/api/extraction/create")
+async def api_extraction_create(request: Request):
+    """
+    创建数据提取记录
+    
+    Body: {"study_name": "Gandhi 2018", "pmid": "29658856"}
+    """
+    body = await request.json()
+    study_name = body.get("study_name", "")
+    pmid = body.get("pmid", "")
+    
+    engine = DataExtractionEngine()
+    study = engine.create_extraction(study_name, pmid)
+    
+    return {
+        "success": True,
+        "study_name": study_name,
+        "template": engine.get_template(),
+    }
+
+
+# ============================================
+# v2.0 API: 报告生成
+# ============================================
+
+@app.post("/api/report/generate")
+async def api_report_generate(request: Request):
+    """
+    生成 PRISMA 2020 系统评价报告
+    
+    Body: 完整项目数据（包含 picos, search, screening, analysis, prisma, rob）
+    """
+    body = await request.json()
+    
+    reporter = PRISMA2020Reporter()
+    report = reporter.generate_from_project(body)
+    
+    return {
+        "success": True,
+        "title": report.title,
+        "sections": {
+            name: {
+                "title": section.title,
+                "prisma_item": section.prisma_item,
+                "content": section.content,
+            }
+            for name, section in report.sections.items()
+        },
+        "abstract": {
+            "background": report.abstract_background,
+            "objectives": report.abstract_objectives,
+            "methods": report.abstract_methods,
+            "results": report.abstract_results,
+            "conclusions": report.abstract_conclusions,
+        },
+        "markdown": report.to_markdown(),
+    }
+
+
+@app.post("/api/report/html")
+async def api_report_html(request: Request):
+    """
+    生成报告 HTML 版本
+    """
+    body = await request.json()
+    
+    reporter = PRISMA2020Reporter()
+    report = reporter.generate_from_project(body)
+    html = reporter.export_html()
+    
+    return HTMLResponse(content=html)
+
+
+# ============================================
+# v2.0 API: 多Agent盲筛
+# ============================================
+
+@app.post("/api/screen/blind")
+async def api_blind_screen(request: Request):
+    """
+    多Agent盲筛 + 仲裁
+    
+    Body:
+    {
+        "articles": [{"pmid": "...", "title": "...", "abstract": "..."}],
+        "criteria": {"population_include": "...", "intervention_include": "..."},
+        "n_agents": 2
+    }
+    """
+    body = await request.json()
+    articles = body.get("articles", [])
+    criteria = body.get("criteria", {})
+    n_agents = min(body.get("n_agents", 2), 3)
+    
+    if not articles:
+        return JSONResponse({"error": "文献列表不能为空"}, status_code=400)
+    
+    engine = BlindScreeningEngine(n_agents=n_agents)
+    session = engine.screen_all(articles, criteria)
+    results = engine.get_results(session)
+    
+    return {
+        "success": True,
+        "method": "多Agent盲筛+仲裁",
+        "n_agents": n_agents,
+        **results,
+    }
+
+
+# ============================================
+# v2.0 API: PDF视觉解析
+# ============================================
+
+@app.post("/api/visual/extract-stats")
+async def api_visual_extract(request: Request):
+    """
+    从文本中提取统计量
+    
+    Body: {"text": "OR = 0.68 (95% CI 0.55-0.84), P = 0.001"}
+    """
+    body = await request.json()
+    text = body.get("text", "")
+    
+    if not text:
+        return JSONResponse({"error": "文本不能为空"}, status_code=400)
+    
+    engine = PDFVisualEngine()
+    stats = engine.extract_statistics_from_text(text)
+    
+    return {
+        "success": True,
+        "statistics": [
+            {
+                "type": s.field_name,
+                "value": s.value,
+                "ci_lower": s.ci_lower,
+                "ci_upper": s.ci_upper,
+                "source": s.source_ref[:100],
+            }
+            for s in stats
+        ],
+    }
+
+
+@app.post("/api/visual/parse-table")
+async def api_visual_table(request: Request):
+    """
+    解析表格数据
+    
+    Body: {"table": [["Group", "Events/N", "Mean±SD"], ["Intervention", "45/120", "7.2±1.3"]]}
+    """
+    body = await request.json()
+    table_data = body.get("table", [])
+    
+    if not table_data:
+        return JSONResponse({"error": "表格数据不能为空"}, status_code=400)
+    
+    engine = PDFVisualEngine()
+    table = ExtractedTable(headers=table_data[0], rows=table_data[1:])
+    result = engine.parse_table_to_extraction(table)
+    
+    return {
+        "success": True,
+        "extraction": result,
+    }
+
+
+@app.post("/api/visual/convert-unit")
+async def api_visual_convert(request: Request):
+    """
+    单位换算
+    
+    Body: {"value": 120, "from_unit": "mg/dl", "to_unit": "mmol/l"}
+    """
+    body = await request.json()
+    value = body.get("value", 0)
+    from_unit = body.get("from_unit", "")
+    to_unit = body.get("to_unit", "")
+    
+    engine = PDFVisualEngine()
+    result = engine.compute_unit_conversion(float(value), from_unit, to_unit)
+    
+    if result is None:
+        return JSONResponse({"error": f"不支持的换算: {from_unit} → {to_unit}"}, status_code=400)
+    
+    return {
+        "success": True,
+        "original": f"{value} {from_unit}",
+        "converted": f"{result} {to_unit}",
+    }
+
+
+# ============================================
+# Health
+# ============================================
+
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "service": "MetaForge", "version": "2.0.0"}
+    return {"status": "ok", "service": "MetaForge", "version": "2.0.0", "cochrane_compliant": True, "features": ["picos", "cochrane_compliance", "rob2", "blind_screening", "data_extraction", "visual_extract", "report_generator"]}
 
 
 if __name__ == "__main__":

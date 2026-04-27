@@ -80,8 +80,3 @@ test_prompts:
 ## 参考文件
 - 统计引擎: `~/Desktop/metaforge/app/stats/engine.py`
 - PRISMA生成: `~/Desktop/metaforge/app/stats/prisma.py`
-
-
-## 异常处理
-- 输入为空时返回友好提示
-- 处理超时时自动重试
