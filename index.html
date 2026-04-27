@@ -37,12 +37,13 @@
         <li><a href="#features">功能</a></li>
         <li><a href="#agents">AI Agents</a></li>
         <li><a href="#demo">实时演示</a></li>
+        <li><a href="#figures">图表库</a></li>
         <li><a href="#comparison">对比</a></li>
         <li><a href="#pricing">定价</a></li>
       </ul>
       <div class="nav-cta">
         <a href="#demo" class="btn btn-secondary">查看演示</a>
-        <a href="#pricing" class="btn btn-primary">免费试用</a>
+        <a href="/app" class="btn btn-primary">免费试用</a>
       </div>
       <button class="mobile-menu-btn">☰</button>
     </div>
@@ -65,7 +66,7 @@
           MetaForge 是全球首个端到端AI循证医学研究平台。6大AI Agent自主协作，自动完成检索、筛选、提取、评价、统计、写作全流程，输出可溯源、可复现的规范结果。
         </p>
         <div class="hero-actions">
-          <a href="#pricing" class="btn btn-primary">
+          <a href="/app" class="btn btn-primary">
             🚀 立即体验 — 免费开始
           </a>
           <a href="#demo" class="btn btn-secondary">
@@ -344,6 +345,76 @@
     </div>
   </section>
 
+  <!-- ====== FIGURES GALLERY ====== -->
+  <section class="section figures-section page-section" id="figures">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">📊 发表级图表</span>
+        <h2 class="section-title">Meta分析 <span class="gradient">图表库</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          自动生成Nature/NEJM级Meta分析图表，包括森林图、漏斗图、PRISMA流程图、亚组分析、敏感性分析。点击可放大查看。
+        </p>
+      </div>
+      <div class="figures-grid reveal">
+        <div class="figure-card" onclick="openLightbox('assets/figures/1_主分析森林图.png', '主分析森林图 — 固定/随机效应模型合并结果')">
+          <img src="assets/figures/1_主分析森林图.png" alt="主分析森林图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>主分析森林图</h3>
+            <p>固定效应与随机效应模型合并效应量，含95%CI、权重、异质性检验</p>
+            <span class="figure-badge badge-forest">Forest Plot</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/2_扩展分析森林图.png', '扩展分析森林图 — 多模型对比')">
+          <img src="assets/figures/2_扩展分析森林图.png" alt="扩展分析森林图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>扩展分析森林图</h3>
+            <p>多种统计模型对比（M-H、D-L、REML），含预测区间</p>
+            <span class="figure-badge badge-forest">Forest Plot</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/3_PRISMA流程图.png', 'PRISMA 2020 流程图')">
+          <img src="assets/figures/3_PRISMA流程图.png" alt="PRISMA流程图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>PRISMA 2020 流程图</h3>
+            <p>文献检索、筛选、纳入的完整流程，符合PRISMA 2020标准</p>
+            <span class="figure-badge badge-prisma">PRISMA</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/4_亚组分析.png', '亚组分析 — 按研究特征分组')">
+          <img src="assets/figures/4_亚组分析.png" alt="亚组分析" loading="lazy">
+          <div class="figure-card-info">
+            <h3>亚组分析</h3>
+            <p>按干预剂量、随访时间、人群特征等分组的亚组Meta分析</p>
+            <span class="figure-badge badge-subgroup">Subgroup</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/5_逐一剔除分析.png', '逐一剔除敏感性分析')">
+          <img src="assets/figures/5_逐一剔除分析.png" alt="逐一剔除分析" loading="lazy">
+          <div class="figure-card-info">
+            <h3>逐一剔除分析</h3>
+            <p>Leave-one-out敏感性分析，评估单个研究对合并效应的影响</p>
+            <span class="figure-badge badge-sensitivity">Sensitivity</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/6_漏斗图.png', '漏斗图 — 发表偏倚评估')">
+          <img src="assets/figures/6_漏斗图.png" alt="漏斗图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>漏斗图</h3>
+            <p>Funnel plot发表偏倚可视化，含Egger检验和Trim-and-Fill</p>
+            <span class="figure-badge badge-funnel">Funnel Plot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
   <!-- ====== COMPARISON ====== -->
   <section class="section page-section" id="comparison">
     <div class="container">
@@ -618,6 +689,21 @@
     </div>
   </footer>
 
+  <script>
+    // Lightbox for figures gallery
+    function openLightbox(src, caption) {
+      const overlay = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-caption').textContent = caption || '';
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  </script>
   <script src="js/main.js"></script>
 </body>
 </html>
