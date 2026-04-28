@@ -1,109 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MetaForge - MoKangMedical</title>
-<meta name="description" content="Automated meta-analysis pipeline from literature search to report.">
-<meta property="og:title" content="MetaForge - MoKangMedical">
-<meta property="og:description" content="Automated meta-analysis pipeline from literature search to report.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://mokangmedical.github.io/metaforge/">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1f3e5;</text></svg>">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--p:#a855f7;--bg:#0a0a0f;--s:#12121a;--t:#e2e8f0;--m:#94a3b8;--b:rgba(255,255,255,.06)}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t);line-height:1.6}
-a{color:var(--p);text-decoration:none}
-.nav{position:fixed;top:0;left:0;right:0;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--b);z-index:1000;padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
-.nb{font-size:1.2rem;font-weight:700;color:var(--p)}
-.nl{display:flex;gap:1.5rem;align-items:center}
-.nl a{color:var(--m);font-size:.85rem;transition:color .2s}
-.nl a:hover{color:var(--t)}
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,#a855f715,transparent 70%)}
-.hc{position:relative;max-width:800px}
-.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-.03em;background:linear-gradient(135deg,#fff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1rem}
-.sub{font-size:1.3rem;color:var(--m);margin-bottom:2rem}
-.cat{display:inline-block;padding:.4rem 1rem;background:#a855f722;border:1px solid #a855f744;border-radius:999px;font-size:.8rem;color:var(--p);margin-bottom:2rem}
-.btn{display:inline-block;padding:.8rem 2rem;background:var(--p);color:#fff;border-radius:8px;font-weight:600;transition:all .2s}
-.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px #a855f740}
-.bo{display:inline-block;padding:.6rem 1.5rem;border:1px solid var(--p);color:var(--p);border-radius:8px;font-weight:500;transition:all .2s}
-.bo:hover{background:var(--p);color:#fff}
-.sec{padding:5rem 2rem;max-width:1200px;margin:0 auto}
-.st{text-align:center;font-size:2.2rem;font-weight:700;margin-bottom:.5rem}
-.ss{text-align:center;color:var(--m);margin-bottom:3rem}
-.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
-.fc{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:2rem;transition:all .3s}
-.fc:hover{border-color:#a855f740;transform:translateY(-4px)}
-.fi{width:40px;height:40px;background:#a855f720;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1rem}
-.fc h3{font-size:1.1rem;margin-bottom:.5rem}
-.fc p{color:var(--m);font-size:.9rem}
-.pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;margin-top:2rem}
-.pc{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:2rem;text-align:center;transition:all .3s}
-.pc:hover{border-color:#a855f740}
-.pr{font-size:2.5rem;font-weight:800;color:var(--p);margin:1rem 0}
-.pc p{color:var(--m);margin-bottom:1.5rem}
-.cta{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,#a855f710,transparent)}
-footer{text-align:center;padding:2rem;color:var(--m);font-size:.8rem;border-top:1px solid var(--b)}
-footer a{color:var(--m)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin:3rem 0}
-.stat{text-align:center}
-.stat .num{font-size:2.5rem;font-weight:800;color:var(--p)}
-.stat .lbl{color:var(--m);font-size:.85rem}
-@media(max-width:768px){.nl{display:none}.fg,.pg{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
-</style>
-</head>
-<body>
-<nav class="nav">
-<a href="https://mokangmedical.github.io/opc-homepage/" class="nb">MoKangMedical</a>
-<div class="nl">
-<a href="#features">Features</a>
-<a href="#pricing">Pricing</a>
-<a href="https://github.com/MoKangMedical/metaforge">GitHub</a>
-<a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a>
-</div>
-</nav>
-<section class="hero">
-<div class="hc">
-<span class="cat">Research Tools</span>
-<h1>MetaForge</h1>
-<p class="sub">Meta-Analysis Automation Engine</p>
-<div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-<a href="https://github.com/MoKangMedical/metaforge" class="btn">View on GitHub</a>
-<a href="#features" class="bo">Explore Features</a>
-</div>
-</div>
-</section>
-<section class="sec" id="features">
-<h2 class="st">Capabilities</h2>
-<p class="ss">Automated meta-analysis pipeline from literature search to report.</p>
-<div class="fg"><div class="fc"><div class="fi">◆</div><h3>Auto Literature Search</h3><p>Advanced auto literature search capabilities powered by AI</p></div><div class="fc"><div class="fi">◇</div><h3>Data Extraction</h3><p>Advanced data extraction capabilities powered by AI</p></div><div class="fc"><div class="fi">◈</div><h3>Statistical Analysis</h3><p>Advanced statistical analysis capabilities powered by AI</p></div><div class="fc"><div class="fi">◉</div><h3>Bias Assessment</h3><p>Advanced bias assessment capabilities powered by AI</p></div><div class="fc"><div class="fi">◊</div><h3>Report Generation</h3><p>Advanced report generation capabilities powered by AI</p></div><div class="fc"><div class="fi">○</div><h3>PRISMA Compliance</h3><p>Advanced prisma compliance capabilities powered by AI</p></div>
-</div>
-</section>
-<section class="sec" id="pricing">
-<h2 class="st">Pricing</h2>
-<p class="ss">Flexible plans for every scale</p>
-<div class="pg">
-<div class="pc"><h3>Starter</h3><div class="pr">Free</div><p>Basic features and community support</p><a href="https://github.com/MoKangMedical/metaforge" class="bo">Get Started</a></div>
-<div class="pc"><h3>Professional</h3><div class="pr">$299/mo</div><p>Full access with priority support</p><a href="https://github.com/MoKangMedical/metaforge" class="bo">Start Trial</a></div>
-<div class="pc"><h3>Enterprise</h3><div class="pr">Custom</div><p>Custom deployment with SLA</p><a href="https://github.com/MoKangMedical/metaforge" class="bo">Contact Sales</a></div>
-</div>
-</section>
-<section class="cta">
-<h2>Ready to get started?</h2>
-<p style="color:var(--m);margin-bottom:2rem">Join leading organizations using MetaForge</p>
-<a href="https://github.com/MoKangMedical/metaforge" class="btn">Get Started Free</a>
-</section>
-<footer>
-<p>&copy; 2025 MoKangMedical. All rights reserved. | <a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a> | <a href="https://github.com/MoKangMedical">GitHub</a></p>
-</footer>
-<script>
-// Scroll reveal animation
-const obs=new IntersectionObserver(e=>{e.forEach(i=>{if(i.isIntersecting){i.target.style.opacity='1';i.target.style.transform='translateY(0)';obs.unobserve(i.target)}})},{threshold:.1});
-document.querySelectorAll('.fc,.pc').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='all 0.6s ease';obs.observe(el)});
-// Counter animation
-document.querySelectorAll('.stat .num').forEach(el=>{const t=parseInt(el.dataset.val||0);let c=0;const s=t/60;const tm=setInterval(()=>{c+=s;if(c>=t){c=t;clearInterval(tm)}el.textContent=Math.floor(c).toLocaleString()},25)});
-</script>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MetaForge — Meta-Analysis Platform — MoKangMedical</title><meta name="description" content="End-to-end meta-analysis workflow automation">
+<link rel="stylesheet" href="https://mokangmedical.github.io/opc-homepage/shared-design-system.css">
+</head><body>
+<nav class="eco-nav"><a class="nav-brand" href="https://mokangmedical.github.io/opc-homepage/">MoKangMedical</a>
+<div class="nav-links"><a href="https://github.com/MoKangMedical/metaforge">GitHub</a><a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div></nav>
+<section class="hero"><div class="badge">EBM Platform</div><h1>MetaForge — Meta-Analysis Platform</h1><p class="subtitle">End-to-end meta-analysis workflow automation</p>
+<div class="btn-group"><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary">View on GitHub</a><a href="#features" class="btn btn-outline">Explore Features</a></div></section>
+<section class="section" id="stats"><div class="stats"><div><div class="stat-num">5+</div><div class="stat-label">Analysis Types</div></div><div><div class="stat-num">PRISMA</div><div class="stat-label">Compliant</div></div><div><div class="stat-num">Multi</div><div class="stat-label">Format Import</div></div><div><div class="stat-num">One-Click</div><div class="stat-label">Report</div></div></div></section>
+<section class="section" id="features"><h2 class="section-title">Key Features</h2><p class="section-desc">Powerful capabilities for medical professionals</p><div class="card-grid"><div class="card fade-up"><div class="card-icon">📥</div><h3>Data Import</h3><p>Import from RevMan, Covidence, R, Stata, and CSV formats</p></div><div class="card fade-up"><div class="card-icon">📊</div><h3>Analysis Engine</h3><p>Fixed/random effects, network meta-analysis, dose-response, and diagnostic accuracy</p></div><div class="card fade-up"><div class="card-icon">🔍</div><h3>Heterogeneity</h3><p>I-squared, prediction intervals, meta-regression, and influence analysis</p></div><div class="card fade-up"><div class="card-icon">📈</div><h3>Publication Plots</h3><p>Forest, funnel, Galbraith, L'Abbe, and Baujat plots</p></div><div class="card fade-up"><div class="card-icon">📝</div><h3>Report Generator</h3><p>One-click PRISMA-compliant report with all figures and tables</p></div><div class="card fade-up"><div class="card-icon">🤝</div><h3>Collaboration</h3><p>Multi-analyst projects with version control and audit trails</p></div></div></section>
+<section class="section" id="pricing"><h2 class="section-title">Pricing</h2><p class="section-desc">Choose your plan</p><div class="pricing-grid"><div class="price-card "><h3>Academic</h3><div class="price-tag">$49/mo</div><ul><li>Basic analyses</li><li>3 projects</li><li>Community support</li></ul><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a></div><div class="price-card featured"><div class="price-badge">Most Popular</div><h3>Pro</h3><div class="price-tag">$149/mo</div><ul><li>All analyses</li><li>Unlimited projects</li><li>API access</li></ul><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a></div><div class="price-card "><h3>Institution</h3><div class="price-tag">$499/mo</div><ul><li>Site license</li><li>Custom methods</li><li>Training</li></ul><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a></div></div></section>
+<footer class="footer"><div class="footer-links"><a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a><a href="https://github.com/MoKangMedical">GitHub</a></div><p>&copy; 2025 MoKangMedical</p></footer>
+</body></html>
