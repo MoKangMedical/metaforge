@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>功能特性 - MetaForge</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e5e5e5;line-height:1.6}
+.nav{position:sticky;top:0;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:#0a0a0aee;backdrop-filter:blur(10px);border-bottom:1px solid #1a1a1a}
+.nav a{color:#a3a3a3;text-decoration:none;margin:0 0.8rem;font-size:0.9rem;transition:color 0.3s}
+.nav a:hover{color:#fff}
+.nav .brand{color:#fff;font-weight:700;font-size:1.1rem}
+.hero{padding:6rem 2rem 4rem;text-align:center;background:linear-gradient(135deg,#0a0a0a,#1a1a2e)}
+.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;background:linear-gradient(135deg,#0ea5e9,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#a3a3a3;max-width:700px;margin:1rem auto;font-size:1.15rem}
+.container{max-width:1100px;margin:0 auto;padding:2rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.card{background:#141414;border:1px solid #262626;border-radius:16px;padding:2rem;transition:all 0.3s}
+.card:hover{border-color:#0ea5e944;transform:translateY(-3px)}
+.card h3{color:#fff;margin-bottom:0.5rem;font-size:1.15rem}
+.card p{color:#a3a3a3;font-size:0.95rem}
+.card .icon{font-size:2rem;margin-bottom:1rem}
+.cta{display:inline-block;padding:0.8rem 2rem;background:#0ea5e9;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;transition:all 0.3s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 8px 25px #0ea5e944}
+.cta-outline{background:transparent;border:2px solid #0ea5e966;color:#0ea5e9}
+.price-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
+.price-card{background:#141414;border:1px solid #262626;border-radius:16px;padding:2rem;text-align:center;transition:all 0.3s}
+.price-card.featured{border-color:#0ea5e9;transform:scale(1.03)}
+.price-card h3{color:#fff;margin-bottom:0.5rem}
+.price{font-size:2.2rem;font-weight:800;color:#0ea5e9;margin:0.8rem 0}
+.price span{font-size:0.9rem;color:#737373}
+.price-card ul{list-style:none;text-align:left;margin:1.5rem 0}
+.price-card li{padding:0.4rem 0;color:#a3a3a3;border-bottom:1px solid #1a1a1a;font-size:0.95rem}
+.price-card li::before{content:'✓ ';color:#0ea5e9}
+.section-title{text-align:center;font-size:2rem;margin-bottom:0.5rem;color:#fff}
+.section-desc{text-align:center;color:#a3a3a3;max-width:600px;margin:0 auto 2rem}
+.timeline{position:relative;padding-left:2rem}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#0ea5e944}
+.timeline-item{position:relative;margin-bottom:2rem;padding-left:1.5rem}
+.timeline-item::before{content:'';position:absolute;left:-2.35rem;top:0.5rem;width:12px;height:12px;border-radius:50%;background:#0ea5e9}
+.timeline-item h4{color:#fff;margin-bottom:0.3rem}
+.timeline-item p{color:#a3a3a3;font-size:0.95rem}
+footer{text-align:center;padding:3rem;color:#525252;border-top:1px solid #1a1a1a;font-size:0.85rem;margin-top:4rem}
+footer a{color:#0ea5e9;text-decoration:none}
+.stats{display:flex;justify-content:center;gap:3rem;padding:2rem;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .num{font-size:2rem;font-weight:800;color:#0ea5e9}
+.stat .label{color:#737373;font-size:0.85rem}
+</style></head>
+<body><nav class="nav">
+<a class="brand" href="https://mokangmedical.github.io/opc-homepage/">MoKangMedical</a>
+<div>
+<a href="index.html">首页</a>
+<a href="features.html">功能</a>
+<a href="pricing.html">定价</a>
+<a href="about.html">关于</a>
+<a href="https://github.com/MoKangMedical/metaforge">GitHub</a>
+</div>
+</nav>
+<div class="hero"><h1>核心功能</h1><p>MetaForge 提供全方位的专业功能，助力您的工作流</p></div>
+<div class="container"><div class="grid">
+<div class="card"><h3>智能分析引擎</h3><p>基于深度学习的智能分析核心，自动处理复杂数据，提供精准洞察</p></div>
+<div class="card"><h3>实时数据处理</h3><p>毫秒级实时数据处理能力，支持大规模并发场景</p></div>
+<div class="card"><h3>可视化报告</h3><p>一键生成专业可视化报告，支持多种导出格式</p></div>
+<div class="card"><h3>API开放平台</h3><p>完整的RESTful API接口，支持第三方系统集成</p></div>
+<div class="card"><h3>团队协作</h3><p>多人实时协作，权限精细化管理，审计日志完整</p></div>
+<div class="card"><h3>安全合规</h3><p>端到端加密，符合GDPR/HIPAA等国际合规标准</p></div>
+<div class="card"><h3>自动化工作流</h3><p>可视化工作流编排，定时任务，事件触发自动化</p></div>
+<div class="card"><h3>多语言支持</h3><p>中英日韩等多语言界面，国际化部署无门槛</p></div>
+<div class="card"><h3>插件生态</h3><p>丰富的插件市场，支持自定义插件开发</p></div>
+</div></div><footer>
+<p>&copy; 2026 MoKangMedical. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
+</footer></body></html>
