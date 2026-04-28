@@ -25,8 +25,10 @@ from typing import List, Optional, Dict, Any
 import numpy as np
 from scipy import stats as sp_stats
 
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+import csv as csv_module
+
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # ============================================================
@@ -278,6 +280,182 @@ class MetaAnalysisEngine:
                 "p_value": round(pooled["p_value"], 4),
             })
         return results
+
+    def egger_test(self, studies: List[StudyResult]) -> dict:
+        """Egger's regression test for publication bias.
+
+        Regresses standardized effect (log_effect / log_se) on precision (1 / log_se).
+        A significant intercept suggests asymmetry (publication bias).
+        """
+        if len(studies) < 3:
+            return {"intercept": 0.0, "slope": 0.0, "p_value": 1.0,
+                    "t_statistic": 0.0, "conclusion": "insufficient_studies"}
+
+        precision = np.array([1.0 / s.log_se for s in studies])
+        std_effect = np.array([s.log_effect / s.log_se for s in studies])
+
+        n = len(studies)
+        x_mean = np.mean(precision)
+        y_mean = np.mean(std_effect)
+
+        ss_xx = float(np.sum((precision - x_mean) ** 2))
+        ss_xy = float(np.sum((precision - x_mean) * (std_effect - y_mean)))
+
+        slope = ss_xy / ss_xx if ss_xx > 0 else 0.0
+        intercept = y_mean - slope * x_mean
+
+        y_pred = intercept + slope * precision
+        residuals = std_effect - y_pred
+        mse = float(np.sum(residuals ** 2) / (n - 2)) if n > 2 else 0.0
+        se_intercept = math.sqrt(mse * (1.0 / n + x_mean ** 2 / ss_xx)) if ss_xx > 0 else 0.0
+
+        t_stat = intercept / se_intercept if se_intercept > 0 else 0.0
+        p_value = 2 * (1 - sp_stats.t.cdf(abs(t_stat), df=n - 2)) if n > 2 else 1.0
+
+        return {
+            "intercept": round(float(intercept), 4),
+            "slope": round(float(slope), 4),
+            "t_statistic": round(float(t_stat), 4),
+            "p_value": round(float(p_value), 4),
+            "conclusion": "significant" if p_value < 0.05 else "not_significant",
+        }
+
+    def begg_test(self, studies: List[StudyResult]) -> dict:
+        """Begg's rank correlation test for publication bias.
+
+        Computes Kendall's tau between effect sizes and their variances.
+        A significant correlation suggests small-study effects / bias.
+        """
+        if len(studies) < 3:
+            return {"tau": 0.0, "p_value": 1.0, "conclusion": "insufficient_studies"}
+
+        effects = [s.log_effect for s in studies]
+        variances = [s.log_se ** 2 for s in studies]
+
+        tau, p_value = sp_stats.kendalltau(effects, variances)
+
+        return {
+            "tau": round(float(tau), 4),
+            "p_value": round(float(p_value), 4),
+            "conclusion": "significant" if p_value < 0.05 else "not_significant",
+        }
+
+    def cumulative_analysis(self, studies: List[StudyInput],
+                            sort_by: str = "name",
+                            effect_measure: str = "OR",
+                            model: str = "random") -> list:
+        """Cumulative meta-analysis.
+
+        Adds studies one at a time (sorted by name or effect size) and returns
+        the evolving pooled estimate at each step.
+        """
+        if sort_by == "effect":
+            sorted_studies = sorted(
+                studies,
+                key=lambda s: self._calc_dichotomous(s, effect_measure).log_effect,
+            )
+        else:
+            sorted_studies = list(studies)
+
+        results = []
+        for i in range(2, len(sorted_studies) + 1):
+            subset = sorted_studies[:i]
+            srs = [self._calc_dichotomous(s, effect_measure) for s in subset]
+            pooled = self._random_effects(srs) if model == "random" else self._fixed_effect(srs)
+            het = self._heterogeneity(srs)
+            results.append({
+                "step": i,
+                "n_studies": i,
+                "studies_included": [s.name for s in subset],
+                "pooled_effect": round(pooled["effect"], 4),
+                "ci_lower": round(pooled["ci_lower"], 4),
+                "ci_upper": round(pooled["ci_upper"], 4),
+                "p_value": round(pooled["p_value"], 4),
+                "i_squared": het["i_squared"],
+            })
+
+        return results
+
+    def trim_and_fill(self, studies: List[StudyResult],
+                      model: str = "random") -> dict:
+        """Trim-and-fill method for publication bias (Duval & Tweedie).
+
+        Estimates the number of missing studies on one side of the funnel,
+        imputes them, and returns the adjusted pooled estimate.
+        """
+        if len(studies) < 3:
+            return {"estimated_missing": 0, "original_effect": 0.0,
+                    "adjusted_effect": 0.0, "adjusted_ci_lower": 0.0,
+                    "adjusted_ci_upper": 0.0, "imputed_studies": []}
+
+        # Original pooled estimate
+        pooled_orig = self._random_effects(studies) if model == "random" else self._fixed_effect(studies)
+        pooled_log = math.log(pooled_orig["effect"])
+
+        # Center effect sizes around the pooled estimate
+        centered = sorted(
+            [(s, s.log_effect - pooled_log) for s in studies],
+            key=lambda x: x[1],
+        )
+
+        # Right-truncation version of the R-estimator
+        # Count how many studies need trimming from the right tail
+        k = len(studies)
+        gamma_plus = sum(1 for _, c in centered if c > 0)
+        gamma_minus = k - gamma_plus
+
+        # Simple rank-based estimator for number of missing studies
+        # n_0 = (k - |S_rank|) / 2  where S_rank is the sign-rank statistic
+        sign_ranks = []
+        for i, (_, c) in enumerate(centered):
+            rank = i + 1
+            sign = 1 if c >= 0 else -1
+            sign_ranks.append(sign * rank)
+        S = sum(sign_ranks)
+        n_missing = max(0, round((k - abs(S) / (k * (k + 1) / (2 * k))) / 2))
+        # Clamp to a reasonable value
+        n_missing = min(n_missing, k)
+
+        # Impute missing studies by mirror-imputation
+        imputed_details = []
+        if n_missing > 0:
+            # Take the n_missing studies closest to the center and mirror them
+            sorted_by_abs = sorted(studies, key=lambda s: abs(s.log_effect - pooled_log))
+            imputed_studies = []
+            for idx in range(n_missing):
+                orig = sorted_by_abs[idx]
+                mirrored_log = 2 * pooled_log - orig.log_effect
+                imp = StudyResult(
+                    name=f"Imputed_{idx + 1}",
+                    effect=round(math.exp(mirrored_log), 4),
+                    ci_lower=round(math.exp(mirrored_log - 1.96 * orig.log_se), 4),
+                    ci_upper=round(math.exp(mirrored_log + 1.96 * orig.log_se), 4),
+                    weight=orig.weight,
+                    log_effect=mirrored_log,
+                    log_se=orig.log_se,
+                    subgroup="",
+                )
+                imputed_studies.append(imp)
+                imputed_details.append({"name": imp.name, "effect": imp.effect,
+                                        "ci_lower": imp.ci_lower, "ci_upper": imp.ci_upper})
+
+            all_studies = list(studies) + imputed_studies
+            pooled_adj = self._random_effects(all_studies) if model == "random" else self._fixed_effect(all_studies)
+        else:
+            pooled_adj = pooled_orig
+
+        return {
+            "estimated_missing": n_missing,
+            "original_effect": round(pooled_orig["effect"], 4),
+            "original_ci_lower": round(pooled_orig["ci_lower"], 4),
+            "original_ci_upper": round(pooled_orig["ci_upper"], 4),
+            "original_p_value": round(pooled_orig["p_value"], 4),
+            "adjusted_effect": round(pooled_adj["effect"], 4),
+            "adjusted_ci_lower": round(pooled_adj["ci_lower"], 4),
+            "adjusted_ci_upper": round(pooled_adj["ci_upper"], 4),
+            "adjusted_p_value": round(pooled_adj["p_value"], 4),
+            "imputed_studies": imputed_details,
+        }
 
     def _forest_plot(self, studies: List[StudyResult], pooled: dict, measure: str) -> str:
         """生成SVG森林图"""
@@ -561,6 +739,158 @@ async def list_models():
             {"key": "RR", "name": "Risk Ratio", "description": "相对风险"},
         ],
     }
+
+
+@app.post("/api/bias")
+async def api_bias(request: Request):
+    """Run Egger's test and Begg's test for publication bias"""
+    body = await request.json()
+    studies_data = body.get("studies", [])
+    effect_measure = body.get("effect_measure", "OR")
+
+    if len(studies_data) < 3:
+        raise HTTPException(400, "At least 3 studies required for bias tests")
+
+    studies = [StudyInput(**s) for s in studies_data]
+    srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
+
+    egger = engine.egger_test(srs)
+    begg = engine.begg_test(srs)
+    trim_fill = engine.trim_and_fill(srs)
+
+    return {
+        "egger_test": egger,
+        "begg_test": begg,
+        "trim_and_fill": trim_fill,
+    }
+
+
+@app.post("/api/cumulative")
+async def api_cumulative(request: Request):
+    """Run cumulative meta-analysis"""
+    body = await request.json()
+    studies_data = body.get("studies", [])
+    sort_by = body.get("sort_by", "name")
+    effect_measure = body.get("effect_measure", "OR")
+    model = body.get("model", "random")
+
+    if len(studies_data) < 2:
+        raise HTTPException(400, "At least 2 studies required")
+
+    studies = [StudyInput(**s) for s in studies_data]
+
+    try:
+        results = engine.cumulative_analysis(
+            studies, sort_by=sort_by, effect_measure=effect_measure, model=model
+        )
+        return {"cumulative_results": results, "sort_by": sort_by, "model": model}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@app.post("/api/export/csv")
+async def api_export_csv(request: Request):
+    """Export meta-analysis results as CSV"""
+    body = await request.json()
+    studies_data = body.get("studies", [])
+    effect_measure = body.get("effect_measure", "OR")
+    model = body.get("model", "random")
+
+    if len(studies_data) < 2:
+        raise HTTPException(400, "At least 2 studies required")
+
+    studies = [StudyInput(**s) for s in studies_data]
+    result = engine.analyze(studies, model=model, effect_measure=effect_measure)
+
+    output = io.StringIO()
+    writer = csv_module.writer(output)
+    writer.writerow(["Study", "Effect", "CI_Lower", "CI_Upper", "Weight", "Log_Effect", "Log_SE", "Subgroup"])
+    for s in result.studies:
+        writer.writerow([
+            s["name"], s["effect"], s["ci_lower"], s["ci_upper"],
+            s["weight"], s["log_effect"], s["log_se"], s["subgroup"],
+        ])
+    writer.writerow([])
+    writer.writerow(["Pooled", result.pooled_effect, result.pooled_ci_lower,
+                      result.pooled_ci_upper, "", "", "", ""])
+    writer.writerow(["I_squared", result.i_squared, "Tau_squared", result.tau_squared,
+                      "Q", result.q_statistic, "Q_p", result.q_p_value])
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=metaforge_results.csv"},
+    )
+
+
+@app.post("/api/export/json")
+async def api_export_json(request: Request):
+    """Export meta-analysis results as JSON"""
+    body = await request.json()
+    studies_data = body.get("studies", [])
+    effect_measure = body.get("effect_measure", "OR")
+    model = body.get("model", "random")
+
+    if len(studies_data) < 2:
+        raise HTTPException(400, "At least 2 studies required")
+
+    studies = [StudyInput(**s) for s in studies_data]
+    result = engine.analyze(studies, model=model, effect_measure=effect_measure)
+
+    export_data = {
+        "metaforge_version": "3.0.0",
+        "exported_at": datetime.now().isoformat(),
+        "model": model,
+        "effect_measure": effect_measure,
+        "pooled_effect": result.pooled_effect,
+        "pooled_ci_lower": result.pooled_ci_lower,
+        "pooled_ci_upper": result.pooled_ci_upper,
+        "p_value": result.p_value,
+        "i_squared": result.i_squared,
+        "tau_squared": result.tau_squared,
+        "q_statistic": result.q_statistic,
+        "q_p_value": result.q_p_value,
+        "heterogeneity": result.heterogeneity,
+        "studies": result.studies,
+    }
+
+    return JSONResponse(content=export_data, headers={
+        "Content-Disposition": "attachment; filename=metaforge_results.json"
+    })
+
+
+@app.post("/api/upload/csv")
+async def api_upload_csv(file: UploadFile = File(...)):
+    """Upload a CSV file and run meta-analysis.
+
+    Expected CSV columns: name, e_events, e_total, c_events, c_total
+    Optional: subgroup, data_type
+    """
+    content = await file.read()
+    text = content.decode("utf-8")
+    reader = csv_module.DictReader(io.StringIO(text))
+
+    studies = []
+    for row in reader:
+        studies.append(StudyInput(
+            name=row.get("name", f"Study_{len(studies)+1}"),
+            e_events=int(row.get("e_events", 0)),
+            e_total=int(row.get("e_total", 0)),
+            c_events=int(row.get("c_events", 0)),
+            c_total=int(row.get("c_total", 0)),
+            subgroup=row.get("subgroup", ""),
+            data_type=row.get("data_type", "dichotomous"),
+        ))
+
+    if len(studies) < 2:
+        raise HTTPException(400, "CSV must contain at least 2 studies")
+
+    try:
+        result = engine.analyze(studies, model="random", effect_measure="OR")
+        return asdict(result)
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 
 # ============================================================

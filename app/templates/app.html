@@ -4,301 +4,259 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MetaForge Workbench — AI循证医学研究工作台</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    :root{--bg:#0a0f1a;--surface:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#64748b;--accent:#e94560;--accent2:#3b82f6;--success:#22c55e;--warn:#f59e0b}
+    :root{--bg:#0a0f1a;--surface:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#64748b;--accent:#e94560;--accent2:#3b82f6;--success:#22c55e;--warn:#f59e0b;--purple:#a855f7}
     body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
     a{color:var(--accent2);text-decoration:none}
-
-    /* Layout */
     .app-header{background:#111827;border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
     .app-header .logo{font-size:20px;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:8px}
-    .app-header .logo span{font-size:12px;color:var(--muted);font-weight:400;background:rgba(233,69,96,0.15);padding:2px 8px;border-radius:4px}
-    .app-header nav{display:flex;gap:16px}
-    .app-header nav a{color:var(--muted);font-size:13px;font-weight:500;padding:6px 12px;border-radius:6px;transition:.2s}
+    .app-header .logo span{font-size:11px;color:var(--muted);font-weight:500;background:rgba(233,69,96,0.15);padding:2px 8px;border-radius:4px}
+    .app-header nav{display:flex;gap:12px;align-items:center}
+    .app-header nav a{color:var(--muted);font-size:13px;font-weight:500;padding:6px 10px;border-radius:6px;transition:.2s}
     .app-header nav a:hover,.app-header nav a.active{color:#fff;background:rgba(255,255,255,0.08)}
-    .back-link{color:var(--muted);font-size:13px}
-    .back-link:hover{color:#fff}
-
-    .app-body{display:grid;grid-template-columns:340px 1fr;min-height:calc(100vh - 52px)}
-    @media(max-width:900px){.app-body{grid-template-columns:1fr}}
-
-    /* Sidebar */
-    .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px;overflow-y:auto}
-    .sidebar h3{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
-    .sidebar label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
-    .sidebar select,.sidebar input{width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;font-family:inherit}
+    .app-body{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 52px)}
+    @media(max-width:960px){.app-body{grid-template-columns:1fr}}
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:16px;overflow-y:auto;max-height:calc(100vh - 52px);position:sticky;top:52px}
+    .sidebar h3{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px}
+    .sidebar h3:first-child{margin-top:0}
+    .sidebar label{display:block;font-size:11px;color:var(--muted);margin:6px 0 3px}
+    .sidebar select,.sidebar input[type="text"],.sidebar input[type="number"]{width:100%;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit}
     .sidebar select:focus,.sidebar input:focus{outline:none;border-color:var(--accent2)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
     .btn-primary{background:var(--accent);color:#fff;width:100%}
-    .btn-primary:hover{background:#d63a54;transform:translateY(-1px)}
-    .btn-secondary{background:rgba(59,130,246,0.15);color:var(--accent2);width:100%}
-    .btn-secondary:hover{background:rgba(59,130,246,0.25)}
-    .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
-
-    /* Study table */
-    .study-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
-    .study-table th{background:rgba(255,255,255,0.05);color:var(--muted);font-weight:600;text-align:left;padding:8px;border-bottom:1px solid var(--border)}
-    .study-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.04)}
-    .study-table input{width:100%;padding:4px 6px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px;font-family:'JetBrains Mono',monospace}
+    .btn-primary:hover{background:#d63a54}
+    .btn-secondary{background:rgba(59,130,246,0.12);color:var(--accent2);width:100%}
+    .btn-secondary:hover{background:rgba(59,130,246,0.22)}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);width:100%}
+    .btn-outline:hover{border-color:var(--accent2);color:var(--accent2)}
+    .btn:disabled{opacity:0.4;cursor:not-allowed}
+    .btn-sm{padding:6px 10px;font-size:11px;width:auto}
+    .study-table{width:100%;border-collapse:collapse;font-size:11px;margin:8px 0}
+    .study-table th{background:rgba(255,255,255,0.04);color:var(--muted);font-weight:600;text-align:left;padding:6px;border-bottom:1px solid var(--border)}
+    .study-table td{padding:4px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .study-table input{width:100%;padding:4px 5px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;font-family:'JetBrains Mono',monospace}
     .study-table input:focus{outline:none;border-color:var(--accent2)}
     .study-table .name-input{font-family:inherit}
-    .add-row-btn{color:var(--accent2);font-size:12px;cursor:pointer;background:none;border:none;font-family:inherit;margin-top:6px}
-    .add-row-btn:hover{text-decoration:underline}
-
-    /* Main content */
-    .main{padding:24px;overflow-y:auto}
-    .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
-    .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-    .panel-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
-    .panel-badge{font-size:11px;padding:3px 8px;border-radius:4px;font-weight:600}
+    .add-row{color:var(--accent2);font-size:11px;cursor:pointer;background:none;border:none;font-family:inherit;margin-top:4px}
+    .add-row:hover{text-decoration:underline}
+    .main{padding:20px;overflow-y:auto}
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+    .panel-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .badge{font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600}
     .badge-green{background:rgba(34,197,94,0.15);color:var(--success)}
     .badge-blue{background:rgba(59,130,246,0.15);color:var(--accent2)}
     .badge-orange{background:rgba(245,158,11,0.15);color:var(--warn)}
-
-    /* Stats grid */
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
-    .stat-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
-    .stat-value{font-size:24px;font-weight:800;font-family:'JetBrains Mono',monospace}
-    .stat-label{font-size:11px;color:var(--muted);margin-top:4px}
-    .stat-value.green{color:var(--success)}
-    .stat-value.blue{color:var(--accent2)}
-    .stat-value.orange{color:var(--warn)}
-    .stat-value.red{color:var(--accent)}
-
-    /* Charts */
-    .chart-container{background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;margin:12px 0;overflow-x:auto}
+    .badge-purple{background:rgba(168,85,247,0.15);color:var(--purple)}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+    .stat-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+    .stat-value{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace}
+    .stat-label{font-size:10px;color:var(--muted);margin-top:3px}
+    .chart-container{background:rgba(0,0,0,0.25);border-radius:8px;padding:10px;margin:10px 0;overflow-x:auto}
     .chart-container svg{max-width:100%;height:auto}
-    .chart-tabs{display:flex;gap:8px;margin-bottom:12px}
-    .chart-tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:.2s;font-family:inherit}
+    .chart-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+    .chart-tab{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:.2s;font-family:inherit}
     .chart-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
     .chart-tab:hover:not(.active){background:rgba(255,255,255,0.05)}
-
-    /* Results table */
-    .results-table{width:100%;border-collapse:collapse;font-size:12px}
-    .results-table th{background:rgba(255,255,255,0.05);color:var(--muted);font-weight:600;text-align:left;padding:10px;border-bottom:1px solid var(--border)}
-    .results-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.04);font-family:'JetBrains Mono',monospace}
+    .results-table{width:100%;border-collapse:collapse;font-size:11px}
+    .results-table th{background:rgba(255,255,255,0.04);color:var(--muted);font-weight:600;text-align:left;padding:8px;border-bottom:1px solid var(--border)}
+    .results-table td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,0.03);font-family:'JetBrains Mono',monospace}
     .results-table tr:hover{background:rgba(255,255,255,0.02)}
-
-    /* Heterogeneity bar */
-    .het-bar{height:6px;border-radius:3px;background:var(--border);margin-top:6px;overflow:hidden}
+    .het-bar{height:5px;border-radius:3px;background:var(--border);margin-top:5px;overflow:hidden}
     .het-bar-fill{height:100%;border-radius:3px;transition:.5s}
-
-    /* Empty state */
-    .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
-    .empty-state .icon{font-size:48px;margin-bottom:16px;opacity:0.3}
-    .empty-state h3{font-size:18px;color:var(--text);margin-bottom:8px}
-    .empty-state p{font-size:13px;max-width:400px;margin:0 auto}
-
-    /* Loading */
-    .loading{display:none;text-align:center;padding:40px}
+    .empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+    .empty-state .icon{font-size:42px;margin-bottom:12px;opacity:0.3}
+    .empty-state h3{font-size:16px;color:var(--text);margin-bottom:6px}
+    .empty-state p{font-size:12px;max-width:380px;margin:0 auto}
+    .loading{display:none;text-align:center;padding:30px}
     .loading.active{display:block}
-    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+    .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px}
     @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* Responsive */
-    @media(max-width:900px){
-      .app-body{grid-template-columns:1fr}
-      .sidebar{border-right:none;border-bottom:1px solid var(--border)}
-    }
+    .toast{position:fixed;top:20px;right:20px;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9999;transform:translateX(120%);transition:.3s;max-width:300px}
+    .toast.show{transform:translateX(0)}
+    .toast-success{background:rgba(34,197,94,0.9);color:#fff}
+    .toast-error{background:rgba(233,69,96,0.9);color:#fff}
+    .toast-info{background:rgba(59,130,246,0.9);color:#fff}
+    .export-bar{display:flex;gap:6px;flex-wrap:wrap}
+    .bias-result{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+    .bias-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:12px}
+    .bias-card h4{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .bias-card .val{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace}
+    .csv-input{width:100%;height:100px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;font-family:'JetBrains Mono',monospace;padding:8px;resize:vertical}
+    .csv-input:focus{outline:none;border-color:var(--accent2)}
+    .shortcut{font-size:10px;color:var(--muted);margin-top:4px}
+    .quick-datasets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+    .quick-btn{padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;transition:.2s}
+    .quick-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+    @media(max-width:960px){.sidebar{position:static;max-height:none}}
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header class="app-header">
-    <div class="logo">
-      MetaForge <span>v3.0</span>
-    </div>
+    <div class="logo">MetaForge <span>v3.1</span></div>
     <nav>
-      <a href="/" class="back-link">← 返回首页</a>
-      <a href="#" class="active" onclick="showSection('workbench')">工作台</a>
-      <a href="#" onclick="loadDemo()">演示数据</a>
+      <a href="/">← 首页</a>
+      <a href="#" class="active">工作台</a>
+      <a href="#" onclick="loadDemo();return false">演示数据</a>
     </nav>
   </header>
 
   <div class="app-body">
-    <!-- Sidebar: Data Input -->
     <aside class="sidebar">
-      <h3>📋 研究数据</h3>
-
-      <label>效应量类型</label>
-      <select id="effect-measure">
-        <option value="OR">Odds Ratio (OR)</option>
-        <option value="RR">Risk Ratio (RR)</option>
-      </select>
-
+      <h3>📊 研究数据</h3>
+      <label>效应量</label>
+      <select id="effect-measure" onchange="autoRerun()"><option value="OR">Odds Ratio (OR)</option><option value="RR">Risk Ratio (RR)</option></select>
       <label>统计模型</label>
-      <select id="model">
-        <option value="random">Random Effects (DerSimonian-Laird)</option>
-        <option value="fixed">Fixed Effect (Mantel-Haenszel)</option>
-      </select>
+      <select id="model" onchange="autoRerun()"><option value="random">Random Effects (D-L)</option><option value="fixed">Fixed Effect (M-H)</option></select>
 
-      <h3 style="margin-top:20px">研究数据表</h3>
-      <p style="font-size:11px;color:var(--muted);margin-bottom:8px">输入每个研究的二分类数据</p>
+      <h3>快捷数据集</h3>
+      <div class="quick-datasets">
+        <button class="quick-btn" onclick="loadDataset('nscld_pd1')">NSCLC PD-1</button>
+        <button class="quick-btn" onclick="loadDataset('statins')">他汀类药物</button>
+        <button class="quick-btn" onclick="loadDataset('antihypertensives')">降压药</button>
+      </div>
 
+      <h3>研究数据表</h3>
       <div style="overflow-x:auto">
         <table class="study-table" id="study-table">
-          <thead>
-            <tr>
-              <th style="min-width:100px">研究名称</th>
-              <th>E events</th>
-              <th>E total</th>
-              <th>C events</th>
-              <th>C total</th>
-              <th style="min-width:70px">亚组</th>
-              <th></th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th style="min-width:90px">研究</th><th>E evt</th><th>E n</th><th>C evt</th><th>C n</th><th style="min-width:60px">亚组</th><th></th>
+          </tr></thead>
           <tbody id="study-tbody"></tbody>
         </table>
       </div>
-      <button class="add-row-btn" onclick="addStudyRow()">+ 添加研究</button>
+      <button class="add-row" onclick="addStudyRow()">+ 添加研究</button>
 
-      <div style="margin-top:20px;display:flex;gap:8px">
+      <div style="margin-top:14px;display:flex;gap:6px">
         <button class="btn btn-primary" id="analyze-btn" onclick="runAnalysis()">▶ 运行分析</button>
       </div>
-      <button class="btn btn-secondary" style="margin-top:8px" onclick="loadDemo()">📂 加载演示数据</button>
 
-      <div style="margin-top:20px;padding:12px;background:rgba(59,130,246,0.08);border-radius:8px;font-size:11px;color:var(--muted)">
-        <strong style="color:var(--accent2)">使用说明</strong><br>
-        1. 输入研究名称和二分类数据<br>
-        2. 可选填亚组标签用于亚组分析<br>
-        3. 点击"运行分析"一键完成全流程<br>
-        4. 支持OR/RR效应量、固定/随机效应模型
+      <h3>CSV导入</h3>
+      <textarea class="csv-input" id="csv-input" placeholder="name,e_events,e_total,c_events,c_total,subgroup&#10;Study1,50,100,30,100,GroupA&#10;Study2,60,120,40,120,GroupB"></textarea>
+      <button class="btn btn-outline" style="margin-top:4px" onclick="importCSV()">📥 导入CSV</button>
+      <div class="shortcut">格式: name,e_events,e_total,c_events,c_total,subgroup</div>
+
+      <h3>导出结果</h3>
+      <div class="export-bar">
+        <button class="btn btn-sm btn-outline" onclick="exportCSV()">📄 CSV</button>
+        <button class="btn btn-sm btn-outline" onclick="exportJSON()">📋 JSON</button>
+      </div>
+
+      <div style="margin-top:12px;padding:10px;background:rgba(59,130,246,0.06);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.5">
+        <strong style="color:var(--accent2)">快捷键</strong><br>
+        Ctrl+Enter → 运行分析<br>
+        支持OR/RR、固定/随机效应模型
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main" id="main-content">
-      <!-- Empty state -->
       <div class="empty-state" id="empty-state">
         <div class="icon">📊</div>
         <h3>开始你的Meta分析</h3>
-        <p>在左侧输入研究数据，或点击"加载演示数据"快速体验完整的Meta分析流程。</p>
-        <button class="btn btn-primary" style="margin-top:20px;width:auto" onclick="loadDemo()">加载演示数据</button>
+        <p>在左侧输入研究数据，或选择快捷数据集快速体验。</p>
+        <button class="btn btn-primary" style="margin-top:16px;width:auto" onclick="loadDemo()">加载演示数据</button>
       </div>
 
-      <!-- Loading -->
       <div class="loading" id="loading">
         <div class="spinner"></div>
         <p>正在执行Meta分析...</p>
       </div>
 
-      <!-- Results (hidden initially) -->
       <div id="results" style="display:none">
-        <!-- Summary Stats -->
+        <!-- Summary -->
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">📈 合并效应量</div>
-            <span class="panel-badge badge-blue" id="model-badge">Random Effects</span>
+            <span class="badge badge-blue" id="model-badge">—</span>
           </div>
           <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-value blue" id="pooled-effect">—</div>
-              <div class="stat-label">合并效应量 (OR)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value blue" id="pooled-ci">—</div>
-              <div class="stat-label">95% CI</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value green" id="p-value">—</div>
-              <div class="stat-label">P值</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value orange" id="i-squared">—</div>
-              <div class="stat-label">I² (异质性)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="q-stat">—</div>
-              <div class="stat-label">Q统计量</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="n-studies">—</div>
-              <div class="stat-label">纳入研究数</div>
-            </div>
+            <div class="stat-card"><div class="stat-value blue" id="pooled-effect">—</div><div class="stat-label" id="measure-label">合并效应量</div></div>
+            <div class="stat-card"><div class="stat-value blue" id="pooled-ci">—</div><div class="stat-label">95% CI</div></div>
+            <div class="stat-card"><div class="stat-value green" id="p-value">—</div><div class="stat-label">P值</div></div>
+            <div class="stat-card"><div class="stat-value orange" id="i-squared">—</div><div class="stat-label">I²</div></div>
+            <div class="stat-card"><div class="stat-value" id="q-stat">—</div><div class="stat-label">Q统计量</div></div>
+            <div class="stat-card"><div class="stat-value" id="n-studies">—</div><div class="stat-label">纳入研究</div></div>
           </div>
-          <div style="font-size:12px;color:var(--muted)">
-            异质性水平: <strong id="het-level">—</strong>
+          <div style="font-size:11px;color:var(--muted)">
+            异质性: <strong id="het-level">—</strong>
             <div class="het-bar"><div class="het-bar-fill" id="het-bar" style="width:0;background:var(--success)"></div></div>
           </div>
         </div>
 
         <!-- Charts -->
         <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">📊 可视化图表</div>
-          </div>
+          <div class="panel-header"><div class="panel-title">📊 可视化图表</div></div>
           <div class="chart-tabs">
-            <button class="chart-tab active" onclick="showChart('forest')">森林图</button>
-            <button class="chart-tab" onclick="showChart('funnel')">漏斗图</button>
-            <button class="chart-tab" onclick="showChart('prisma')">PRISMA流程图</button>
+            <button class="chart-tab active" onclick="showChart('forest',this)">森林图</button>
+            <button class="chart-tab" onclick="showChart('funnel',this)">漏斗图</button>
+            <button class="chart-tab" onclick="showChart('prisma',this)">PRISMA</button>
+            <button class="chart-tab" onclick="showChart('cumulative',this)">累积分析</button>
           </div>
           <div class="chart-container" id="chart-forest"></div>
           <div class="chart-container" id="chart-funnel" style="display:none"></div>
           <div class="chart-container" id="chart-prisma" style="display:none"></div>
+          <div class="chart-container" id="chart-cumulative" style="display:none"></div>
         </div>
 
-        <!-- Study Results Table -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-title">📋 各研究结果</div>
+        <!-- Bias Tests -->
+        <div class="panel" id="bias-panel" style="display:none">
+          <div class="panel-header"><div class="panel-title">⚖️ 发表偏倚检验</div></div>
+          <div class="bias-result">
+            <div class="bias-card">
+              <h4>Egger回归检验</h4>
+              <div class="val" id="egger-val">—</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px" id="egger-desc">—</div>
+            </div>
+            <div class="bias-card">
+              <h4>Begg秩相关检验</h4>
+              <div class="val" id="begg-val">—</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px" id="begg-desc">—</div>
+            </div>
+            <div class="bias-card">
+              <h4>Trim-and-Fill</h4>
+              <div class="val" id="tf-val">—</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px" id="tf-desc">—</div>
+            </div>
+            <div class="bias-card">
+              <h4>调整后效应量</h4>
+              <div class="val" id="tf-adj">—</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:4px" id="tf-adj-desc">—</div>
+            </div>
           </div>
+        </div>
+
+        <!-- Study Results -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">📋 各研究结果</div></div>
           <div style="overflow-x:auto">
             <table class="results-table" id="results-table">
-              <thead>
-                <tr>
-                  <th>研究</th>
-                  <th>效应量</th>
-                  <th>95% CI</th>
-                  <th>权重</th>
-                  <th>亚组</th>
-                </tr>
-              </thead>
+              <thead><tr><th>研究</th><th>效应量</th><th>95% CI</th><th>权重</th><th>亚组</th></tr></thead>
               <tbody id="results-tbody"></tbody>
             </table>
           </div>
         </div>
 
-        <!-- Subgroup Analysis -->
+        <!-- Subgroup -->
         <div class="panel" id="subgroup-panel" style="display:none">
-          <div class="panel-header">
-            <div class="panel-title">🔬 亚组分析</div>
-          </div>
+          <div class="panel-header"><div class="panel-title">🔬 亚组分析</div></div>
           <div style="overflow-x:auto">
-            <table class="results-table" id="subgroup-table">
-              <thead>
-                <tr>
-                  <th>亚组</th>
-                  <th>研究数</th>
-                  <th>合并效应量</th>
-                  <th>95% CI</th>
-                  <th>P值</th>
-                  <th>I²</th>
-                </tr>
-              </thead>
+            <table class="results-table">
+              <thead><tr><th>亚组</th><th>研究数</th><th>合并效应量</th><th>95% CI</th><th>P值</th><th>I²</th></tr></thead>
               <tbody id="subgroup-tbody"></tbody>
             </table>
           </div>
         </div>
 
-        <!-- Sensitivity Analysis -->
+        <!-- Sensitivity -->
         <div class="panel" id="sensitivity-panel" style="display:none">
-          <div class="panel-header">
-            <div class="panel-title">🔄 敏感性分析 (逐一剔除)</div>
-          </div>
+          <div class="panel-header"><div class="panel-title">🔄 敏感性分析 (逐一剔除)</div></div>
           <div style="overflow-x:auto">
-            <table class="results-table" id="sensitivity-table">
-              <thead>
-                <tr>
-                  <th>剔除研究</th>
-                  <th>合并效应量</th>
-                  <th>95% CI</th>
-                  <th>P值</th>
-                </tr>
-              </thead>
+            <table class="results-table">
+              <thead><tr><th>剔除研究</th><th>合并效应量</th><th>95% CI</th><th>P值</th></tr></thead>
               <tbody id="sensitivity-tbody"></tbody>
             </table>
           </div>
@@ -307,20 +265,43 @@
     </main>
   </div>
 
+  <div class="toast" id="toast"></div>
+
   <script>
-    // Demo data: PD-1 inhibitors + chemotherapy vs chemo alone in NSCLC
-    const DEMO_STUDIES = [
-      {name:"Gandhi 2018",e_events:138,e_total:292,c_events:108,c_total:288,subgroup:"Phase III"},
-      {name:"Paz-Ares 2018",e_events:171,e_total:292,c_events:134,c_total:291,subgroup:"Phase III"},
-      {name:"West 2019",e_events:117,e_total:241,c_events:89,c_total:238,subgroup:"Phase III"},
-      {name:"Carbone 2017",e_events:104,e_total:199,c_events:81,c_total:200,subgroup:"Phase III"},
-      {name:"Reck 2016",e_events:92,e_total:185,c_events:71,c_total:183,subgroup:"Phase III"},
-      {name:"Herbst 2016",e_events:69,e_total:143,c_events:55,c_total:141,subgroup:"Phase II"},
-      {name:"Langer 2016",e_events:48,e_total:98,c_events:37,c_total:97,subgroup:"Phase II"},
-      {name:"Rittmeyer 2017",e_events:102,e_total:201,c_events:78,c_total:199,subgroup:"Phase III"},
-      {name:"Barlesi 2016",e_events:88,e_total:177,c_events:66,c_total:176,subgroup:"Phase III"},
-      {name:"Brahmer 2015",e_events:45,e_total:131,c_events:28,c_total:129,subgroup:"Phase II"},
-    ];
+    // Sample datasets
+    const DATASETS = {
+      nscld_pd1: [
+        {name:"Gandhi 2018",e_events:138,e_total:292,c_events:108,c_total:288,subgroup:"Phase III"},
+        {name:"Paz-Ares 2018",e_events:171,e_total:292,c_events:134,c_total:291,subgroup:"Phase III"},
+        {name:"West 2019",e_events:117,e_total:241,c_events:89,c_total:238,subgroup:"Phase III"},
+        {name:"Carbone 2017",e_events:104,e_total:199,c_events:81,c_total:200,subgroup:"Phase III"},
+        {name:"Reck 2016",e_events:92,e_total:185,c_events:71,c_total:183,subgroup:"Phase III"},
+        {name:"Herbst 2016",e_events:69,e_total:143,c_events:55,c_total:141,subgroup:"Phase II"},
+        {name:"Langer 2016",e_events:48,e_total:98,c_events:37,c_total:97,subgroup:"Phase II"},
+        {name:"Rittmeyer 2017",e_events:102,e_total:201,c_events:78,c_total:199,subgroup:"Phase III"},
+        {name:"Barlesi 2016",e_events:88,e_total:177,c_events:66,c_total:176,subgroup:"Phase III"},
+        {name:"Brahmer 2015",e_events:45,e_total:131,c_events:28,c_total:129,subgroup:"Phase II"},
+      ],
+      statins: [
+        {name:"CTT 2005",e_events:1322,e_total:44435,c_events:1507,c_total:44516,subgroup:"Primary"},
+        {name:"JUPITER 2008",e_events:142,e_total:8901,c_events:207,c_total:8901,subgroup:"Primary"},
+        {name:"ASCOT 2003",e_events:100,e_total:5168,c_events:154,c_total:5137,subgroup:"Primary"},
+        {name:"HPS 2002",e_events:1328,e_total:10269,c_events:1507,c_total:10267,subgroup:"Secondary"},
+        {name:"4S 1994",e_events:182,e_total:2221,c_events:256,c_total:2223,subgroup:"Secondary"},
+        {name:"CARE 1996",e_events:135,e_total:2081,c_events:173,c_total:2078,subgroup:"Secondary"},
+        {name:"LIPID 1998",e_events:336,e_total:4512,c_events:440,c_total:4502,subgroup:"Secondary"},
+      ],
+      antihypertensives: [
+        {name:"ALLHAT 2002",e_events:618,e_total:15255,c_events:603,c_total:15255,subgroup:"Thiazide"},
+        {name:"VALUE 2004",e_events:369,e_total:7596,c_events:393,c_total:7515,subgroup:"ARB"},
+        {name:"LIFE 2002",e_events:279,e_total:4605,c_events:307,c_total:4588,subgroup:"ARB"},
+        {name:"SCOPE 2003",e_events:187,e_total:2477,c_events:202,c_total:2460,subgroup:"ARB"},
+        {name:"SHEP 1991",e_events:213,e_total:2365,c_events:322,c_total:2371,subgroup:"Thiazide"},
+        {name:"HYVET 2008",e_events:196,e_total:1933,c_events:235,c_total:1912,subgroup:"Thiazide"},
+      ],
+    };
+
+    let lastResult = null;
 
     function addStudyRow(data) {
       const tbody = document.getElementById('study-tbody');
@@ -332,15 +313,20 @@
         <td><input type="number" value="${data?.c_events||''}" min="0" placeholder="0"></td>
         <td><input type="number" value="${data?.c_total||''}" min="0" placeholder="0"></td>
         <td><input class="name-input" value="${data?.subgroup||''}" placeholder="亚组"></td>
-        <td><button onclick="this.closest('tr').remove()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px">×</button></td>
-      `;
+        <td><button onclick="this.closest('tr').remove()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px">×</button></td>`;
       tbody.appendChild(tr);
     }
 
-    function loadDemo() {
+    function loadDataset(key) {
+      const data = DATASETS[key];
+      if (!data) return;
       document.getElementById('study-tbody').innerHTML = '';
-      DEMO_STUDIES.forEach(s => addStudyRow(s));
+      data.forEach(s => addStudyRow(s));
+      showToast('已加载 ' + data.length + ' 个研究', 'info');
+      runAnalysis();
     }
+
+    function loadDemo() { loadDataset('nscld_pd1'); }
 
     function collectStudies() {
       const rows = document.querySelectorAll('#study-tbody tr');
@@ -350,146 +336,216 @@
         const name = inputs[0].value.trim();
         if (!name) return;
         studies.push({
-          name,
-          e_events: parseInt(inputs[1].value) || 0,
-          e_total: parseInt(inputs[2].value) || 0,
-          c_events: parseInt(inputs[3].value) || 0,
-          c_total: parseInt(inputs[4].value) || 0,
-          subgroup: inputs[5].value.trim(),
-          data_type: "dichotomous",
+          name, e_events:+inputs[1].value||0, e_total:+inputs[2].value||0,
+          c_events:+inputs[3].value||0, c_total:+inputs[4].value||0,
+          subgroup:inputs[5].value.trim(), data_type:"dichotomous",
         });
       });
       return studies;
     }
 
+    function importCSV() {
+      const text = document.getElementById('csv-input').value.trim();
+      if (!text) { showToast('请输入CSV数据', 'error'); return; }
+      const lines = text.split('\n').filter(l => l.trim());
+      document.getElementById('study-tbody').innerHTML = '';
+      let count = 0;
+      lines.forEach((line, i) => {
+        if (i === 0 && line.toLowerCase().includes('name')) return; // skip header
+        const parts = line.split(',').map(s => s.trim());
+        if (parts.length >= 5) {
+          addStudyRow({name:parts[0], e_events:+parts[1], e_total:+parts[2], c_events:+parts[3], c_total:+parts[4], subgroup:parts[5]||''});
+          count++;
+        }
+      });
+      showToast(`已导入 ${count} 个研究`, 'success');
+      if (count >= 2) runAnalysis();
+    }
+
     async function runAnalysis() {
       const studies = collectStudies();
-      if (studies.length < 2) { alert('至少需要2个研究'); return; }
-
+      if (studies.length < 2) { showToast('至少需要2个研究', 'error'); return; }
       const model = document.getElementById('model').value;
       const effectMeasure = document.getElementById('effect-measure').value;
-
       document.getElementById('empty-state').style.display = 'none';
       document.getElementById('results').style.display = 'none';
       document.getElementById('loading').classList.add('active');
       document.getElementById('analyze-btn').disabled = true;
 
       try {
-        const resp = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({studies, model, effect_measure: effectMeasure}),
-        });
+        // Run analysis + bias + cumulative in parallel
+        const [analysisRes, biasRes, cumulativeRes] = await Promise.all([
+          fetch('/api/analyze', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({studies,model,effect_measure:effectMeasure})}),
+          fetch('/api/bias', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({studies})}),
+          fetch('/api/cumulative', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({studies,model,effect_measure:effectMeasure})}),
+        ]);
 
-        if (!resp.ok) throw new Error(await resp.text());
-        const data = await resp.json();
-        renderResults(data, effectMeasure);
+        if (!analysisRes.ok) throw new Error(await analysisRes.text());
+        lastResult = await analysisRes.json();
+        const biasData = biasRes.ok ? await biasRes.json() : null;
+        const cumulData = cumulativeRes.ok ? await cumulativeRes.json() : null;
+
+        renderResults(lastResult, effectMeasure);
+        if (biasData) renderBias(biasData);
+        if (cumulData) renderCumulative(cumulData, effectMeasure);
+
+        // Fetch PRISMA
+        fetch('/api/prisma', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({total_found:studies.length*73,after_dedup:studies.length*56,after_screen:studies.length*9,included:studies.length})})
+          .then(r=>r.json()).then(d=>{document.getElementById('chart-prisma').innerHTML=d.svg;});
+
+        showToast('分析完成', 'success');
       } catch (e) {
-        alert('分析失败: ' + e.message);
+        showToast('分析失败: ' + e.message, 'error');
       } finally {
         document.getElementById('loading').classList.remove('active');
         document.getElementById('analyze-btn').disabled = false;
       }
     }
 
-    function renderResults(data, effectMeasure) {
-      document.getElementById('results').style.display = 'block';
+    function autoRerun() { if (lastResult) runAnalysis(); }
 
-      // Summary stats
+    function renderResults(data, em) {
+      document.getElementById('results').style.display = 'block';
       document.getElementById('pooled-effect').textContent = data.pooled_effect.toFixed(3);
       document.getElementById('pooled-ci').textContent = `[${data.pooled_ci_lower.toFixed(3)}, ${data.pooled_ci_upper.toFixed(3)}]`;
       document.getElementById('p-value').textContent = data.p_value < 0.001 ? '<0.001' : data.p_value.toFixed(4);
       document.getElementById('i-squared').textContent = data.i_squared.toFixed(1) + '%';
       document.getElementById('q-stat').textContent = data.q_statistic.toFixed(2);
       document.getElementById('n-studies').textContent = data.studies.length;
+      document.getElementById('measure-label').textContent = `合并${em}`;
       document.getElementById('model-badge').textContent = data.model === 'random' ? 'Random Effects (D-L)' : 'Fixed Effect (M-H)';
 
-      // Heterogeneity bar
       const hetLevel = document.getElementById('het-level');
       const hetBar = document.getElementById('het-bar');
-      hetLevel.textContent = data.heterogeneity === 'low' ? '低度异质性' : data.heterogeneity === 'moderate' ? '中度异质性' : '高度异质性';
+      hetLevel.textContent = data.heterogeneity === 'low' ? '低度' : data.heterogeneity === 'moderate' ? '中度' : '高度';
       hetBar.style.width = data.i_squared + '%';
       hetBar.style.background = data.i_squared < 25 ? 'var(--success)' : data.i_squared < 75 ? 'var(--warn)' : 'var(--accent)';
 
-      // Charts
       document.getElementById('chart-forest').innerHTML = data.forest_plot_svg;
       document.getElementById('chart-funnel').innerHTML = data.funnel_plot_svg;
 
-      // PRISMA (generate client-side or fetch)
-      generatePRISMA(data.studies.length);
-
-      // Study results table
       const tbody = document.getElementById('results-tbody');
       tbody.innerHTML = '';
-      const maxWeight = Math.max(...data.studies.map(s => s.weight));
+      const maxW = Math.max(...data.studies.map(s => s.weight));
       data.studies.forEach(s => {
-        tbody.innerHTML += `<tr>
-          <td style="font-family:inherit;font-weight:500">${s.name}</td>
-          <td>${s.effect.toFixed(3)}</td>
-          <td>[${s.ci_lower.toFixed(3)}, ${s.ci_upper.toFixed(3)}]</td>
-          <td>${(s.weight/maxWeight*100).toFixed(1)}%</td>
-          <td style="font-family:inherit;color:var(--muted)">${s.subgroup||'—'}</td>
-        </tr>`;
+        tbody.innerHTML += `<tr><td style="font-family:inherit;font-weight:500">${s.name}</td><td>${s.effect.toFixed(3)}</td><td>[${s.ci_lower.toFixed(3)}, ${s.ci_upper.toFixed(3)}]</td><td>${(s.weight/maxW*100).toFixed(1)}%</td><td style="font-family:inherit;color:var(--muted)">${s.subgroup||'—'}</td></tr>`;
       });
 
-      // Subgroup analysis
-      const sgKeys = Object.keys(data.subgroup_results || {});
+      const sgKeys = Object.keys(data.subgroup_results||{});
       if (sgKeys.length > 1) {
         document.getElementById('subgroup-panel').style.display = 'block';
-        const sgTbody = document.getElementById('subgroup-tbody');
-        sgTbody.innerHTML = '';
-        sgKeys.forEach(k => {
-          const sg = data.subgroup_results[k];
-          sgTbody.innerHTML += `<tr>
-            <td style="font-family:inherit;font-weight:500">${k}</td>
-            <td>${sg.n_studies}</td>
-            <td>${sg.pooled_effect.toFixed(3)}</td>
-            <td>[${sg.ci_lower.toFixed(3)}, ${sg.ci_upper.toFixed(3)}]</td>
-            <td>${sg.p_value < 0.001 ? '<0.001' : sg.p_value.toFixed(4)}</td>
-            <td>${sg.i_squared.toFixed(1)}%</td>
-          </tr>`;
-        });
-      }
+        const sg = document.getElementById('subgroup-tbody');
+        sg.innerHTML = '';
+        sgKeys.forEach(k => {const v=data.subgroup_results[k]; sg.innerHTML+=`<tr><td style="font-family:inherit;font-weight:500">${k}</td><td>${v.n_studies}</td><td>${v.pooled_effect.toFixed(3)}</td><td>[${v.ci_lower.toFixed(3)}, ${v.ci_upper.toFixed(3)}]</td><td>${v.p_value<0.001?'<0.001':v.p_value.toFixed(4)}</td><td>${v.i_squared.toFixed(1)}%</td></tr>`;});
+      } else { document.getElementById('subgroup-panel').style.display = 'none'; }
 
-      // Sensitivity analysis
       if (data.sensitivity_results?.length > 0) {
         document.getElementById('sensitivity-panel').style.display = 'block';
-        const senTbody = document.getElementById('sensitivity-tbody');
-        senTbody.innerHTML = '';
-        data.sensitivity_results.forEach(s => {
-          senTbody.innerHTML += `<tr>
-            <td style="font-family:inherit;color:var(--accent)">${s.excluded}</td>
-            <td>${s.pooled_effect.toFixed(3)}</td>
-            <td>[${s.ci_lower.toFixed(3)}, ${s.ci_upper.toFixed(3)}]</td>
-            <td>${s.p_value < 0.001 ? '<0.001' : s.p_value.toFixed(4)}</td>
-          </tr>`;
-        });
-      }
+        const st = document.getElementById('sensitivity-tbody');
+        st.innerHTML = '';
+        data.sensitivity_results.forEach(s => { st.innerHTML+=`<tr><td style="font-family:inherit;color:var(--accent)">${s.excluded}</td><td>${s.pooled_effect.toFixed(3)}</td><td>[${s.ci_lower.toFixed(3)}, ${s.ci_upper.toFixed(3)}]</td><td>${s.p_value<0.001?'<0.001':s.p_value.toFixed(4)}</td></tr>`;});
+      } else { document.getElementById('sensitivity-panel').style.display = 'none'; }
     }
 
-    async function generatePRISMA(nStudies) {
-      try {
-        const resp = await fetch('/api/prisma', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({total_found: Math.round(nStudies*73), after_dedup: Math.round(nStudies*56), after_screen: Math.round(nStudies*9), included: nStudies}),
-        });
-        const data = await resp.json();
-        document.getElementById('chart-prisma').innerHTML = data.svg;
-      } catch(e) {
-        document.getElementById('chart-prisma').innerHTML = '<p style="color:var(--muted)">PRISMA generation failed</p>';
-      }
+    function renderBias(data) {
+      document.getElementById('bias-panel').style.display = 'block';
+      const egger = data.egger_test;
+      const begg = data.begg_test;
+      const tf = data.trim_and_fill;
+
+      document.getElementById('egger-val').textContent = `p = ${egger.p_value.toFixed(3)}`;
+      document.getElementById('egger-val').style.color = egger.p_value < 0.05 ? 'var(--accent)' : 'var(--success)';
+      document.getElementById('egger-desc').textContent = `intercept=${egger.intercept.toFixed(3)}, t=${egger.t_statistic.toFixed(2)} → ${egger.conclusion === 'significant' ? '存在发表偏倚' : '无显著偏倚'}`;
+
+      document.getElementById('begg-val').textContent = `p = ${begg.p_value.toFixed(3)}`;
+      document.getElementById('begg-val').style.color = begg.p_value < 0.05 ? 'var(--accent)' : 'var(--success)';
+      document.getElementById('begg-desc').textContent = `τ = ${begg.tau.toFixed(3)} → ${begg.conclusion === 'significant' ? '存在发表偏倚' : '无显著偏倚'}`;
+
+      document.getElementById('tf-val').textContent = `${tf.estimated_missing} 篇`;
+      document.getElementById('tf-desc').textContent = tf.estimated_missing > 0 ? `可能缺失 ${tf.estimated_missing} 篇研究` : '无缺失研究';
+
+      document.getElementById('tf-adj').textContent = tf.adjusted_effect.toFixed(3);
+      document.getElementById('tf-adj-desc').textContent = `调整后 [${tf.adjusted_ci_lower.toFixed(3)}, ${tf.adjusted_ci_upper.toFixed(3)}]`;
     }
 
-    function showChart(type) {
-      ['forest','funnel','prisma'].forEach(t => {
+    function renderCumulative(data, em) {
+      const results = data.cumulative_results;
+      if (!results || results.length < 2) return;
+      const w = 600, h = Math.max(200, results.length * 36 + 60);
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+      svg += `<rect width="${w}" height="${h}" fill="#0d1117"/>`;
+      svg += `<text x="${w/2}" y="24" text-anchor="middle" fill="#e6edf3" font-size="14" font-weight="bold" font-family="Inter,sans-serif">Cumulative Meta-Analysis — ${em}</text>`;
+
+      const allEffs = results.map(r => [r.ci_lower, r.ci_upper]).flat();
+      const eMin = Math.log(Math.min(...allEffs)) - 0.3;
+      const eMax = Math.log(Math.max(...allEffs)) + 0.3;
+      const px = 200, pw = 300;
+      const mapX = v => px + (Math.log(v) - eMin) / (eMax - eMin) * pw;
+
+      // Null line
+      const nullX = mapX(1);
+      if (nullX > px && nullX < px+pw) {
+        svg += `<line x1="${nullX}" y1="40" x2="${nullX}" y2="${h-20}" stroke="#484f58" stroke-width="1" stroke-dasharray="4,3"/>`;
+      }
+
+      results.forEach((r, i) => {
+        const cy = 55 + i * 32;
+        svg += `<text x="10" y="${cy+4}" fill="#e6edf3" font-size="11" font-family="Inter,sans-serif">${r.n_studies} studies</text>`;
+        svg += `<text x="80" y="${cy+4}" fill="#8b949e" font-size="10" font-family="JetBrains Mono,monospace">${r.pooled_effect.toFixed(3)}</text>`;
+        const x1 = mapX(r.ci_lower), x2 = mapX(r.ci_upper), xm = mapX(r.pooled_effect);
+        svg += `<line x1="${x1}" y1="${cy}" x2="${x2}" y2="${cy}" stroke="#58a6ff" stroke-width="2"/>`;
+        svg += `<circle cx="${xm}" cy="${cy}" r="4" fill="#58a6ff"/>`;
+      });
+
+      svg += '</svg>';
+      document.getElementById('chart-cumulative').innerHTML = svg;
+    }
+
+    function showChart(type, btn) {
+      ['forest','funnel','prisma','cumulative'].forEach(t => {
         document.getElementById('chart-'+t).style.display = t===type?'block':'none';
       });
-      document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
-      event.target.classList.add('active');
+      document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+      if (btn) btn.classList.add('active');
     }
 
-    // Init empty table
+    async function exportCSV() {
+      const studies = collectStudies();
+      if (studies.length < 2) { showToast('请先运行分析', 'error'); return; }
+      try {
+        const r = await fetch('/api/export/csv', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({studies})});
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='metaforge_results.csv'; a.click();
+        showToast('CSV已下载', 'success');
+      } catch(e) { showToast('导出失败', 'error'); }
+    }
+
+    async function exportJSON() {
+      const studies = collectStudies();
+      if (studies.length < 2) { showToast('请先运行分析', 'error'); return; }
+      try {
+        const r = await fetch('/api/export/json', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({studies})});
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='metaforge_results.json'; a.click();
+        showToast('JSON已下载', 'success');
+      } catch(e) { showToast('导出失败', 'error'); }
+    }
+
+    function showToast(msg, type='info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = `toast toast-${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runAnalysis(); }
+    });
+
+    // Init
     for (let i = 0; i < 3; i++) addStudyRow();
   </script>
 </body>
