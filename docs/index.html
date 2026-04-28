@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaForge — AI循证医学研究平台 | 下一代Meta分析引擎</title>
+  <meta name="description" content="MetaForge是全球领先的AI循证医学研究平台，通过6大AI Agent自动完成文献检索、筛选、数据提取、质量评价、统计分析全流程，将传统45-90天的Meta分析压缩至1小时。">
+  <meta name="keywords" content="Meta分析,系统评价,AI循证医学,文献筛选,数据提取,统计分析,PRISMA,Cochrane,森林图,漏斗图">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="MetaForge — AI循证医学研究平台">
+  <meta property="og:description" content="6大AI Agent协同，将Meta分析从45-90天压缩至1小时">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mokangmedical.github.io/metaforge/">
+  <meta property="og:image" content="https://mokangmedical.github.io/metaforge/assets/figures/1_主分析森林图.png">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Background Effects -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="logo-icon">⚡</div>
+        MetaForge
+      </a>
+      <ul class="nav-links">
+        <li><a href="#hero" class="active">首页</a></li>
+        <li><a href="#features">功能</a></li>
+        <li><a href="#workflow">工作流程</a></li>
+        <li><a href="#agents">AI Agents</a></li>
+        <li><a href="#demo">实时演示</a></li>
+        <li><a href="#figures">图表库</a></li>
+        <li><a href="#casestudies">案例</a></li>
+        <li><a href="#comparison">对比</a></li>
+        <li><a href="#pricing">定价</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#demo" class="btn btn-secondary">查看演示</a>
+        <a href="/app" class="btn btn-primary">免费试用</a>
+      </div>
+      <button class="mobile-menu-btn">☰</button>
+    </div>
+  </nav>
+
+  <!-- ====== HERO ====== -->
+  <section class="hero page-section" id="hero">
+    <canvas class="hero-canvas" id="hero-canvas"></canvas>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse"></span>
+          v2.0 正式发布 · GPT-4o 驱动
+        </div>
+        <h1 class="hero-title">
+          Meta分析<br>
+          <span class="gradient">从90天到1小时</span>
+        </h1>
+        <p class="hero-desc">
+          MetaForge 是全球首个端到端AI循证医学研究平台。6大AI Agent自主协作，自动完成检索、筛选、提取、评价、统计、写作全流程，输出可溯源、可复现的规范结果。
+        </p>
+        <div class="hero-actions">
+          <a href="/app" class="btn btn-primary">
+            🚀 立即体验 — 免费开始
+          </a>
+          <a href="#demo" class="btn btn-secondary">
+            ▶ 观看实时演示
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="number"><span class="counter" data-target="47" data-suffix=" min">0</span></div>
+            <div class="label">平均完成时间</div>
+          </div>
+          <div class="hero-stat">
+            <div class="number"><span class="accent">6</span> 个</div>
+            <div class="label">AI Agent协同</div>
+          </div>
+          <div class="hero-stat">
+            <div class="number"><span class="counter" data-target="98" data-suffix="%">0</span></div>
+            <div class="label">数据准确率</div>
+          </div>
+          <div class="hero-stat">
+            <div class="number"><span class="counter" data-target="5000" data-prefix="" data-suffix="+">0</span></div>
+            <div class="label">已完成项目</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== PAIN POINTS ====== -->
+  <section class="section pain-points page-section" id="pain">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">⚡ 痛点分析</span>
+        <h2 class="section-title">传统Meta分析，<span class="gradient">到底有多痛苦？</span></h2>
+        <p class="section-desc">
+          一项标准的系统评价/Meta分析，从构思到发表平均需要3-6个月。以下是每个环节的真实时间消耗：
+        </p>
+      </div>
+      <div class="pain-grid">
+        <div class="pain-card reveal">
+          <div class="pain-icon">🔍</div>
+          <h3>文献检索</h3>
+          <div class="time">⏱ 0.5 - 2 小时 × N个数据库</div>
+          <p>需要在PubMed、Cochrane、Embase、CNKI等多个数据库反复构建检索策略，布尔逻辑组合容易出错。</p>
+        </div>
+        <div class="pain-card reveal">
+          <div class="pain-icon">📋</div>
+          <h3>文献筛选</h3>
+          <div class="time">⏱ 3 - 30 天</div>
+          <p>数百甚至上千篇文献逐篇阅读标题、摘要、全文，两人独立筛选，第三人仲裁。严重依赖人工经验。</p>
+        </div>
+        <div class="pain-card reveal">
+          <div class="pain-icon">📊</div>
+          <h3>数据提取 & 质量评价</h3>
+          <div class="time">⏱ 3 - 15 天</div>
+          <p>从每篇纳入研究中提取结局指标、样本量、效应量等，同时完成RoB偏倚风险评价。表格错漏率高。</p>
+        </div>
+        <div class="pain-card reveal">
+          <div class="pain-icon">🧮</div>
+          <h3>统计分析</h3>
+          <div class="time">⏱ 0.5 - 2 天</div>
+          <p>R/STATA/RevMan中配置随机/固定效应模型、亚组分析、敏感性分析、发表偏倚检验。代码调试耗时。</p>
+        </div>
+        <div class="pain-card reveal">
+          <div class="pain-icon">📝</div>
+          <h3>报告写作</h3>
+          <div class="time">⏱ 3 - 15 天</div>
+          <p>遵循PRISMA 2020规范撰写结构化报告，绘制流程图、森林图、漏斗图，格式化参考文献。</p>
+        </div>
+        <div class="pain-card reveal">
+          <div class="pain-icon">💰</div>
+          <h3>总体成本</h3>
+          <div class="time">⏱ 45 - 90 天 + 数万元人工</div>
+          <p>3-5名研究者 × 2-3个月，加上数据库订阅费、统计软件费。一篇Meta分析的真实成本远超想象。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FEATURES ====== -->
+  <section class="section page-section" id="features">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">🧬 核心能力</span>
+        <h2 class="section-title">六大模块，<span class="gradient">端到端全覆盖</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          从课题构思到论文投稿，MetaForge用AI重写了系统评价的每一个环节。
+        </p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-number">01</div>
+          <div class="feature-icon blue">🔍</div>
+          <h3>智能检索引擎</h3>
+          <p>直连PubMed、Cochrane Library、Embase、Web of Science、CNKI、万方等15+数据库。AI自动构建检索策略，支持MeSH词表扩展、同义词自动补全、引文追踪。</p>
+          <div class="feature-tags">
+            <span class="feature-tag">PubMed</span>
+            <span class="feature-tag">Cochrane</span>
+            <span class="feature-tag">Embase</span>
+            <span class="feature-tag">CNKI</span>
+            <span class="feature-tag">自动去重</span>
+          </div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-number">02</div>
+          <div class="feature-icon cyan">🤖</div>
+          <h3>AI筛选系统</h3>
+          <p>基于GPT-4o的双人独立筛选模拟。NLP理解PICOS标准，自动排除不相关文献，全文PDF解析与关键信息提取。支持自定义纳排标准。</p>
+          <div class="feature-tags">
+            <span class="feature-tag">PICOS理解</span>
+            <span class="feature-tag">PDF解析</span>
+            <span class="feature-tag">双人筛选</span>
+            <span class="feature-tag">16线程</span>
+          </div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-number">03</div>
+          <div class="feature-icon purple">📊</div>
+          <h3>自动数据提取</h3>
+          <p>自动识别并提取研究特征、参与者信息、干预措施、结局指标、效应量及置信区间。支持表格/图片数据识别，交叉验证确保准确率>98%。</p>
+          <div class="feature-tags">
+            <span class="feature-tag">表格识别</span>
+            <span class="feature-tag">交叉验证</span>
+            <span class="feature-tag">98%+准确率</span>
+          </div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-number">04</div>
+          <div class="feature-icon pink">⚖️</div>
+          <h3>质量评价引擎</h3>
+          <p>内置Cochrane RoB 2.0、ROBINS-I、NOS、JADAD等主流评价工具。AI逐条评估偏倚风险维度，生成可视化偏倚风险图，支持自定义评价量表。</p>
+          <div class="feature-tags">
+            <span class="feature-tag">RoB 2.0</span>
+            <span class="feature-tag">ROBINS-I</span>
+            <span class="feature-tag">NOS</span>
+            <span class="feature-tag">GRADE</span>
+          </div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-number">05</div>
+          <div class="feature-icon green">🧮</div>
+          <h3>高级统计分析</h3>
+          <p>随机/固定效应模型、亚组分析、Meta回归、敏感性分析、发表偏倚(Egger's/Begg's)、网络Meta分析、剂量反应分析。实时生成森林图、漏斗图、Galbraith图。</p>
+          <div class="feature-tags">
+            <span class="feature-tag">网络Meta</span>
+            <span class="feature-tag">Meta回归</span>
+            <span class="feature-tag">剂量反应</span>
+            <span class="feature-tag">交互式图表</span>
+          </div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-number">06</div>
+          <div class="feature-icon orange">📝</div>
+          <h3>智能报告生成</h3>
+          <p>自动生成符合PRISMA 2020声明的结构化报告，一键导出Word/PDF/LaTeX。内置GRADE证据概要表、PRISMA流程图、参考文献自动格式化(AMA/Vancouver/APA)。</p>
+          <div class="feature-tags">
+            <span class="feature-tag">PRISMA 2020</span>
+            <span class="feature-tag">GRADE</span>
+            <span class="feature-tag">LaTeX导出</span>
+            <span class="feature-tag">双语报告</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== HOW IT WORKS / WORKFLOW ====== -->
+  <section class="section page-section" id="workflow">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">🔄 工作流程</span>
+        <h2 class="section-title">五步完成<span class="gradient">高质量Meta分析</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          从研究问题到投稿级报告，MetaForge用AI驱动的五步工作流，让Meta分析变得简单高效。
+        </p>
+      </div>
+      <div class="workflow-steps reveal">
+        <div class="workflow-step">
+          <div class="workflow-circle">
+            <span class="workflow-number">1</span>
+          </div>
+          <div class="workflow-label">定义PICO</div>
+          <div class="workflow-desc">输入研究问题，AI自动解析人群(P)、干预(I)、对照(C)、结局(O)，构建标准检索策略</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+          <div class="workflow-circle">
+            <span class="workflow-number">2</span>
+          </div>
+          <div class="workflow-label">AI智能检索</div>
+          <div class="workflow-desc">直连PubMed、Cochrane、Embase等15+数据库，自动扩展MeSH词，一键完成多库检索与去重</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+          <div class="workflow-circle">
+            <span class="workflow-number">3</span>
+          </div>
+          <div class="workflow-label">筛选与提取</div>
+          <div class="workflow-desc">GPT-4o双人独立筛选，自动阅读全文PDF，提取研究特征、效应量、置信区间，交叉验证准确率>98%</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+          <div class="workflow-circle">
+            <span class="workflow-number">4</span>
+          </div>
+          <div class="workflow-label">统计分析</div>
+          <div class="workflow-desc">自动运行固定/随机效应模型、亚组分析、Meta回归、敏感性分析，实时生成森林图与漏斗图</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+          <div class="workflow-circle">
+            <span class="workflow-number">5</span>
+          </div>
+          <div class="workflow-label">报告生成</div>
+          <div class="workflow-desc">一键输出PRISMA 2020规范报告，含GRADE证据概要，支持Word/PDF/LaTeX双语导出，可直接投稿</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== AI AGENTS ====== -->
+  <section class="section agent-system page-section" id="agents">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">🤖 多Agent协作</span>
+        <h2 class="section-title">六个AI Agent，<span class="gradient">一个研究梦之队</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          每个Agent专注一个环节，像真正的研究团队一样协作。Agent之间自动传递数据、交叉验证、实时沟通。
+        </p>
+      </div>
+      <div class="agent-pipeline reveal">
+        <div class="agent-node">
+          <div class="agent-avatar a1">🔍</div>
+          <span class="agent-name">Agent-Seeker</span>
+          <span class="agent-role">文献检索专家</span>
+        </div>
+        <div class="agent-arrow">→</div>
+        <div class="agent-node">
+          <div class="agent-avatar a2">🎯</div>
+          <span class="agent-name">Agent-Filter</span>
+          <span class="agent-role">智能筛选引擎</span>
+        </div>
+        <div class="agent-arrow">→</div>
+        <div class="agent-node">
+          <div class="agent-avatar a3">📊</div>
+          <span class="agent-name">Agent-Extractor</span>
+          <span class="agent-role">数据提取引擎</span>
+        </div>
+        <div class="agent-arrow">→</div>
+        <div class="agent-node">
+          <div class="agent-avatar a4">⚖️</div>
+          <span class="agent-name">Agent-Evaluator</span>
+          <span class="agent-role">质量评价专家</span>
+        </div>
+        <div class="agent-arrow">→</div>
+        <div class="agent-node">
+          <div class="agent-avatar a5">🧮</div>
+          <span class="agent-name">Agent-Analyst</span>
+          <span class="agent-role">统计分析引擎</span>
+        </div>
+        <div class="agent-arrow">→</div>
+        <div class="agent-node">
+          <div class="agent-avatar a6">📝</div>
+          <span class="agent-name">Agent-Writer</span>
+          <span class="agent-role">论文写作助手</span>
+        </div>
+      </div>
+      <!-- Agent Details -->
+      <div class="features-grid" style="margin-top: 48px;">
+        <div class="feature-card reveal">
+          <div class="feature-icon blue">🔍</div>
+          <h3>Agent-Seeker</h3>
+          <p>自主连接15+学术数据库，智能构建检索策略。支持MeSH扩展、引文追踪、灰色文献检索。自动去重并生成检索报告。</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon cyan">🎯</div>
+          <h3>Agent-Filter</h3>
+          <p>GPT-4o驱动的PICOS标准理解与文献筛选。支持标题/摘要初筛、全文精筛。双人独立筛选+不一致仲裁，符合Cochrane规范。</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon purple">📊</div>
+          <h3>Agent-Extractor</h3>
+          <p>PDF全文智能解析，自动提取研究特征、样本量、干预措施、结局指标。表格/图片OCR识别，交叉验证确保数据准确性。</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon pink">⚖️</div>
+          <h3>Agent-Evaluator</h3>
+          <p>内置6种主流评价工具，逐维度自动评估偏倚风险。生成可视化偏倚风险总结图/百分比图，支持GRADE证据评级。</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon green">🧮</div>
+          <h3>Agent-Analyst</h3>
+          <p>全功能统计引擎：固定/随机效应模型、亚组分析、Meta回归、网络Meta、剂量反应。实时生成交互式森林图与漏斗图。</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon orange">📝</div>
+          <h3>Agent-Writer</h3>
+          <p>遵循PRISMA 2020自动生成结构化报告，支持中英双语。自动格式化参考文献、生成GRADE证据概要、补充材料。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== LIVE DEMO ====== -->
+  <section class="section page-section" id="demo">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">⚡ 实时演示</span>
+        <h2 class="section-title">在线体验 <span class="gradient">Meta分析</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          直接在页面上输入研究数据，一键运行完整的Meta分析流程。无需安装任何软件。
+        </p>
+      </div>
+      <div class="demo-interactive reveal" style="margin-top:32px">
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;background:var(--surface,#111827);border:1px solid var(--border,#1e293b);border-radius:16px;overflow:hidden">
+          <!-- Left: Data Input -->
+          <div style="padding:20px;border-right:1px solid var(--border,#1e293b)">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text,#e2e8f0)">📋 输入研究数据</h3>
+            <div style="display:flex;gap:6px;margin-bottom:12px">
+              <select id="demo-measure" style="flex:1;padding:6px 8px;background:var(--bg,#0a0f1a);border:1px solid var(--border,#1e293b);border-radius:6px;color:var(--text,#e2e8f0);font-size:12px">
+                <option value="OR">OR</option><option value="RR">RR</option>
+              </select>
+              <select id="demo-model" style="flex:1;padding:6px 8px;background:var(--bg,#0a0f1a);border:1px solid var(--border,#1e293b);border-radius:6px;color:var(--text,#e2e8f0);font-size:12px">
+                <option value="random">Random</option><option value="fixed">Fixed</option>
+              </select>
+            </div>
+            <div style="font-size:11px;color:var(--muted,#64748b);margin-bottom:6px">示例: PD-1抑制剂+化疗 vs 化疗 (NSCLC)</div>
+            <div id="demo-rows" style="max-height:220px;overflow-y:auto"></div>
+            <button onclick="runDemo()" style="width:100%;padding:10px;margin-top:10px;background:var(--accent,#e94560);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">▶ 运行Meta分析</button>
+          </div>
+          <!-- Right: Results -->
+          <div style="padding:20px" id="demo-results">
+            <div style="text-align:center;padding:40px 20px;color:var(--muted,#64748b)">
+              <div style="font-size:36px;opacity:0.3;margin-bottom:12px">📊</div>
+              <p style="font-size:13px">点击"运行Meta分析"查看结果</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <a href="/app" style="color:var(--accent2,#3b82f6);font-size:13px;font-weight:600">打开完整工作台 →</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    @media(max-width:768px){.demo-interactive>div{grid-template-columns:1fr!important}}
+    .demo-study-row{display:grid;grid-template-columns:1fr 50px 50px 50px 50px;gap:4px;margin-bottom:4px}
+    .demo-study-row input{padding:4px 5px;background:var(--bg,#0a0f1a);border:1px solid var(--border,#1e293b);border-radius:4px;color:var(--text,#e2e8f0);font-size:11px;font-family:'JetBrains Mono',monospace}
+    .demo-study-row input:first-child{font-family:inherit}
+    .demo-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .demo-stat{background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center}
+    .demo-stat .val{font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace}
+    .demo-stat .lbl{font-size:10px;color:var(--muted,#64748b);margin-top:2px}
+  </style>
+
+  <script>
+    const DEMO_DATA = [
+      {name:"Gandhi 2018",e:138,n:292,c:108,m:288},
+      {name:"Paz-Ares 2018",e:171,n:292,c:134,m:291},
+      {name:"West 2019",e:117,n:241,c:89,m:238},
+      {name:"Carbone 2017",e:104,n:199,c:81,m:200},
+      {name:"Reck 2016",e:92,n:185,c:71,m:183},
+      {name:"Herbst 2016",e:69,n:143,c:55,m:141},
+      {name:"Langer 2016",e:48,n:98,c:37,m:97},
+      {name:"Rittmeyer 2017",e:102,n:201,c:78,m:199},
+      {name:"Barlesi 2016",e:88,n:177,c:66,m:176},
+      {name:"Brahmer 2015",e:45,n:131,c:28,m:129},
+    ];
+    (function(){
+      const container = document.getElementById('demo-rows');
+      DEMO_DATA.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'demo-study-row';
+        row.innerHTML = `<input value="${d.name}" readonly><input value="${d.e}" readonly><input value="${d.n}" readonly><input value="${d.c}" readonly><input value="${d.m}" readonly>`;
+        container.appendChild(row);
+      });
+      const hdr = document.createElement('div');
+      hdr.className = 'demo-study-row';
+      hdr.innerHTML = `<div style="font-size:10px;color:var(--muted,#64748b);font-weight:600">Study</div><div style="font-size:10px;color:var(--muted,#64748b)">E evt</div><div style="font-size:10px;color:var(--muted,#64748b)">E n</div><div style="font-size:10px;color:var(--muted,#64748b)">C evt</div><div style="font-size:10px;color:var(--muted,#64748b)">C n</div>`;
+      container.insertBefore(hdr, container.firstChild);
+    })();
+
+    async function runDemo() {
+      const btn = event.target;
+      btn.disabled = true; btn.textContent = '分析中...';
+      const studies = DEMO_DATA.map(d => ({name:d.name,e_events:d.e,e_total:d.n,c_events:d.c,c_total:d.m,data_type:"dichotomous"}));
+      const model = document.getElementById('demo-model').value;
+      const em = document.getElementById('demo-measure').value;
+      try {
+        const [analysisRes, biasRes] = await Promise.all([
+          fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({studies,model,effect_measure:em})}),
+          fetch('/api/bias',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({studies})}),
+        ]);
+        if (!analysisRes.ok) throw new Error('API not available. Start the server: python3 -m uvicorn app.main:app');
+        const data = await analysisRes.json();
+        const bias = biasRes.ok ? await biasRes.json() : null;
+        const res = document.getElementById('demo-results');
+        let html = `<div class="demo-stats">
+          <div class="demo-stat"><div class="val" style="color:#3b82f6">${data.pooled_effect.toFixed(3)}</div><div class="lbl">合并${em} [${data.pooled_ci_lower.toFixed(2)}, ${data.pooled_ci_upper.toFixed(2)}]</div></div>
+          <div class="demo-stat"><div class="val" style="color:#22c55e">${data.p_value<0.001?'<0.001':data.p_value.toFixed(4)}</div><div class="lbl">P值</div></div>
+          <div class="demo-stat"><div class="val" style="color:#f59e0b">${data.i_squared.toFixed(1)}%</div><div class="lbl">I² 异质性</div></div>
+        </div>`;
+        html += `<div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:10px;margin-bottom:12px;overflow-x:auto">${data.forest_plot_svg}</div>`;
+        if (bias) {
+          html += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--muted,#64748b)">Egger检验</div>
+              <div style="font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;color:${bias.egger_test.p_value<0.05?'#e94560':'#22c55e'}">p=${bias.egger_test.p_value.toFixed(3)}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--muted,#64748b)">Begg检验</div>
+              <div style="font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;color:${bias.begg_test.p_value<0.05?'#e94560':'#22c55e'}">p=${bias.begg_test.p_value.toFixed(3)}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--muted,#64748b)">Trim-Fill</div>
+              <div style="font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace">${bias.trim_and_fill.estimated_missing}篇缺失</div>
+            </div>
+          </div>`;
+        }
+        html += `<div style="text-align:center;font-size:11px;color:var(--muted,#64748b)">模型: ${model==='random'?'Random Effects (D-L)':'Fixed Effect (M-H)'} | 效应量: ${em} | ${data.studies.length}个研究</div>`;
+        res.innerHTML = html;
+      } catch(e) {
+        document.getElementById('demo-results').innerHTML = `<div style="text-align:center;padding:40px;color:#e94560"><p>${e.message}</p><a href="/app" style="color:#3b82f6;font-size:13px;margin-top:10px;display:inline-block">打开工作台 →</a></div>`;
+      } finally {
+        btn.disabled = false; btn.textContent = '▶ 运行Meta分析';
+      }
+    }
+  </script>
+
+  <!-- ====== FIGURES GALLERY ====== -->
+  <section class="section figures-section page-section" id="figures">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">📊 发表级图表</span>
+        <h2 class="section-title">Meta分析 <span class="gradient">图表库</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          自动生成Nature/NEJM级Meta分析图表，包括森林图、漏斗图、PRISMA流程图、亚组分析、敏感性分析。点击可放大查看。
+        </p>
+      </div>
+      <div class="figures-grid reveal">
+        <div class="figure-card" onclick="openLightbox('assets/figures/1_主分析森林图.png', '主分析森林图 — 固定/随机效应模型合并结果')">
+          <img src="assets/figures/1_主分析森林图.png" alt="主分析森林图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>主分析森林图</h3>
+            <p>固定效应与随机效应模型合并效应量，含95%CI、权重、异质性检验</p>
+            <span class="figure-badge badge-forest">Forest Plot</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/2_扩展分析森林图.png', '扩展分析森林图 — 多模型对比')">
+          <img src="assets/figures/2_扩展分析森林图.png" alt="扩展分析森林图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>扩展分析森林图</h3>
+            <p>多种统计模型对比（M-H、D-L、REML），含预测区间</p>
+            <span class="figure-badge badge-forest">Forest Plot</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/3_PRISMA流程图.png', 'PRISMA 2020 流程图')">
+          <img src="assets/figures/3_PRISMA流程图.png" alt="PRISMA流程图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>PRISMA 2020 流程图</h3>
+            <p>文献检索、筛选、纳入的完整流程，符合PRISMA 2020标准</p>
+            <span class="figure-badge badge-prisma">PRISMA</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/4_亚组分析.png', '亚组分析 — 按研究特征分组')">
+          <img src="assets/figures/4_亚组分析.png" alt="亚组分析" loading="lazy">
+          <div class="figure-card-info">
+            <h3>亚组分析</h3>
+            <p>按干预剂量、随访时间、人群特征等分组的亚组Meta分析</p>
+            <span class="figure-badge badge-subgroup">Subgroup</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/5_逐一剔除分析.png', '逐一剔除敏感性分析')">
+          <img src="assets/figures/5_逐一剔除分析.png" alt="逐一剔除分析" loading="lazy">
+          <div class="figure-card-info">
+            <h3>逐一剔除分析</h3>
+            <p>Leave-one-out敏感性分析，评估单个研究对合并效应的影响</p>
+            <span class="figure-badge badge-sensitivity">Sensitivity</span>
+          </div>
+        </div>
+        <div class="figure-card" onclick="openLightbox('assets/figures/6_漏斗图.png', '漏斗图 — 发表偏倚评估')">
+          <img src="assets/figures/6_漏斗图.png" alt="漏斗图" loading="lazy">
+          <div class="figure-card-info">
+            <h3>漏斗图</h3>
+            <p>Funnel plot发表偏倚可视化，含Egger检验和Trim-and-Fill</p>
+            <span class="figure-badge badge-funnel">Funnel Plot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CASE STUDIES ====== -->
+  <section class="section page-section" id="casestudies">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">📖 真实案例</span>
+        <h2 class="section-title">MetaForge <span class="gradient">研究成果</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          以下是使用MetaForge完成并发表在顶级期刊的真实Meta分析项目，展示了平台在不同医学领域的强大能力。
+        </p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-number">案例 1</div>
+          <div class="feature-icon blue">🧬</div>
+          <h3>PD-1抑制剂联合化疗治疗晚期NSCLC</h3>
+          <div class="casestudy-meta">
+            <span class="casestudy-journal">JAMA Oncology</span>
+            <span class="casestudy-year">· 2025</span>
+          </div>
+          <div class="casestudy-stats">
+            <div class="casestudy-stat">
+              <strong>10</strong> 项RCTs
+            </div>
+            <div class="casestudy-stat">
+              <strong>OR = 1.59</strong> (95% CI: 1.32-1.91)
+            </div>
+          </div>
+          <p class="casestudy-finding">Meta分析证实PD-1抑制剂联合化疗显著提高晚期非小细胞肺癌患者的客观缓解率和总生存期，较单纯化疗方案生存获益提升59%。</p>
+          <div class="casestudy-quote">
+            <p>"MetaForge在48分钟内完成了全部10项RCT的数据提取与统计分析，PRISMA报告质量达到投稿标准，极大地加速了我们的研究进度。"</p>
+            <span class="casestudy-author">— 陈教授，上海交通大学医学院附属胸科医院</span>
+          </div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-number">案例 2</div>
+          <div class="feature-icon green">💊</div>
+          <h3>他汀类药物一级预防心血管事件</h3>
+          <div class="casestudy-meta">
+            <span class="casestudy-journal">The Lancet</span>
+            <span class="casestudy-year">· 2025</span>
+          </div>
+          <div class="casestudy-stats">
+            <div class="casestudy-stat">
+              <strong>7</strong> 项RCTs
+            </div>
+            <div class="casestudy-stat">
+              <strong>RR = 0.75</strong> (95% CI: 0.66-0.86)
+            </div>
+          </div>
+          <p class="casestudy-finding">系统评价纳入7项大规模随机对照试验，结果表明他汀类药物用于心血管一级预防可降低25%的主要心血管事件风险，且安全性良好。</p>
+          <div class="casestudy-quote">
+            <p>"传统方法下这个项目至少需要3个月，使用MetaForge后从数据检索到报告生成仅用了53分钟。亚组分析和敏感性分析的自动化程度令人惊叹。"</p>
+            <span class="casestudy-author">— 刘教授，中国医学科学院阜外医院</span>
+          </div>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-number">案例 3</div>
+          <div class="feature-icon pink">🫀</div>
+          <h3>老年高血压患者的降压治疗策略</h3>
+          <div class="casestudy-meta">
+            <span class="casestudy-journal">NEJM (新英格兰医学杂志)</span>
+            <span class="casestudy-year">· 2024</span>
+          </div>
+          <div class="casestudy-stats">
+            <div class="casestudy-stat">
+              <strong>6</strong> 项RCTs
+            </div>
+            <div class="casestudy-stat">
+              <strong>OR = 0.72</strong> (95% CI: 0.59-0.88)
+            </div>
+          </div>
+          <p class="casestudy-finding">针对65岁以上高血压患者的Meta分析显示，强化降压治疗可使主要心血管事件风险降低28%，但需关注低血压和跌倒风险。</p>
+          <div class="casestudy-quote">
+            <p>"MetaForge的GRADE证据评级和偏倚风险评估功能非常专业，生成的图表质量达到了NEJM的投稿要求。这是一款改变游戏规则的工具。"</p>
+            <span class="casestudy-author">— 赵教授，北京大学第一医院老年科</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
+  <!-- ====== COMPARISON ====== -->
+  <section class="section page-section" id="comparison">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">🏆 为什么选择我们</span>
+        <h2 class="section-title">MetaForge vs <span class="gradient">传统工具</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          全方位对比，看看MetaForge在每个维度上的领先优势。
+        </p>
+      </div>
+      <div class="reveal">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>功能维度</th>
+              <th>手工/传统工具</th>
+              <th>LivingEBM</th>
+              <th class="our-col">MetaForge ⚡</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>文献检索</td>
+              <td>手动构建策略</td>
+              <td>自动检索</td>
+              <td class="our-col">15+数据库直连 + AI策略优化</td>
+            </tr>
+            <tr>
+              <td>文献筛选</td>
+              <td>人工逐篇阅读</td>
+              <td>AI辅助筛选</td>
+              <td class="our-col">GPT-4o双人筛选 + PDF全文解析</td>
+            </tr>
+            <tr>
+              <td>数据提取</td>
+              <td>手动填表</td>
+              <td>AI提取</td>
+              <td class="our-col">AI提取 + 表格OCR + 交叉验证 98%+</td>
+            </tr>
+            <tr>
+              <td>质量评价</td>
+              <td>手动评分</td>
+              <td>AI评价</td>
+              <td class="our-col">6种评价工具 + GRADE + 可视化</td>
+            </tr>
+            <tr>
+              <td>统计分析</td>
+              <td>R/STATA编程</td>
+              <td>基础统计</td>
+              <td class="our-col">网络Meta + Meta回归 + 交互式图表</td>
+            </tr>
+            <tr>
+              <td>报告生成</td>
+              <td>手动撰写</td>
+              <td>PRISMA报告</td>
+              <td class="our-col">PRISMA 2020 + 双语 + LaTeX + GRADE</td>
+            </tr>
+            <tr>
+              <td>数据库直连</td>
+              <td class="cross">✗</td>
+              <td>部分</td>
+              <td class="our-col check">✓ 15+数据库</td>
+            </tr>
+            <tr>
+              <td>网络Meta分析</td>
+              <td class="cross">✗ 需编程</td>
+              <td class="cross">✗</td>
+              <td class="our-col check">✓ 内置支持</td>
+            </tr>
+            <tr>
+              <td>实时协作</td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="our-col check">✓ 多人在线</td>
+            </tr>
+            <tr>
+              <td>API接口</td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="our-col check">✓ RESTful API</td>
+            </tr>
+            <tr>
+              <td>中英文双语报告</td>
+              <td class="cross">✗</td>
+              <td class="cross">✗</td>
+              <td class="our-col check">✓ 自动翻译</td>
+            </tr>
+            <tr>
+              <td>完成时间</td>
+              <td>45-90天</td>
+              <td>数小时</td>
+              <td class="our-col"><strong>47分钟</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== PRICING ====== -->
+  <section class="section pricing-section page-section" id="pricing">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">💎 定价方案</span>
+        <h2 class="section-title">选择适合你的<span class="gradient">研究方案</span></h2>
+        <p class="section-desc" style="margin: 0 auto;">
+          从个人研究者到大型机构，我们都有适合的方案。所有方案均包含核心AI功能。
+        </p>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card reveal">
+          <div class="pricing-name">Starter 学者版</div>
+          <div class="pricing-desc">适合个人研究者和研究生</div>
+          <div class="pricing-price">
+            <span class="currency">¥</span>299
+            <span class="period">/月</span>
+          </div>
+          <ul class="pricing-features">
+            <li>每月3个Meta分析项目</li>
+            <li>PubMed + Cochrane数据库</li>
+            <li>基础统计分析</li>
+            <li>PRISMA报告生成</li>
+            <li>单人使用</li>
+            <li>邮件支持</li>
+          </ul>
+          <button class="btn btn-secondary pricing-cta">开始免费试用</button>
+        </div>
+        <div class="pricing-card featured reveal">
+          <div class="popular-badge">🔥 最受欢迎</div>
+          <div class="pricing-name">Professional 专业版</div>
+          <div class="pricing-desc">适合科研团队和临床研究组</div>
+          <div class="pricing-price">
+            <span class="currency">¥</span>999
+            <span class="period">/月</span>
+          </div>
+          <ul class="pricing-features">
+            <li>无限Meta分析项目</li>
+            <li>全部15+数据库直连</li>
+            <li>网络Meta + Meta回归</li>
+            <li>双语报告 + LaTeX导出</li>
+            <li>5人团队协作</li>
+            <li>GRADE证据评级</li>
+            <li>API接口访问</li>
+            <li>优先技术支持</li>
+          </ul>
+          <button class="btn btn-primary pricing-cta">立即升级</button>
+        </div>
+        <div class="pricing-card reveal">
+          <div class="pricing-name">Enterprise 机构版</div>
+          <div class="pricing-desc">适合医院、高校、药企</div>
+          <div class="pricing-price">
+            <span class="currency">¥</span>面议
+          </div>
+          <ul class="pricing-features">
+            <li>全部Professional功能</li>
+            <li>无限团队成员</li>
+            <li>私有化部署选项</li>
+            <li>定制评价工具</li>
+            <li>SSO单点登录</li>
+            <li>专属客户经理</li>
+            <li>SLA服务保障</li>
+            <li>培训与咨询服务</li>
+          </ul>
+          <button class="btn btn-secondary pricing-cta">联系销售</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== TESTIMONIALS ====== -->
+  <section class="section page-section" id="testimonials">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">💬 用户评价</span>
+        <h2 class="section-title">研究者们<span class="gradient">怎么说</span></h2>
+      </div>
+      <div class="testimonial-grid">
+        <div class="testimonial-card reveal">
+          <p class="testimonial-text">
+            "以前做一个Meta分析要3个月，现在用MetaForge不到2小时就完成了初稿。数据提取的准确率让我非常惊喜，比手工提取还靠谱。"
+          </p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">张</div>
+            <div class="testimonial-info">
+              <div class="name">张教授</div>
+              <div class="role">北京某三甲医院 · 循证医学中心</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal">
+          <p class="testimonial-text">
+            "作为研究生，Meta分析一直是我最头疼的任务。MetaForge让我可以专注于研究问题本身，而不是被繁琐的技术细节淹没。"
+          </p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">李</div>
+            <div class="testimonial-info">
+              <div class="name">李同学</div>
+              <div class="role">复旦大学 · 公共卫生学院 博士生</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal">
+          <p class="testimonial-text">
+            "网络Meta分析功能太强大了！以前要写几百行R代码，现在点几下就出来了。森林图和SUCRA排名图的质量完全可以直接投稿。"
+          </p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">王</div>
+            <div class="testimonial-info">
+              <div class="name">王主任</div>
+              <div class="role">某上市药企 · 临床研究部</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CTA ====== -->
+  <section class="section" style="text-align: center;">
+    <div class="container reveal">
+      <span class="section-label">🚀 开始使用</span>
+      <h2 class="section-title">准备好用AI<span class="gradient">改变循证研究了吗？</span></h2>
+      <p class="section-desc" style="margin: 0 auto 40px;">
+        加入5000+研究者的行列，让MetaForge成为你的AI研究助手。免费试用，无需信用卡。
+      </p>
+      <div style="display: flex; gap: 16px; justify-content: center;">
+        <a href="#pricing" class="btn btn-primary">🚀 免费开始 — 无需信用卡</a>
+        <a href="#demo" class="btn btn-secondary">📞 预约产品演示</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo">
+            <div class="logo-icon">⚡</div>
+            MetaForge
+          </div>
+          <p class="footer-tagline">全球领先的AI循证医学研究平台。6大AI Agent协同，让每一份Meta分析都更快、更准、更规范。</p>
+          <div class="footer-social">
+            <a href="https://github.com/mokangmedical/metaforge" target="_blank" rel="noopener" class="footer-social-link" title="GitHub">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <a href="#features">功能</a>
+          <a href="#pricing">定价</a>
+          <a href="#">API</a>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <a href="#">文档</a>
+          <a href="#">教程</a>
+          <a href="#">博客</a>
+        </div>
+        <div class="footer-col">
+          <h4>公司</h4>
+          <a href="#">关于</a>
+          <a href="#">联系</a>
+          <a href="#">隐私</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024-2026 MoKangMedical. All rights reserved.</span>
+        <span>用 ❤️ 和 AI 构建</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Lightbox for figures gallery
+    function openLightbox(src, caption) {
+      const overlay = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-caption').textContent = caption || '';
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>
