@@ -22,6 +22,10 @@ from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Dict, Any
 
+# Database and auth imports
+from app.database import init_db, get_db, User, Project, APIUsage, ShareToken, PLAN_LIMITS, SessionLocal
+from app.auth import hash_password, verify_password, generate_token, validate_token, check_api_quota, increment_api_usage
+
 import numpy as np
 from scipy import stats as sp_stats
 
@@ -1194,33 +1198,31 @@ engine = MetaAnalysisEngine()
 # User System & AI Simulation — In-Memory Stores
 # ============================================================
 
-# users_db[username] = {username, email, password_hash, created_at}
-users_db: Dict[str, dict] = {}
-
-# sessions_db[token] = {username, created_at}
-sessions_db: Dict[str, dict] = {}
-
-# user_projects_db[project_id] = {id, owner, name, studies, settings, created_at, updated_at}
-user_projects_db: Dict[str, dict] = {}
-
-# shared_links_db[token] = {project_id, created_by, created_at, access_count}
-shared_links_db: Dict[str, dict] = {}
+# Initialize database on startup
+@app.on_event("startup")
+async def startup():
+    init_db()
 
 
-def _hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
-
-
-def _get_current_user(request: Request) -> str:
-    """Extract username from Authorization header (Bearer token). Raises 401 if invalid."""
+def _get_current_user(request: Request) -> tuple:
+    """Extract user from Authorization header (Bearer token). Returns (user, db) tuple."""
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
         raise HTTPException(401, "Missing or invalid Authorization header. Use: Bearer <token>")
     token = auth[7:]
-    session = sessions_db.get(token)
-    if not session:
+    payload = validate_token(token)
+    if not payload:
         raise HTTPException(401, "Invalid or expired session token")
-    return session["username"]
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == payload["user_id"]).first()
+        if not user:
+            raise HTTPException(401, "User not found")
+        return user, db
+    except:
+        db.close()
+        raise
 
 # ============================================================
 # API 端点
@@ -1261,6 +1263,35 @@ async def api_analyze(request: Request):
 
     if len(studies_data) < 2:
         raise HTTPException(400, "至少需要2个研究")
+
+    # Track API usage for authenticated users
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            token = auth[7:]
+            payload = validate_token(token)
+            if payload:
+                db = SessionLocal()
+                try:
+                    user = db.query(User).filter(User.id == payload["user_id"]).first()
+                    if user:
+                        if not check_api_quota(user):
+                            raise HTTPException(429, "API quota exceeded. Upgrade your plan.")
+                        increment_api_usage(user, db)
+                        # Log usage
+                        usage = APIUsage(
+                            user_id=user.id,
+                            endpoint="/api/analyze",
+                            response_ms=0,
+                        )
+                        db.add(usage)
+                        db.commit()
+                finally:
+                    db.close()
+        except HTTPException:
+            raise
+        except:
+            pass  # Allow anonymous usage
 
     studies = [StudyInput(**s) for s in studies_data]
 
@@ -2084,16 +2115,34 @@ async def api_register(request: Request):
         raise HTTPException(400, "Password must be at least 6 characters")
     if "@" not in email:
         raise HTTPException(400, "Invalid email format")
-    if username in users_db:
-        raise HTTPException(409, "Username already exists")
+    db = SessionLocal()
+    try:
+        existing = db.query(User).filter((User.username == username) | (User.email == email)).first()
+        if existing:
+            raise HTTPException(409, "Username or email already exists")
 
-    users_db[username] = {
-        "username": username,
-        "email": email,
-        "password_hash": _hash_password(password),
-        "created_at": datetime.now().isoformat(),
-    }
-    return {"message": "User registered successfully", "username": username}
+        user = User(
+            username=username,
+            email=email,
+            password_hash=hash_password(password),
+            plan="free",
+            api_calls_today=0,
+            api_calls_limit=50,
+            projects_limit=3,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        token = generate_token(user.id, user.username)
+        return {
+            "message": "User registered successfully",
+            "username": user.username,
+            "token": token,
+            "plan": user.plan,
+        }
+    finally:
+        db.close()
 
 
 @app.post("/api/login")
@@ -2106,76 +2155,264 @@ async def api_login(request: Request):
     if not username or not password:
         raise HTTPException(400, "username and password are required")
 
-    user = users_db.get(username)
-    if not user or user["password_hash"] != _hash_password(password):
-        raise HTTPException(401, "Invalid username or password")
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == username).first()
+        if not user or not verify_password(password, user.password_hash):
+            raise HTTPException(401, "Invalid username or password")
 
-    token = str(uuid.uuid4())
-    sessions_db[token] = {
-        "username": username,
-        "created_at": datetime.now().isoformat(),
-    }
-    return {"message": "Login successful", "token": token, "username": username}
+        # Update last login
+        user.last_login = datetime.utcnow()
+        db.commit()
+
+        token = generate_token(user.id, user.username)
+        return {
+            "message": "Login successful",
+            "token": token,
+            "username": user.username,
+            "plan": user.plan,
+            "api_calls_remaining": user.api_calls_limit - user.api_calls_today if user.api_calls_limit > 0 else "unlimited",
+        }
+    finally:
+        db.close()
 
 
 @app.post("/api/projects/save")
 async def api_project_save(request: Request):
     """Save a meta-analysis project (requires auth)."""
-    username = _get_current_user(request)
-    body = await request.json()
+    user, db = _get_current_user(request)
+    try:
+        body = await request.json()
+        project_name = body.get("name", "").strip()
+        studies = body.get("studies", [])
+        settings = body.get("settings", {})
+        project_id = body.get("id")
 
-    project_name = body.get("name", "").strip()
-    studies = body.get("studies", [])
-    settings = body.get("settings", {})
-    project_id = body.get("id")  # If provided, update existing
+        if not project_name:
+            raise HTTPException(400, "Project name is required")
+        if not studies or len(studies) < 1:
+            raise HTTPException(400, "At least 1 study is required")
 
-    if not project_name:
-        raise HTTPException(400, "Project name is required")
-    if not studies or len(studies) < 1:
-        raise HTTPException(400, "At least 1 study is required")
+        # Check project quota
+        user_projects_count = db.query(Project).filter(Project.user_id == user.id).count()
+        if user.projects_limit > 0 and user_projects_count >= user.projects_limit and not project_id:
+            raise HTTPException(403, f"Project limit reached ({user.projects_limit}). Upgrade your plan.")
 
-    if not project_id:
-        project_id = str(uuid.uuid4())
+        if project_id:
+            # Update existing
+            project = db.query(Project).filter(Project.id == project_id, Project.user_id == user.id).first()
+            if not project:
+                raise HTTPException(404, "Project not found")
+            project.name = project_name
+            project.studies_json = json.dumps(studies)
+            project.settings_json = json.dumps(settings)
+            project.updated_at = datetime.utcnow()
+        else:
+            # Create new
+            project_id = str(uuid.uuid4())
+            project = Project(
+                id=project_id,
+                user_id=user.id,
+                name=project_name,
+                studies_json=json.dumps(studies),
+                settings_json=json.dumps(settings),
+            )
+            db.add(project)
 
-    now = datetime.now().isoformat()
-    existing = user_projects_db.get(project_id)
-
-    user_projects_db[project_id] = {
-        "id": project_id,
-        "owner": username,
-        "name": project_name,
-        "studies": studies,
-        "settings": settings,
-        "created_at": existing["created_at"] if existing else now,
-        "updated_at": now,
-    }
-
-    return {"message": "Project saved", "project_id": project_id}
+        db.commit()
+        return {"message": "Project saved", "project_id": project_id}
+    finally:
+        db.close()
 
 
 @app.get("/api/projects/list")
 async def api_projects_list(request: Request):
     """List all projects for the authenticated user."""
-    username = _get_current_user(request)
-    projects = [
-        {"id": p["id"], "name": p["name"], "created_at": p["created_at"], "updated_at": p["updated_at"]}
-        for p in user_projects_db.values()
-        if p["owner"] == username
-    ]
-    projects.sort(key=lambda x: x["updated_at"], reverse=True)
-    return {"projects": projects, "count": len(projects)}
+    user, db = _get_current_user(request)
+    try:
+        projects = db.query(Project).filter(Project.user_id == user.id).order_by(Project.updated_at.desc()).all()
+        return {
+            "projects": [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "created_at": p.created_at.isoformat() if p.created_at else None,
+                    "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+                }
+                for p in projects
+            ],
+            "count": len(projects),
+            "limit": user.projects_limit,
+        }
+    finally:
+        db.close()
 
 
 @app.get("/api/projects/{project_id}")
 async def api_project_get(project_id: str, request: Request):
     """Get a specific project by ID (owner only)."""
-    username = _get_current_user(request)
-    project = user_projects_db.get(project_id)
-    if not project:
-        raise HTTPException(404, "Project not found")
-    if project["owner"] != username:
-        raise HTTPException(403, "Access denied: you do not own this project")
-    return project
+    user, db = _get_current_user(request)
+    try:
+        project = db.query(Project).filter(Project.id == project_id, Project.user_id == user.id).first()
+        if not project:
+            raise HTTPException(404, "Project not found")
+        return {
+            "id": project.id,
+            "name": project.name,
+            "studies": json.loads(project.studies_json),
+            "settings": json.loads(project.settings_json),
+            "created_at": project.created_at.isoformat() if project.created_at else None,
+            "updated_at": project.updated_at.isoformat() if project.updated_at else None,
+        }
+    finally:
+        db.close()
+
+
+@app.delete("/api/projects/{project_id}")
+async def api_project_delete(project_id: str, request: Request):
+    """Delete a project (owner only)."""
+    user, db = _get_current_user(request)
+    try:
+        project = db.query(Project).filter(Project.id == project_id, Project.user_id == user.id).first()
+        if not project:
+            raise HTTPException(404, "Project not found")
+        db.delete(project)
+        db.commit()
+        return {"message": "Project deleted", "project_id": project_id}
+    finally:
+        db.close()
+
+
+@app.get("/api/user/profile")
+async def api_user_profile(request: Request):
+    """Get current user profile and usage stats."""
+    user, db = _get_current_user(request)
+    try:
+        projects_count = db.query(Project).filter(Project.user_id == user.id).count()
+        limits = PLAN_LIMITS.get(user.plan, PLAN_LIMITS["free"])
+        return {
+            "username": user.username,
+            "email": user.email,
+            "plan": user.plan,
+            "api_calls_today": user.api_calls_today,
+            "api_calls_limit": user.api_calls_limit,
+            "projects_count": projects_count,
+            "projects_limit": user.projects_limit,
+            "created_at": user.created_at.isoformat() if user.created_at else None,
+            "last_login": user.last_login.isoformat() if user.last_login else None,
+        }
+    finally:
+        db.close()
+
+
+# ============================================================
+# Payment Endpoints (Stripe Integration)
+# ============================================================
+
+PLAN_PRICES = {
+    "starter": {"amount": 29900, "currency": "cny", "name": "Starter", "interval": "month"},
+    "professional": {"amount": 99900, "currency": "cny", "name": "Professional", "interval": "month"},
+}
+
+
+@app.post("/api/payment/checkout")
+async def api_payment_checkout(request: Request):
+    """Create a checkout session for plan upgrade."""
+    user, db = _get_current_user(request)
+    try:
+        body = await request.json()
+        plan = body.get("plan", "").lower()
+
+        if plan not in PLAN_PRICES:
+            raise HTTPException(400, f"Invalid plan. Choose: {list(PLAN_PRICES.keys())}")
+
+        price_info = PLAN_PRICES[plan]
+        checkout_id = str(uuid.uuid4())
+
+        # In production, this would call Stripe API:
+        # session = stripe.checkout.Session.create(...)
+        # For now, return a mock checkout URL
+        return {
+            "checkout_id": checkout_id,
+            "plan": plan,
+            "amount": price_info["amount"],
+            "currency": price_info["currency"],
+            "checkout_url": f"/payment/checkout?plan={plan}&session={checkout_id}",
+            "message": "Redirect user to checkout_url to complete payment",
+        }
+    finally:
+        db.close()
+
+
+@app.post("/api/payment/confirm")
+async def api_payment_confirm(request: Request):
+    """Confirm a payment (called after successful checkout)."""
+    user, db = _get_current_user(request)
+    try:
+        body = await request.json()
+        plan = body.get("plan", "").lower()
+        checkout_id = body.get("checkout_id", "")
+
+        if plan not in PLAN_PRICES:
+            raise HTTPException(400, "Invalid plan")
+
+        # Update user plan
+        limits = PLAN_LIMITS.get(plan, PLAN_LIMITS["free"])
+        user.plan = plan
+        user.api_calls_limit = limits["api_calls_per_day"]
+        user.projects_limit = limits["projects"]
+        db.commit()
+
+        return {
+            "message": f"Successfully upgraded to {plan} plan",
+            "plan": user.plan,
+            "api_calls_limit": user.api_calls_limit,
+            "projects_limit": user.projects_limit,
+        }
+    finally:
+        db.close()
+
+
+@app.get("/api/payment/plans")
+async def api_payment_plans():
+    """Get available plans and pricing."""
+    return {
+        "plans": [
+            {
+                "id": "free",
+                "name": "Free",
+                "price": 0,
+                "currency": "cny",
+                "interval": "forever",
+                "features": ["50 API calls/day", "3 projects", "10 studies/project", "CSV export"],
+            },
+            {
+                "id": "starter",
+                "name": "Starter",
+                "price": 299,
+                "currency": "cny",
+                "interval": "month",
+                "features": ["500 API calls/day", "20 projects", "50 studies/project", "CSV+JSON export"],
+            },
+            {
+                "id": "professional",
+                "name": "Professional",
+                "price": 999,
+                "currency": "cny",
+                "interval": "month",
+                "features": ["5000 API calls/day", "100 projects", "500 studies/project", "All formats", "Priority support"],
+                "popular": True,
+            },
+            {
+                "id": "enterprise",
+                "name": "Enterprise",
+                "price": None,
+                "currency": "cny",
+                "interval": "custom",
+                "features": ["Unlimited API", "Unlimited projects", "Custom deployment", "Dedicated support", "SLA"],
+            },
+        ]
+    }
 
 
 # ============================================================

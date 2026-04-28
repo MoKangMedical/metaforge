@@ -20,6 +20,28 @@
     .app-header nav a:hover,.app-header nav a.active{color:#fff;background:rgba(255,255,255,0.08)}
     .app-body{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 52px)}
     @media(max-width:960px){.app-body{grid-template-columns:1fr}}
+    @media(max-width:600px){
+      .app-body{grid-template-columns:1fr;gap:0}
+      .sidebar{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--border);padding:12px}
+      .main{padding:12px}
+      .app-header{padding:10px 14px;flex-wrap:wrap;gap:8px}
+      .app-header .logo{font-size:17px}
+      .app-header nav{gap:6px}
+      .app-header nav a{font-size:11px;padding:4px 8px}
+      .stats-grid{grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px}
+      .stat-value{font-size:16px}
+      .panel{padding:12px;border-radius:8px}
+      .panel-title{font-size:13px}
+      .chart-tab{padding:4px 8px;font-size:10px}
+      .study-table{font-size:10px}
+      .study-table th,.study-table td{padding:3px}
+      .results-table{font-size:10px}
+      .results-table th,.results-table td{padding:4px 5px}
+      .btn{padding:7px 12px;font-size:11px}
+      .quick-btn{padding:4px 8px;font-size:10px}
+      .bias-result{grid-template-columns:1fr}
+      .chart-container{padding:6px}
+    }
     .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:16px;overflow-y:auto;max-height:calc(100vh - 52px);position:sticky;top:52px}
     .sidebar h3{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px}
     .sidebar h3:first-child{margin-top:0}
@@ -89,6 +111,12 @@
     .csv-input{width:100%;height:100px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;font-family:'JetBrains Mono',monospace;padding:8px;resize:vertical}
     .csv-input:focus{outline:none;border-color:var(--accent2)}
     .shortcut{font-size:10px;color:var(--muted);margin-top:4px}
+    .kbd-panel{display:none;background:rgba(59,130,246,0.06);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px;font-size:10px;color:var(--muted);line-height:1.8}
+    .kbd-panel.show{display:block}
+    .kbd-panel strong{color:var(--accent2)}
+    .kbd{display:inline-block;background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text);margin:0 2px}
+    .kbd-toggle{background:none;border:none;color:var(--accent2);font-size:11px;cursor:pointer;font-family:inherit;float:right;margin-top:-2px}
+    .kbd-toggle:hover{text-decoration:underline}
     .quick-datasets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
     .quick-btn{padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;transition:.2s}
     .quick-btn:hover{border-color:var(--accent2);color:var(--accent2)}
@@ -100,8 +128,8 @@
     <div class="logo">MetaForge <span>v3.1</span></div>
     <nav>
       <a href="/">← 首页</a>
-      <a href="#" class="active">工作台</a>
-      <a href="#" onclick="loadDemo();return false">演示数据</a>
+      <a href="javascript:void(0)" class="active">工作台</a>
+      <a href="demo.html" onclick="loadDemo();return false">演示数据</a>
     </nav>
   </header>
 
@@ -118,6 +146,9 @@
         <button class="quick-btn" onclick="loadDataset('nscld_pd1')">NSCLC PD-1</button>
         <button class="quick-btn" onclick="loadDataset('statins')">他汀类药物</button>
         <button class="quick-btn" onclick="loadDataset('antihypertensives')">降压药</button>
+        <button class="quick-btn" onclick="loadDataset('oncology')">免疫治疗</button>
+        <button class="quick-btn" onclick="loadDataset('cardiology')">SGLT2i</button>
+        <button class="quick-btn" onclick="loadDataset('neurology')">抗淀粉样蛋白</button>
       </div>
 
       <h3>研究数据表</h3>
@@ -144,12 +175,22 @@
       <div class="export-bar">
         <button class="btn btn-sm btn-outline" onclick="exportCSV()">📄 CSV</button>
         <button class="btn btn-sm btn-outline" onclick="exportJSON()">📋 JSON</button>
+        <button class="btn btn-sm btn-outline" onclick="exportReport()">🖨️ Report</button>
       </div>
 
       <div style="margin-top:12px;padding:10px;background:rgba(59,130,246,0.06);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.5">
-        <strong style="color:var(--accent2)">快捷键</strong><br>
+        <strong style="color:var(--accent2)">快捷键</strong> <button class="kbd-toggle" onclick="document.getElementById('kbd-panel').classList.toggle('show')">展开 ▾</button><br>
         Ctrl+Enter → 运行分析<br>
         支持OR/RR、固定/随机效应模型
+      </div>
+      <div class="kbd-panel" id="kbd-panel">
+        <strong>快捷键一览</strong><br>
+        <span class="kbd">Ctrl+Enter</span> 运行分析<br>
+        <span class="kbd">Ctrl+1</span> 加载 NSCLC PD-1<br>
+        <span class="kbd">Ctrl+2</span> 加载 他汀类药物<br>
+        <span class="kbd">Ctrl+3</span> 加载 降压药<br>
+        <span class="kbd">Ctrl+M</span> 切换统计模型<br>
+        <span class="kbd">Ctrl+E</span> 切换效应量(OR/RR)<br>
       </div>
     </aside>
 
@@ -195,11 +236,13 @@
             <button class="chart-tab" onclick="showChart('funnel',this)">漏斗图</button>
             <button class="chart-tab" onclick="showChart('prisma',this)">PRISMA</button>
             <button class="chart-tab" onclick="showChart('cumulative',this)">累积分析</button>
+            <button class="chart-tab" onclick="showChart('galbraith',this)">Galbraith</button>
           </div>
           <div class="chart-container" id="chart-forest"></div>
           <div class="chart-container" id="chart-funnel" style="display:none"></div>
           <div class="chart-container" id="chart-prisma" style="display:none"></div>
           <div class="chart-container" id="chart-cumulative" style="display:none"></div>
+          <div class="chart-container" id="chart-galbraith" style="display:none"></div>
         </div>
 
         <!-- Bias Tests -->
@@ -299,6 +342,33 @@
         {name:"SHEP 1991",e_events:213,e_total:2365,c_events:322,c_total:2371,subgroup:"Thiazide"},
         {name:"HYVET 2008",e_events:196,e_total:1933,c_events:235,c_total:1912,subgroup:"Thiazide"},
       ],
+      oncology: [
+        {name:"Gandhi 2018",e_events:157,e_total:410,c_events:121,c_total:410,subgroup:"Lung"},
+        {name:"Motzer 2019",e_events:45,e_total:435,c_events:35,c_total:435,subgroup:"Renal"},
+        {name:"Bellmunt 2017",e_events:85,e_total:270,c_events:63,c_total:272,subgroup:"Bladder"},
+        {name:"Reck 2016",e_events:73,e_total:185,c_events:56,c_total:183,subgroup:"Lung"},
+        {name:"Brahmer 2015",e_events:60,e_total:131,c_events:42,c_total:129,subgroup:"Lung"},
+        {name:"Robert 2015",e_events:222,e_total:455,c_events:171,c_total:455,subgroup:"Melanoma"},
+        {name:"Herbst 2016",e_events:92,e_total:285,c_events:70,c_total:286,subgroup:"Lung"},
+        {name:"Rittmeyer 2017",e_events:105,e_total:425,c_events:83,c_total:425,subgroup:"Lung"},
+      ],
+      cardiology: [
+        {name:"McMurray 2014",e_events:379,e_total:2072,c_events:460,c_total:2066,subgroup:"HFrEF"},
+        {name:"Zinman 2015",e_events:104,e_total:2042,c_events:122,c_total:2041,subgroup:"Mixed"},
+        {name:"McMurray 2019",e_events:516,e_total:2851,c_events:591,c_total:2853,subgroup:"HFrEF"},
+        {name:"Packer 2020",e_events:412,e_total:2461,c_events:520,c_total:2460,subgroup:"HFrEF"},
+        {name:"Anker 2021",e_events:195,e_total:1589,c_events:224,c_total:1586,subgroup:"HFpEF"},
+        {name:"Solomon 2022",e_events:345,e_total:3119,c_events:388,c_total:3118,subgroup:"HFpEF"},
+        {name:"Velazquez 2022",e_events:280,e_total:2776,c_events:312,c_total:2779,subgroup:"Mixed"},
+      ],
+      neurology: [
+        {name:"Sevigny 2016",e_events:32,e_total:126,c_events:10,c_total:126,subgroup:"Phase I"},
+        {name:"Swanson 2021",e_events:58,e_total:1018,c_events:42,c_total:1021,subgroup:"Phase III"},
+        {name:"Van Dyck 2023",e_events:89,e_total:898,c_events:63,c_total:897,subgroup:"Phase III"},
+        {name:"Sims 2023",e_events:72,e_total:858,c_events:55,c_total:859,subgroup:"Phase III"},
+        {name:"Mintun 2021",e_events:45,e_total:556,c_events:30,c_total:555,subgroup:"Phase II"},
+        {name:"Cummings 2023",e_events:68,e_total:785,c_events:48,c_total:787,subgroup:"Phase III"},
+      ],
     };
 
     let lastResult = null;
@@ -388,6 +458,7 @@
         renderResults(lastResult, effectMeasure);
         if (biasData) renderBias(biasData);
         if (cumulData) renderCumulative(cumulData, effectMeasure);
+        renderGalbraith(lastResult, effectMeasure);
 
         // Fetch PRISMA
         fetch('/api/prisma', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({total_found:studies.length*73,after_dedup:studies.length*56,after_screen:studies.length*9,included:studies.length})})
@@ -502,7 +573,7 @@
     }
 
     function showChart(type, btn) {
-      ['forest','funnel','prisma','cumulative'].forEach(t => {
+      ['forest','funnel','prisma','cumulative','galbraith'].forEach(t => {
         document.getElementById('chart-'+t).style.display = t===type?'block':'none';
       });
       document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
@@ -533,6 +604,105 @@
       } catch(e) { showToast('导出失败', 'error'); }
     }
 
+    function exportReport() {
+      if (!lastResult) { showToast('请先运行分析', 'error'); return; }
+      const em = document.getElementById('effect-measure').value;
+      const model = document.getElementById('model').value;
+      const d = lastResult;
+      const hetLvl = d.heterogeneity === 'low' ? '低度' : d.heterogeneity === 'moderate' ? '中度' : '高度';
+      let rows = '';
+      d.studies.forEach(s => {
+        rows += `<tr><td>${s.name}</td><td>${s.effect.toFixed(3)}</td><td>[${s.ci_lower.toFixed(3)}, ${s.ci_upper.toFixed(3)}]</td><td>${(s.weight/Math.max(...d.studies.map(x=>x.weight))*100).toFixed(1)}%</td><td>${s.subgroup||'—'}</td></tr>`;
+      });
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>MetaForge Report</title>
+<style>
+body{font-family:'Segoe UI',Arial,sans-serif;max-width:900px;margin:40px auto;color:#1a1a2e;line-height:1.6}
+h1{color:#e94560;border-bottom:3px solid #e94560;padding-bottom:8px;font-size:22px}
+h2{color:#3b82f6;font-size:16px;margin-top:24px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.summary-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center}
+.summary-card .val{font-size:22px;font-weight:800;color:#1a1a2e}
+.summary-card .lbl{font-size:11px;color:#64748b;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0}
+th{background:#f1f5f9;text-align:left;padding:8px;border-bottom:2px solid #e2e8f0;font-weight:600}
+td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
+.footer{margin-top:30px;padding-top:12px;border-top:1px solid #e2e7eb;font-size:10px;color:#94a3b8;text-align:center}
+@media print{body{margin:10px}.summary-grid{grid-template-columns:repeat(3,1fr)}}
+</style></head><body>
+<h1>📊 MetaForge Meta-Analysis Report</h1>
+<p style="font-size:12px;color:#64748b">Generated: ${new Date().toLocaleString()} &bull; Model: ${model === 'random' ? 'Random Effects (D-L)' : 'Fixed Effect (M-H)'} &bull; Effect Measure: ${em}</p>
+
+<h2>Pooled Effect Summary</h2>
+<div class="summary-grid">
+<div class="summary-card"><div class="val">${d.pooled_effect.toFixed(3)}</div><div class="lbl">Pooled ${em}</div></div>
+<div class="summary-card"><div class="val">[${d.pooled_ci_lower.toFixed(3)}, ${d.pooled_ci_upper.toFixed(3)}]</div><div class="lbl">95% CI</div></div>
+<div class="summary-card"><div class="val">${d.p_value < 0.001 ? '<0.001' : d.p_value.toFixed(4)}</div><div class="lbl">P-value</div></div>
+<div class="summary-card"><div class="val">${d.i_squared.toFixed(1)}%</div><div class="lbl">I² (Heterogeneity)</div></div>
+<div class="summary-card"><div class="val">${d.q_statistic.toFixed(2)}</div><div class="lbl">Q Statistic</div></div>
+<div class="summary-card"><div class="val">${d.studies.length}</div><div class="lbl">Included Studies</div></div>
+</div>
+<p style="font-size:12px"><strong>Heterogeneity:</strong> ${hetLvl} (I² = ${d.i_squared.toFixed(1)}%)</p>
+
+<h2>Individual Study Results</h2>
+<table><thead><tr><th>Study</th><th>${em}</th><th>95% CI</th><th>Weight</th><th>Subgroup</th></tr></thead><tbody>${rows}</tbody></table>
+
+<div class="footer">MetaForge Workbench — AI Evidence-Based Medicine Research Platform</div>
+</body></html>`;
+      const blob = new Blob([html], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='metaforge_report.html'; a.click();
+      showToast('Report已下载', 'success');
+    }
+
+    function renderGalbraith(data, em) {
+      const studies = data.studies;
+      if (!studies || studies.length < 3) return;
+      const pe = data.pooled_effect;
+      const w = 600, h = 400, pad = 50;
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+      svg += `<rect width="${w}" height="${h}" fill="#0d1117"/>`;
+      svg += `<text x="${w/2}" y="24" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="bold" font-family="Inter,sans-serif">Galbraith Plot — ${em}</text>`;
+
+      // Compute: x = 1/SE, y = effect/SE (standardized effect)
+      const points = studies.map(s => {
+        const se = (Math.log(s.ci_upper) - Math.log(s.ci_lower)) / (2 * 1.96);
+        const z = (Math.log(s.effect) - pe) / se;
+        return {name: s.name, x: 1/se, y: z};
+      });
+      const xMax = Math.max(...points.map(p=>p.x)) * 1.15;
+      const yAbs = Math.max(Math.abs(Math.min(...points.map(p=>p.y))), Math.abs(Math.max(...points.map(p=>p.y)))) * 1.2;
+      const mapX = v => pad + (v / xMax) * (w - pad*2);
+      const mapY = v => h/2 - (v / yAbs) * (h/2 - pad);
+
+      // Axes
+      svg += `<line x1="${pad}" y1="${h/2}" x2="${w-pad}" y2="${h/2}" stroke="#484f58" stroke-width="1"/>`;
+      svg += `<line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h-pad}" stroke="#484f58" stroke-width="1"/>`;
+
+      // ±2SE lines
+      svg += `<line x1="${pad}" y1="${mapY(2)}" x2="${w-pad}" y2="${mapY(2)}" stroke="#e94560" stroke-width="1" stroke-dasharray="4,3"/>`;
+      svg += `<line x1="${pad}" y1="${mapY(-2)}" x2="${w-pad}" y2="${mapY(-2)}" stroke="#e94560" stroke-width="1" stroke-dasharray="4,3"/>`;
+      svg += `<text x="${w-pad+4}" y="${mapY(2)+3}" fill="#e94560" font-size="9" font-family="Inter,sans-serif">+2SE</text>`;
+      svg += `<text x="${w-pad+4}" y="${mapY(-2)+3}" fill="#e94560" font-size="9" font-family="Inter,sans-serif">−2SE</text>`;
+
+      // Points
+      points.forEach(p => {
+        const cx = mapX(p.x), cy = mapY(p.y);
+        svg += `<circle cx="${cx}" cy="${cy}" r="5" fill="#3b82f6" opacity="0.85"/>`;
+        svg += `<text x="${cx}" y="${cy-8}" text-anchor="middle" fill="#8b949e" font-size="8" font-family="Inter,sans-serif">${p.name}</text>`;
+      });
+
+      // Regression line (through origin with slope = weighted mean z)
+      const slope = points.reduce((s,p) => s + p.y, 0) / points.length;
+      svg += `<line x1="${pad}" y1="${mapY(0)}" x2="${w-pad}" y2="${mapY(slope * xMax)}" stroke="#22c55e" stroke-width="1.5" opacity="0.6"/>`;
+
+      // Labels
+      svg += `<text x="${w/2}" y="${h-8}" text-anchor="middle" fill="#8b949e" font-size="10" font-family="Inter,sans-serif">1 / SE (precision)</text>`;
+      svg += `<text x="14" y="${h/2-5}" text-anchor="middle" fill="#8b949e" font-size="10" font-family="Inter,sans-serif" transform="rotate(-90,14,${h/2})">Standardized Effect</text>`;
+
+      svg += '</svg>';
+      document.getElementById('chart-galbraith').innerHTML = svg;
+    }
+
     function showToast(msg, type='info') {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -540,9 +710,26 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // Keyboard shortcut
+    // Keyboard shortcuts
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runAnalysis(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === '1') { e.preventDefault(); loadDataset('nscld_pd1'); }
+      if ((e.ctrlKey || e.metaKey) && e.key === '2') { e.preventDefault(); loadDataset('statins'); }
+      if ((e.ctrlKey || e.metaKey) && e.key === '3') { e.preventDefault(); loadDataset('antihypertensives'); }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'm' || e.key === 'M')) {
+        e.preventDefault();
+        const sel = document.getElementById('model');
+        sel.value = sel.value === 'random' ? 'fixed' : 'random';
+        autoRerun();
+        showToast('模型: ' + (sel.value === 'random' ? 'Random Effects' : 'Fixed Effect'), 'info');
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'e' || e.key === 'E')) {
+        e.preventDefault();
+        const sel = document.getElementById('effect-measure');
+        sel.value = sel.value === 'OR' ? 'RR' : 'OR';
+        autoRerun();
+        showToast('效应量: ' + sel.value, 'info');
+      }
     });
 
     // Init

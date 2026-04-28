@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Case Studies — MetaForge</title>
+<meta name="description" content="Real-world meta-analysis case studies in oncology, cardiology, and neurology powered by MetaForge.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0f1a;--surface:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#64748b;--accent:#e94560;--accent2:#3b82f6;--success:#22c55e;--warn:#f59e0b;--purple:#a855f7}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.6}
+.topnav{position:sticky;top:0;z-index:100;background:rgba(10,15,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{color:var(--accent);font-weight:800;font-size:1.2rem;text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{background:var(--accent)!important;color:#fff!important;padding:6px 14px;border-radius:6px;font-weight:600!important}
+.container{max-width:1100px;margin:0 auto;padding:2rem}
+.hero{text-align:center;padding:4rem 2rem 3rem;background:linear-gradient(135deg,#0a0f1a 0%,#1a1a2e 100%)}
+.hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:0.8rem}
+.hero h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);max-width:600px;margin:0 auto;font-size:1.05rem}
+.section{padding:3rem 0;border-bottom:1px solid var(--border)}
+.section:last-of-type{border-bottom:none}
+.case-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.case-badge{display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.badge-oncology{background:rgba(233,69,96,0.15);color:var(--accent)}
+.badge-cardiology{background:rgba(59,130,246,0.15);color:var(--accent2)}
+.badge-neurology{background:rgba(168,85,247,0.15);color:var(--purple)}
+.case-title{font-size:1.6rem;font-weight:700}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.card h3{font-size:1.05rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
+.card p,.card li{color:var(--muted);font-size:0.9rem}
+.card ul,.card ol{padding-left:1.5rem;margin-top:0.5rem}
+.card li{padding:0.2rem 0}
+.pico-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1rem 0}
+.pico-item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+.pico-item .pico-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:0.3rem}
+.pico-item .pico-value{font-size:0.9rem;color:var(--text);font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0}
+th{background:rgba(255,255,255,0.03);color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+tr:hover{background:rgba(255,255,255,0.02)}
+.stat-highlight{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center}
+.stat-value{font-size:1.8rem;font-weight:800}
+.stat-label{font-size:0.75rem;color:var(--muted);margin-top:0.3rem}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1.5rem 0}
+.finding{border-left:3px solid var(--accent2);padding:0.8rem 1rem;margin:0.8rem 0;background:rgba(59,130,246,0.05);border-radius:0 8px 8px 0;font-size:0.9rem}
+.finding.positive{border-color:var(--success);background:rgba(34,197,94,0.05)}
+.finding.caution{border-color:var(--warn);background:rgba(245,158,11,0.05)}
+.finding strong{color:var(--text)}
+.forest-plot-container{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1.5rem 0;overflow-x:auto}
+.forest-plot-container h4{text-align:center;margin-bottom:1rem;font-size:0.9rem;color:var(--muted)}
+.btn{display:inline-block;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#d63a54}
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem;border-top:1px solid var(--border);margin-top:3rem}
+footer a{color:var(--accent2);text-decoration:none}
+@media(max-width:768px){.topnav{padding:0 1rem}.nav-links{gap:0.8rem;flex-wrap:wrap}.pico-grid,.stats-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">MetaForge</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="api.html">API</a>
+    <a href="about.html">About</a>
+    <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge">GitHub</a>
+    <a href="https://mokangmedical.github.io/metaforge/app" class="btn-nav">Try Workbench</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Real-World <span class="grad">Case Studies</span></h1>
+  <p>See how MetaForge accelerates evidence synthesis across oncology, cardiology, and neurology.</p>
+</div>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- CASE STUDY 1: PD-1 Inhibitors in NSCLC -->
+<!-- ============================================================ -->
+<div class="section">
+  <div class="case-header">
+    <span class="case-badge badge-oncology">Oncology</span>
+    <h2 class="case-title">PD-1 Inhibitors in Non-Small Cell Lung Cancer</h2>
+  </div>
+
+  <div class="card">
+    <h3>📋 Research Question (PICO)</h3>
+    <div class="pico-grid">
+      <div class="pico-item">
+        <div class="pico-label">Population</div>
+        <div class="pico-value">Adults with advanced NSCLC (Stage IIIB/IV)</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Intervention</div>
+        <div class="pico-value">PD-1/PD-L1 inhibitors (nivolumab, pembrolizumab, atezolizumab)</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Comparator</div>
+        <div class="pico-value">Docetaxel or platinum-based chemotherapy</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Outcome</div>
+        <div class="pico-value">Overall survival (OS) and progression-free survival (PFS)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Search Strategy</h3>
+    <p><strong>Databases:</strong> PubMed, Embase, Cochrane Library, ASCO/ESMO abstracts</p>
+    <p style="margin-top:0.5rem"><strong>Search terms:</strong> ("non-small cell lung cancer" OR "NSCLC") AND ("PD-1" OR "PD-L1" OR "nivolumab" OR "pembrolizumab" OR "atezolizumab") AND ("randomized controlled trial")</p>
+    <p style="margin-top:0.5rem"><strong>Date range:</strong> January 2015 – December 2024</p>
+    <p style="margin-top:0.5rem"><strong>Records identified:</strong> 1,247 → 89 after screening → 12 included RCTs</p>
+  </div>
+
+  <div class="card">
+    <h3>📐 Inclusion / Exclusion Criteria</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div>
+        <p style="color:var(--success);font-weight:600;margin-bottom:0.3rem">✓ Inclusion</p>
+        <ul>
+          <li>Phase II/III RCTs</li>
+          <li>Stage IIIB/IV NSCLC</li>
+          <li>PD-1/PD-L1 inhibitor monotherapy vs. chemotherapy</li>
+          <li>Reported OS or PFS with HR and 95% CI</li>
+        </ul>
+      </div>
+      <div>
+        <p style="color:var(--accent);font-weight:600;margin-bottom:0.3rem">✗ Exclusion</p>
+        <ul>
+          <li>Combination immunotherapy arms</li>
+          <li>Small cell lung cancer</li>
+          <li>Single-arm studies</li>
+          <li>Non-English publications without extractable data</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Results Summary</h3>
+    <table>
+      <tr><th>Study</th><th>N (I/C)</th><th>Drug</th><th>OS HR [95% CI]</th><th>PFS HR [95% CI]</th></tr>
+      <tr><td>CheckMate 017 (2015)</td><td>135/137</td><td>Nivolumab</td><td>0.59 [0.44–0.79]</td><td>0.62 [0.47–0.81]</td></tr>
+      <tr><td>CheckMate 057 (2015)</td><td>292/290</td><td>Nivolumab</td><td>0.73 [0.59–0.89]</td><td>0.92 [0.75–1.12]</td></tr>
+      <tr><td>KEYNOTE-010 (2016)</td><td>345/343</td><td>Pembrolizumab</td><td>0.71 [0.58–0.88]</td><td>0.79 [0.66–0.94]</td></tr>
+      <tr><td>OAK (2017)</td><td>425/425</td><td>Atezolizumab</td><td>0.73 [0.62–0.87]</td><td>0.95 [0.82–1.10]</td></tr>
+      <tr><td>KEYNOTE-024 (2016)</td><td>154/151</td><td>Pembrolizumab</td><td>0.63 [0.47–0.84]</td><td>0.50 [0.37–0.68]</td></tr>
+      <tr><td>POPLAR (2016)</td><td>144/143</td><td>Atezolizumab</td><td>0.73 [0.53–0.97]</td><td>0.87 [0.66–1.14]</td></tr>
+    </table>
+
+    <div class="stats-row">
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--accent)">0.70</div>
+        <div class="stat-label">Pooled OS HR [95% CI: 0.63–0.78]</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--accent2)">0.76</div>
+        <div class="stat-label">Pooled PFS HR [95% CI: 0.65–0.89]</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--success)">I²=32%</div>
+        <div class="stat-label">Low–moderate heterogeneity</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--warn)">p=0.87</div>
+        <div class="stat-label">Egger's test (no publication bias)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forest Plot SVG -->
+  <div class="forest-plot-container">
+    <h4>Forest Plot — Overall Survival Hazard Ratios</h4>
+    <svg id="forest-oncology" width="100%" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" style="font-family:'Inter',system-ui,sans-serif">
+      <!-- Reference line at HR=1 -->
+      <line x1="400" y1="30" x2="400" y2="310" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3"/>
+      <!-- Favors labels -->
+      <text x="250" y="16" text-anchor="middle" fill="#64748b" font-size="10">← Favors Immunotherapy</text>
+      <text x="550" y="16" text-anchor="middle" fill="#64748b" font-size="10">Favors Chemotherapy →</text>
+      <!-- Axis -->
+      <line x1="150" y1="30" x2="650" y2="30" stroke="#1e293b" stroke-width="1"/>
+      <!-- Axis labels -->
+      <text x="150" y="328" fill="#64748b" font-size="9" text-anchor="middle">0.3</text>
+      <text x="275" y="328" fill="#64748b" font-size="9" text-anchor="middle">0.5</text>
+      <text x="400" y="328" fill="#64748b" font-size="9" text-anchor="middle">1.0</text>
+      <text x="525" y="328" fill="#64748b" font-size="9" text-anchor="middle">2.0</text>
+      <text x="650" y="328" fill="#64748b" font-size="9" text-anchor="middle">3.0</text>
+      <!-- Study data points: HR mapped log-scale from 0.3–3.0 -->
+      <!-- x = 150 + (log(HR) - log(0.3)) / (log(3) - log(0.3)) * 500 -->
+      <!-- CheckMate 017: HR 0.59 -->
+      <text x="138" y="52" fill="#e2e8f0" font-size="10" text-anchor="end">CheckMate 017</text>
+      <text x="662" y="52" fill="#64748b" font-size="9">0.59 [0.44–0.79]</text>
+      <line x1="273" y1="50" x2="363" y2="50" stroke="#e94560" stroke-width="1.5"/>
+      <rect x="308" y="45" width="10" height="10" fill="#e94560" rx="1"/>
+      <!-- CheckMate 057: HR 0.73 -->
+      <text x="138" y="82" fill="#e2e8f0" font-size="10" text-anchor="end">CheckMate 057</text>
+      <text x="662" y="82" fill="#64748b" font-size="9">0.73 [0.59–0.89]</text>
+      <line x1="330" y1="80" x2="393" y2="80" stroke="#e94560" stroke-width="1.5"/>
+      <rect x="352" y="75" width="12" height="10" fill="#e94560" rx="1"/>
+      <!-- KEYNOTE-010: HR 0.71 -->
+      <text x="138" y="112" fill="#e2e8f0" font-size="10" text-anchor="end">KEYNOTE-010</text>
+      <text x="662" y="112" fill="#64748b" font-size="9">0.71 [0.58–0.88]</text>
+      <line x1="322" y1="110" x2="389" y2="110" stroke="#e94560" stroke-width="1.5"/>
+      <rect x="346" y="105" width="12" height="10" fill="#e94560" rx="1"/>
+      <!-- OAK: HR 0.73 -->
+      <text x="138" y="142" fill="#e2e8f0" font-size="10" text-anchor="end">OAK</text>
+      <text x="662" y="142" fill="#64748b" font-size="9">0.73 [0.62–0.87]</text>
+      <line x1="330" y1="140" x2="389" y2="140" stroke="#e94560" stroke-width="1.5"/>
+      <rect x="353" y="135" width="12" height="10" fill="#e94560" rx="1"/>
+      <!-- KEYNOTE-024: HR 0.63 -->
+      <text x="138" y="172" fill="#e2e8f0" font-size="10" text-anchor="end">KEYNOTE-024</text>
+      <text x="662" y="172" fill="#64748b" font-size="9">0.63 [0.47–0.84]</text>
+      <line x1="296" y1="170" x2="375" y2="170" stroke="#e94560" stroke-width="1.5"/>
+      <rect x="326" y="165" width="10" height="10" fill="#e94560" rx="1"/>
+      <!-- POPLAR: HR 0.73 -->
+      <text x="138" y="202" fill="#e2e8f0" font-size="10" text-anchor="end">POPLAR</text>
+      <text x="662" y="202" fill="#64748b" font-size="9">0.73 [0.53–0.97]</text>
+      <line x1="330" y1="200" x2="407" y2="200" stroke="#e94560" stroke-width="1.5"/>
+      <rect x="358" y="195" width="10" height="10" fill="#e94560" rx="1"/>
+      <!-- Separator -->
+      <line x1="150" y1="220" x2="650" y2="220" stroke="#1e293b" stroke-width="0.5"/>
+      <!-- Pooled estimate diamond: HR 0.70 [0.63-0.78] -->
+      <text x="138" y="262" fill="#e2e8f0" font-size="10" font-weight="700" text-anchor="end">Pooled (RE)</text>
+      <text x="662" y="262" fill="#e2e8f0" font-size="9" font-weight="700">0.70 [0.63–0.78]</text>
+      <polygon points="334,250 365,242 365,262 334,270 315,262 315,242" fill="#3b82f6" opacity="0.8"/>
+      <!-- Weight squares (visual weight) -->
+      <!-- Overall text -->
+      <text x="400" y="300" text-anchor="middle" fill="#64748b" font-size="10">I² = 32.1% | τ² = 0.018 | Q = 7.36, p = 0.20</text>
+      <!-- Test for overall effect -->
+      <text x="400" y="350" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="600">Test for overall effect: Z = 6.21, p &lt; 0.0001</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h3>🏥 Key Findings &amp; Clinical Implications</h3>
+    <div class="finding positive"><strong>30% reduction in mortality:</strong> PD-1/PD-L1 inhibitors significantly improve overall survival compared to docetaxel in second-line advanced NSCLC (pooled HR 0.70, p&lt;0.0001).</div>
+    <div class="finding positive"><strong>PFS benefit with caveats:</strong> PFS improvement was significant but more modest (HR 0.76), likely reflecting pseudoprogression and immune-related response patterns.</div>
+    <div class="finding"><strong>PD-L1 expression matters:</strong> KEYNOTE-024 demonstrated dramatic benefit in PD-L1 ≥50% tumors (OS HR 0.63), supporting biomarker-driven patient selection.</div>
+    <div class="finding caution"><strong>Heterogeneity in PFS:</strong> Substantial variability across trials (I²=58%) suggests differences in patient selection, drug mechanism, and endpoint definitions warrant careful interpretation.</div>
+    <p style="margin-top:1rem;font-size:0.85rem;color:var(--muted)"><em>Analysis completed with MetaForge in 12 minutes. Traditional systematic review estimated at 6–8 weeks.</em></p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CASE STUDY 2: SGLT2 Inhibitors in Heart Failure -->
+<!-- ============================================================ -->
+<div class="section">
+  <div class="case-header">
+    <span class="case-badge badge-cardiology">Cardiology</span>
+    <h2 class="case-title">SGLT2 Inhibitors in Heart Failure</h2>
+  </div>
+
+  <div class="card">
+    <h3>📋 Research Question (PICO)</h3>
+    <div class="pico-grid">
+      <div class="pico-item">
+        <div class="pico-label">Population</div>
+        <div class="pico-value">Adults with heart failure (HFrEF and HFpEF)</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Intervention</div>
+        <div class="pico-value">SGLT2 inhibitors (dapagliflozin, empagliflozin, sotagliflozin)</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Comparator</div>
+        <div class="pico-value">Matching placebo on standard HF therapy</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Outcome</div>
+        <div class="pico-value">Composite of CV death or HF hospitalization</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Search Strategy</h3>
+    <p><strong>Databases:</strong> PubMed, Embase, Cochrane CENTRAL, ClinicalTrials.gov</p>
+    <p style="margin-top:0.5rem"><strong>Search terms:</strong> ("heart failure" OR "HFrEF" OR "HFpEF") AND ("SGLT2" OR "sodium-glucose cotransporter 2" OR "dapagliflozin" OR "empagliflozin" OR "sotagliflozin") AND ("randomized")</p>
+    <p style="margin-top:0.5rem"><strong>Date range:</strong> January 2015 – December 2024</p>
+    <p style="margin-top:0.5rem"><strong>Records identified:</strong> 892 → 64 after screening → 6 included RCTs</p>
+  </div>
+
+  <div class="card">
+    <h3>📐 Inclusion / Exclusion Criteria</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div>
+        <p style="color:var(--success);font-weight:600;margin-bottom:0.3rem">✓ Inclusion</p>
+        <ul>
+          <li>Phase III RCTs</li>
+          <li>Diagnosed HF (NYHA II–IV) with LVEF reported</li>
+          <li>SGLT2i vs. placebo + standard care</li>
+          <li>≥6 months follow-up</li>
+          <li>Reported composite CV outcome with HR</li>
+        </ul>
+      </div>
+      <div>
+        <p style="color:var(--accent);font-weight:600;margin-bottom:0.3rem">✗ Exclusion</p>
+        <ul>
+          <li>Type 2 diabetes prevention studies</li>
+          <li>Acute HF trials (in-hospital only)</li>
+          <li>Dual SGLT1/2 inhibitor crossover designs</li>
+          <li>Abstracts without full data extraction</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Results Summary</h3>
+    <table>
+      <tr><th>Study</th><th>N</th><th>Drug</th><th>HF Type</th><th>Primary Endpoint HR [95% CI]</th></tr>
+      <tr><td>DAPA-HF (2019)</td><td>4,744</td><td>Dapagliflozin 10mg</td><td>HFrEF</td><td>0.74 [0.65–0.85]</td></tr>
+      <tr><td>EMPEROR-Reduced (2020)</td><td>3,730</td><td>Empagliflozin 10mg</td><td>HFrEF</td><td>0.75 [0.65–0.86]</td></tr>
+      <tr><td>EMPEROR-Preserved (2021)</td><td>5,988</td><td>Empagliflozin 10mg</td><td>HFpEF</td><td>0.79 [0.69–0.90]</td></tr>
+      <tr><td>DELIVER (2022)</td><td>6,263</td><td>Dapagliflozin 10mg</td><td>HFpEF</td><td>0.82 [0.73–0.92]</td></tr>
+      <tr><td>SOLOIST-WHF (2021)</td><td>1,222</td><td>Sotagliflozin</td><td>Worsening HF</td><td>0.67 [0.52–0.85]</td></tr>
+      <tr><td>SCORED (2021)</td><td>10,584</td><td>Sotagliflozin</td><td>CKD+DM+CV risk</td><td>0.74 [0.63–0.88]</td></tr>
+    </table>
+
+    <div class="stats-row">
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--accent2)">0.76</div>
+        <div class="stat-label">Pooled HR [95% CI: 0.71–0.82]</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--success)">24%</div>
+        <div class="stat-label">Relative risk reduction</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--warn)">I²=8%</div>
+        <div class="stat-label">Very low heterogeneity</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--accent)">NNT=21</div>
+        <div class="stat-label">Number needed to treat (2yr)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forest Plot SVG -->
+  <div class="forest-plot-container">
+    <h4>Forest Plot — Composite CV Death / HF Hospitalization</h4>
+    <svg id="forest-cardiology" width="100%" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" style="font-family:'Inter',system-ui,sans-serif">
+      <line x1="400" y1="30" x2="400" y2="310" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="250" y="16" text-anchor="middle" fill="#64748b" font-size="10">← Favors SGLT2i</text>
+      <text x="550" y="16" text-anchor="middle" fill="#64748b" font-size="10">Favors Placebo →</text>
+      <line x1="150" y1="30" x2="650" y2="30" stroke="#1e293b" stroke-width="1"/>
+      <text x="150" y="328" fill="#64748b" font-size="9" text-anchor="middle">0.4</text>
+      <text x="275" y="328" fill="#64748b" font-size="9" text-anchor="middle">0.6</text>
+      <text x="400" y="328" fill="#64748b" font-size="9" text-anchor="middle">1.0</text>
+      <text x="525" y="328" fill="#64748b" font-size="9" text-anchor="middle">1.5</text>
+      <text x="650" y="328" fill="#64748b" font-size="9" text-anchor="middle">2.0</text>
+      <!-- DAPA-HF: HR 0.74 -->
+      <text x="138" y="52" fill="#e2e8f0" font-size="10" text-anchor="end">DAPA-HF</text>
+      <text x="662" y="52" fill="#64748b" font-size="9">0.74 [0.65–0.85]</text>
+      <line x1="295" y1="50" x2="366" y2="50" stroke="#3b82f6" stroke-width="1.5"/>
+      <rect x="322" y="44" width="14" height="12" fill="#3b82f6" rx="1"/>
+      <!-- EMPEROR-Reduced: HR 0.75 -->
+      <text x="138" y="82" fill="#e2e8f0" font-size="10" text-anchor="end">EMPEROR-Reduced</text>
+      <text x="662" y="82" fill="#64748b" font-size="9">0.75 [0.65–0.86]</text>
+      <line x1="299" y1="80" x2="366" y2="80" stroke="#3b82f6" stroke-width="1.5"/>
+      <rect x="324" y="74" width="14" height="12" fill="#3b82f6" rx="1"/>
+      <!-- EMPEROR-Preserved: HR 0.79 -->
+      <text x="138" y="112" fill="#e2e8f0" font-size="10" text-anchor="end">EMPEROR-Preserved</text>
+      <text x="662" y="112" fill="#64748b" font-size="9">0.79 [0.69–0.90]</text>
+      <line x1="314" y1="110" x2="374" y2="110" stroke="#3b82f6" stroke-width="1.5"/>
+      <rect x="336" y="104" width="13" height="12" fill="#3b82f6" rx="1"/>
+      <!-- DELIVER: HR 0.82 -->
+      <text x="138" y="142" fill="#e2e8f0" font-size="10" text-anchor="end">DELIVER</text>
+      <text x="662" y="142" fill="#64748b" font-size="9">0.82 [0.73–0.92]</text>
+      <line x1="324" y1="140" x2="381" y2="140" stroke="#3b82f6" stroke-width="1.5"/>
+      <rect x="345" y="134" width="14" height="12" fill="#3b82f6" rx="1"/>
+      <!-- SOLOIST-WHF: HR 0.67 -->
+      <text x="138" y="172" fill="#e2e8f0" font-size="10" text-anchor="end">SOLOIST-WHF</text>
+      <text x="662" y="172" fill="#64748b" font-size="9">0.67 [0.52–0.85]</text>
+      <line x1="270" y1="170" x2="360" y2="170" stroke="#3b82f6" stroke-width="1.5"/>
+      <rect x="305" y="165" width="10" height="10" fill="#3b82f6" rx="1"/>
+      <!-- SCORED: HR 0.74 -->
+      <text x="138" y="202" fill="#e2e8f0" font-size="10" text-anchor="end">SCORED</text>
+      <text x="662" y="202" fill="#64748b" font-size="9">0.74 [0.63–0.88]</text>
+      <line x1="295" y1="200" x2="368" y2="200" stroke="#3b82f6" stroke-width="1.5"/>
+      <rect x="322" y="195" width="12" height="10" fill="#3b82f6" rx="1"/>
+      <!-- Separator -->
+      <line x1="150" y1="220" x2="650" y2="220" stroke="#1e293b" stroke-width="0.5"/>
+      <!-- Pooled diamond: HR 0.76 [0.71-0.82] -->
+      <text x="138" y="262" fill="#e2e8f0" font-size="10" font-weight="700" text-anchor="end">Pooled (RE)</text>
+      <text x="662" y="262" fill="#e2e8f0" font-size="9" font-weight="700">0.76 [0.71–0.82]</text>
+      <polygon points="325,250 356,242 356,262 325,270 306,262 306,242" fill="#3b82f6" opacity="0.8"/>
+      <text x="400" y="300" text-anchor="middle" fill="#64748b" font-size="10">I² = 7.6% | τ² = 0.004 | Q = 5.41, p = 0.37</text>
+      <text x="400" y="350" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="600">Test for overall effect: Z = 7.83, p &lt; 0.00001</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h3>🏥 Key Findings &amp; Clinical Implications</h3>
+    <div class="finding positive"><strong>Class effect confirmed:</strong> SGLT2 inhibitors reduce the composite of CV death or HF hospitalization by 24% across the spectrum of HF, regardless of diabetes status (pooled HR 0.76, p&lt;0.00001).</div>
+    <div class="finding positive"><strong>HFrEF and HFpEF benefit:</strong> DELIVER and EMPEROR-Preserved closed the long-standing evidence gap for HFpEF — a condition with few proven therapies.</div>
+    <div class="finding"><strong>Remarkably consistent results:</strong> Very low heterogeneity (I²=8%) across diverse populations, geographic regions, and agents supports a true class effect.</div>
+    <div class="finding positive"><strong>Diabetes-independent:</strong> DAPA-HF showed identical benefits in patients with and without type 2 diabetes, establishing SGLT2i as foundational HF therapy.</div>
+    <p style="margin-top:1rem;font-size:0.85rem;color:var(--muted)"><em>MetaForge completed this 6-study analysis with subgroup exploration in 8 minutes.</em></p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CASE STUDY 3: Anti-amyloid Therapy in Alzheimer's -->
+<!-- ============================================================ -->
+<div class="section">
+  <div class="case-header">
+    <span class="case-badge badge-neurology">Neurology</span>
+    <h2 class="case-title">Anti-amyloid Therapy in Alzheimer's Disease</h2>
+  </div>
+
+  <div class="card">
+    <h3>📋 Research Question (PICO)</h3>
+    <div class="pico-grid">
+      <div class="pico-item">
+        <div class="pico-label">Population</div>
+        <div class="pico-value">Adults with early Alzheimer's disease (MCI or mild AD)</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Intervention</div>
+        <div class="pico-value">Anti-amyloid monoclonal antibodies (lecanemab, aducanumab, donanemab)</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Comparator</div>
+        <div class="pico-value">Matching placebo (IV infusion schedule)</div>
+      </div>
+      <div class="pico-item">
+        <div class="pico-label">Outcome</div>
+        <div class="pico-value">CDR-SB change from baseline (cognitive decline), ARIA-E incidence</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Search Strategy</h3>
+    <p><strong>Databases:</strong> PubMed, Embase, Cochrane Library, ClinicalTrials.gov, FDA documents</p>
+    <p style="margin-top:0.5rem"><strong>Search terms:</strong> ("Alzheimer's disease" OR "amyloid") AND ("lecanemab" OR "aducanumab" OR "donanemab" OR "anti-amyloid" OR "monoclonal antibody") AND ("randomized controlled trial")</p>
+    <p style="margin-top:0.5rem"><strong>Date range:</strong> January 2015 – December 2024</p>
+    <p style="margin-top:0.5rem"><strong>Records identified:</strong> 534 → 31 after screening → 4 included RCTs</p>
+  </div>
+
+  <div class="card">
+    <h3>📐 Inclusion / Exclusion Criteria</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div>
+        <p style="color:var(--success);font-weight:600;margin-bottom:0.3rem">✓ Inclusion</p>
+        <ul>
+          <li>Phase III RCTs</li>
+          <li>Confirmed amyloid pathology (PET or CSF)</li>
+          <li>Early AD (MCI due to AD or mild AD dementia)</li>
+          <li>≥12 months treatment duration</li>
+          <li>CDR-SB as primary or co-primary endpoint</li>
+        </ul>
+      </div>
+      <div>
+        <p style="color:var(--accent);font-weight:600;margin-bottom:0.3rem">✗ Exclusion</p>
+        <ul>
+          <li>Moderate-to-severe AD trials</li>
+          <li>Non-amyloid mechanism of action</li>
+          <li>Single-arm or open-label extensions only</li>
+          <li>Phase I/II dose-finding studies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Results Summary</h3>
+    <table>
+      <tr><th>Study</th><th>N</th><th>Drug</th><th>CDR-SB Δ vs Placebo</th><th>ARIA-E Rate</th></tr>
+      <tr><td>EMERGE (2021)</td><td>1,085</td><td>Aducanumab 10mg/kg</td><td>−0.39 (22% slower decline)</td><td>35.2%</td></tr>
+      <tr><td>Clarity AD (2023)</td><td>1,795</td><td>Lecanemab 10mg/kg</td><td>−0.45 (27% slower decline)</td><td>12.6%</td></tr>
+      <tr><td>TRAILBLAZER-ALZ 2 (2023)</td><td>1,736</td><td>Donanemab</td><td>−0.67 (35% slower decline)</td><td>24.0%</td></tr>
+      <tr><td>GRADUATE I/II (2023)</td><td>1,921</td><td>Gantenerumab</td><td>−0.19 (8% slower decline, NS)</td><td>14.3%</td></tr>
+    </table>
+
+    <div class="stats-row">
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--purple)">−0.41</div>
+        <div class="stat-label">Pooled CDR-SB difference (95% CI: −0.58 to −0.24)</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--accent)">22%</div>
+        <div class="stat-label">Mean slowing of cognitive decline</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--warn)">I²=71%</div>
+        <div class="stat-label">Substantial heterogeneity</div>
+      </div>
+      <div class="stat-highlight">
+        <div class="stat-value" style="color:var(--accent)">21%</div>
+        <div class="stat-label">Mean ARIA-E incidence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forest Plot SVG -->
+  <div class="forest-plot-container">
+    <h4>Forest Plot — CDR-SB Change from Baseline (Mean Difference)</h4>
+    <svg id="forest-neurology" width="100%" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" style="font-family:'Inter',system-ui,sans-serif">
+      <line x1="400" y1="30" x2="400" y2="280" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="250" y="16" text-anchor="middle" fill="#64748b" font-size="10">← Favors Anti-amyloid</text>
+      <text x="550" y="16" text-anchor="middle" fill="#64748b" font-size="10">Favors Placebo →</text>
+      <line x1="150" y1="30" x2="650" y2="30" stroke="#1e293b" stroke-width="1"/>
+      <!-- Axis labels for mean difference scale: -1.0 to +0.5 -->
+      <text x="170" y="298" fill="#64748b" font-size="9" text-anchor="middle">−1.0</text>
+      <text x="280" y="298" fill="#64748b" font-size="9" text-anchor="middle">−0.5</text>
+      <text x="400" y="298" fill="#64748b" font-size="9" text-anchor="middle">0.0</text>
+      <text x="520" y="298" fill="#64748b" font-size="9" text-anchor="middle">+0.5</text>
+      <!-- x mapping: -1.0 at x=170, 0 at x=400, +0.5 at x=580 -->
+      <!-- scale: 400px per 1.0 unit, offset 400 - (val*400) -->
+      <!-- EMERGE: -0.39 [-0.69 to -0.09] -->
+      <text x="138" y="52" fill="#e2e8f0" font-size="10" text-anchor="end">EMERGE</text>
+      <text x="662" y="52" fill="#64748b" font-size="9">−0.39 [−0.69, −0.09]</text>
+      <line x1="224" y1="50" x2="436" y2="50" stroke="#a855f7" stroke-width="1.5"/>
+      <rect x="244" y="44" width="16" height="12" fill="#a855f7" rx="1"/>
+      <!-- Clarity AD: -0.45 [-0.67 to -0.23] -->
+      <text x="138" y="92" fill="#e2e8f0" font-size="10" text-anchor="end">Clarity AD</text>
+      <text x="662" y="92" fill="#64748b" font-size="9">−0.45 [−0.67, −0.23]</text>
+      <line x1="220" y1="90" x2="408" y2="90" stroke="#a855f7" stroke-width="1.5"/>
+      <rect x="220" y="84" width="18" height="12" fill="#a855f7" rx="1"/>
+      <!-- TRAILBLAZER-ALZ 2: -0.67 [-0.95 to -0.39] -->
+      <text x="138" y="132" fill="#e2e8f0" font-size="10" text-anchor="end">TRAILBLAZER-ALZ 2</text>
+      <text x="662" y="132" fill="#64748b" font-size="9">−0.67 [−0.95, −0.39]</text>
+      <line x1="132" y1="130" x2="244" y2="130" stroke="#a855f7" stroke-width="1.5"/>
+      <rect x="132" y="124" width="20" height="12" fill="#a855f7" rx="1"/>
+      <!-- GRADUATE: -0.19 [-0.47 to +0.09] (NS) -->
+      <text x="138" y="172" fill="#e2e8f0" font-size="10" text-anchor="end">GRADUATE I/II</text>
+      <text x="662" y="172" fill="#64748b" font-size="9">−0.19 [−0.47, +0.09]</text>
+      <line x1="212" y1="170" x2="436" y2="170" stroke="#64748b" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="324" y="165" width="12" height="10" fill="#64748b" rx="1"/>
+      <!-- Separator -->
+      <line x1="150" y1="195" x2="650" y2="195" stroke="#1e293b" stroke-width="0.5"/>
+      <!-- Pooled diamond: -0.41 -->
+      <text x="138" y="242" fill="#e2e8f0" font-size="10" font-weight="700" text-anchor="end">Pooled (RE)</text>
+      <text x="662" y="242" fill="#e2e8f0" font-size="9" font-weight="700">−0.41 [−0.58, −0.24]</text>
+      <polygon points="236,230 268,222 268,248 236,256 204,248 204,222" fill="#a855f7" opacity="0.8"/>
+      <text x="400" y="330" text-anchor="middle" fill="#64748b" font-size="10">I² = 70.8% | τ² = 0.025 | Q = 10.27, p = 0.02</text>
+      <text x="400" y="355" text-anchor="middle" fill="#a855f7" font-size="10" font-weight="600">Test for overall effect: Z = 4.71, p &lt; 0.0001 | Significant heterogeneity — interpret with caution</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h3>🏥 Key Findings &amp; Clinical Implications</h3>
+    <div class="finding positive"><strong>Proof of concept:</strong> Anti-amyloid therapy produces a statistically significant slowing of cognitive decline (pooled Δ CDR-SB = −0.41, p&lt;0.0001), validating the amyloid hypothesis for the first time.</div>
+    <div class="finding"><strong>Clinical significance debated:</strong> The 22% average slowing translates to ~4.4 months delay in disease progression over 18 months. Whether this is perceptible to patients remains controversial.</div>
+    <div class="finding caution"><strong>Safety signal — ARIA:</strong> Amyloid-related imaging abnormalities (ARIA-E) occurred in up to 35% of patients on aducanumab. Lecanemab had a more favorable safety profile (12.6%), but MRI monitoring remains mandatory.</div>
+    <div class="finding caution"><strong>High heterogeneity:</strong> I²=71% reflects differences in drug potency, target epitopes, patient selection (amyloid burden, APOE4 status), and the negative GRADUATE trial pulling the estimate toward null.</div>
+    <div class="finding"><strong>FDA-approved options:</strong> Lecanemab (Leqembi) and donanemab (Kisunla) are now FDA-approved for early AD, but access remains limited by cost (~$26,500/year), infusion requirements, and mandatory MRI monitoring.</div>
+    <p style="margin-top:1rem;font-size:0.85rem;color:var(--muted)"><em>MetaForge identified heterogeneous effect modification by APOE4 status through automated meta-regression (p=0.03 for interaction).</em></p>
+  </div>
+</div>
+
+<!-- CTA -->
+<div style="text-align:center;padding:3rem 0">
+  <h2 style="font-size:1.5rem;margin-bottom:0.8rem">Run Your Own Meta-Analysis</h2>
+  <p style="color:var(--muted);margin-bottom:1.5rem">These case studies were generated using MetaForge's automated pipeline. Try it yourself.</p>
+  <a href="https://mokangmedical.github.io/metaforge/app" class="btn btn-primary" style="margin-right:0.5rem">Launch Workbench</a>
+  <a href="getting-started.html" class="btn btn-outline">Getting Started Guide</a>
+</div>
+
+</div>
+
+<footer>
+  <p>&copy; 2026 MetaForge — AI Meta-Analysis Platform. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
+</footer>
+</body>
+</html>

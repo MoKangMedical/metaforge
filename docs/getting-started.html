@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Getting Started — MetaForge</title>
+<meta name="description" content="Step-by-step tutorial for MetaForge. Install, configure, run your first meta-analysis, and export results.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0f1a;--surface:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#64748b;--accent:#e94560;--accent2:#3b82f6;--success:#22c55e;--warn:#f59e0b;--purple:#a855f7}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.6}
+.topnav{position:sticky;top:0;z-index:100;background:rgba(10,15,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{color:var(--accent);font-weight:800;font-size:1.2rem;text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{background:var(--accent)!important;color:#fff!important;padding:6px 14px;border-radius:6px;font-weight:600!important}
+.container{max-width:900px;margin:0 auto;padding:2rem}
+.hero{text-align:center;padding:4rem 2rem 3rem;background:linear-gradient(135deg,#0a0f1a 0%,#1a1a2e 100%)}
+.hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:0.8rem}
+.hero h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);max-width:600px;margin:0 auto;font-size:1.05rem}
+.section{padding:3rem 0}
+.section-title{font-size:1.6rem;font-weight:700;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.6rem}
+.section-title .step-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-size:0.85rem;font-weight:700;flex-shrink:0}
+.section-desc{color:var(--muted);margin-bottom:1.5rem;font-size:0.95rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.card h3{font-size:1.05rem;margin-bottom:0.6rem}
+.card p{color:var(--muted);font-size:0.9rem}
+.btn{display:inline-block;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#d63a54}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-outline:hover{border-color:var(--accent2);color:var(--accent2)}
+code{font-family:'JetBrains Mono','Fira Code',monospace;font-size:0.82rem}
+pre{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.4rem;overflow-x:auto;margin:1rem 0;font-size:0.82rem;line-height:1.7}
+pre code{color:#c9d1d9}
+.comment{color:#8b949e}.string{color:#a5d6ff}.keyword{color:#ff7b72}.func{color:#d2a8ff}.num{color:#79c0ff}.cmd{color:#7ee787}.flag{color:#ffa657}
+table{width:100%;border-collapse:collapse;font-size:0.85rem;margin:1rem 0}
+th{background:rgba(255,255,255,0.03);color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+tr:hover{background:rgba(255,255,255,0.02)}
+.tip{background:rgba(59,130,246,0.1);border-left:3px solid var(--accent2);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:0.9rem}
+.tip strong{color:var(--accent2)}
+.warn{background:rgba(245,158,11,0.1);border-left:3px solid var(--warn);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:0.9rem}
+.warn strong{color:var(--warn)}
+.img-placeholder{background:var(--surface);border:2px dashed var(--border);border-radius:12px;padding:3rem;text-align:center;color:var(--muted);font-size:0.9rem;margin:1rem 0}
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:2rem 0}
+.toc h3{font-size:0.9rem;margin-bottom:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.toc ol{padding-left:1.5rem;color:var(--muted);font-size:0.9rem}
+.toc li{padding:0.3rem 0}
+.toc a{color:var(--accent2);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.tag{display:inline-block;font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.05);color:var(--muted);margin:2px}
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem;border-top:1px solid var(--border);margin-top:3rem}
+footer a{color:var(--accent2);text-decoration:none}
+@media(max-width:768px){.topnav{padding:0 1rem}.nav-links{gap:0.8rem;flex-wrap:wrap}pre{padding:0.8rem;font-size:0.75rem}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">MetaForge</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="api.html">API</a>
+    <a href="about.html">About</a>
+    <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge">GitHub</a>
+    <a href="https://mokangmedical.github.io/metaforge/app" class="btn-nav">Try Workbench</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1><span class="grad">Getting Started</span> with MetaForge</h1>
+  <p>From installation to your first publication-ready meta-analysis in under 30 minutes.</p>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h3>Table of Contents</h3>
+    <ol>
+      <li><a href="#quickstart">Quick Start — Installation &amp; Setup</a></li>
+      <li><a href="#workbench">Using the Workbench</a></li>
+      <li><a href="#first-analysis">Running Your First Analysis</a></li>
+      <li><a href="#understanding-results">Understanding Results</a></li>
+      <li><a href="#exporting">Exporting Reports</a></li>
+      <li><a href="#api-usage">API Usage</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ol>
+  </div>
+
+  <!-- Step 1: Quick Start -->
+  <div class="section" id="quickstart">
+    <h2 class="section-title"><span class="step-num">1</span> Quick Start</h2>
+    <p class="section-desc">Install MetaForge and get the server running in two commands.</p>
+
+    <div class="card">
+      <h3>Prerequisites</h3>
+      <p>Python 3.9+ and pip. An OpenAI API key is required for AI-powered features (screening, extraction, quality assessment).</p>
+    </div>
+
+    <div class="card">
+      <h3>Install via pip</h3>
+      <pre><code><span class="comment"># Install MetaForge from PyPI</span>
+<span class="cmd">pip</span> install metaforge
+
+<span class="comment"># Or install from source for the latest features</span>
+<span class="cmd">git</span> clone https://github.com/MetaForge/metaforge.git
+<span class="cmd">cd</span> metaforge
+<span class="cmd">pip</span> install -e .</code></pre>
+    </div>
+
+    <div class="card">
+      <h3>Configure Environment</h3>
+      <pre><code><span class="comment"># Set your OpenAI API key (required for AI modules)</span>
+<span class="cmd">export</span> <span class="keyword">OPENAI_API_KEY</span>=<span class="string">"sk-your-key-here"</span>
+
+<span class="comment"># Optional: set a custom port (default is 8501)</span>
+<span class="cmd">export</span> <span class="keyword">METAFORGE_PORT</span>=<span class="string">"8501"</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h3>Launch the Server</h3>
+      <pre><code><span class="comment"># Start MetaForge server</span>
+<span class="cmd">metaforge</span> serve
+
+<span class="comment"># Or run with Streamlit directly</span>
+<span class="cmd">streamlit</span> run metaforge/app.py <span class="flag">--server.port</span> <span class="num">8501</span>
+
+<span class="comment"># Server will be available at http://localhost:8501</span></code></pre>
+      <div class="tip">
+        <strong>Tip:</strong> For production deployments, use <code>metaforge serve --host 0.0.0.0 --port 80</code> and place behind a reverse proxy.
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Using the Workbench -->
+  <div class="section" id="workbench">
+    <h2 class="section-title"><span class="step-num">2</span> Using the Workbench</h2>
+    <p class="section-desc">The interactive Workbench is your primary interface for building meta-analyses visually.</p>
+
+    <div class="img-placeholder">
+      <p>📊 Workbench Dashboard Screenshot</p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">The Workbench provides a drag-and-drop interface for configuring your analysis pipeline.</p>
+    </div>
+
+    <div class="card">
+      <h3>Step 2a — Define Your Research Question</h3>
+      <p>Start by entering your PICO criteria in the sidebar:</p>
+      <table>
+        <tr><th>Field</th><th>Example</th></tr>
+        <tr><td><strong>Population</strong></td><td>Adults with type 2 diabetes</td></tr>
+        <tr><td><strong>Intervention</strong></td><td>SGLT2 inhibitors</td></tr>
+        <tr><td><strong>Comparator</strong></td><td>Placebo or standard care</td></tr>
+        <tr><td><strong>Outcome</strong></td><td>Major adverse cardiovascular events (MACE)</td></tr>
+        <tr><td><strong>Study Design</strong></td><td>Randomized controlled trials</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Step 2b — Select Databases</h3>
+      <p>Choose one or more databases to search. The AI will auto-generate optimized search strategies.</p>
+      <div style="margin-top:0.6rem">
+        <span class="tag">PubMed</span><span class="tag">Cochrane Library</span><span class="tag">Embase</span>
+        <span class="tag">Web of Science</span><span class="tag">CNKI</span><span class="tag">Wanfang</span>
+        <span class="tag">Scopus</span><span class="tag">PsycINFO</span><span class="tag">CINAHL</span>
+      </div>
+    </div>
+
+    <div class="img-placeholder">
+      <p>📋 Search Strategy Builder Screenshot</p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">AI-generated MeSH terms, Boolean operators, and field tags are shown for review before execution.</p>
+    </div>
+
+    <div class="card">
+      <h3>Step 2c — Upload Your Own Data (Optional)</h3>
+      <p>If you already have extracted data, upload a CSV or Excel file with columns for study name, effect size, and confidence intervals:</p>
+      <pre><code><span class="comment"># Example CSV format</span>
+study,TE,seTE,treatment,control,n_treatment,n_control
+Smith 2020,0.72,0.15,45,38,120,118
+Johnson 2021,0.58,0.22,52,41,200,195
+Lee 2022,0.85,0.18,61,48,150,148</code></pre>
+    </div>
+  </div>
+
+  <!-- Step 3: Running Your First Analysis -->
+  <div class="section" id="first-analysis">
+    <h2 class="section-title"><span class="step-num">3</span> Running Your First Analysis</h2>
+    <p class="section-desc">Execute a complete meta-analysis programmatically or via the Workbench.</p>
+
+    <div class="card">
+      <h3>Python API — Quick Analysis</h3>
+      <pre><code><span class="keyword">from</span> metaforge <span class="keyword">import</span> MetaAnalysis
+<span class="keyword">from</span> metaforge.stats <span class="keyword">import</span> RandomEffects, FixedEffects
+
+<span class="comment"># Initialize with your data</span>
+ma = MetaAnalysis(
+    data=<span class="string">"path/to/studies.csv"</span>,
+    method=<span class="string">"random"</span>,          <span class="comment"># "fixed", "random", or "peto"</span>
+    model=<span class="string">"DL"</span>,               <span class="comment"># DerSimonian-Laird estimator</span>
+    measure=<span class="string">"OR"</span>              <span class="comment"># OR, RR, RD, SMD, HR</span>
+)
+
+<span class="comment"># Run the analysis</span>
+results = ma.<span class="func">run</span>()
+
+<span class="comment"># Print summary</span>
+<span class="func">print</span>(results.<span class="func">summary</span>())
+<span class="comment"># ┌─────────────────────────────────────────────────┐
+# │  Pooled OR: 1.42 (95% CI: 1.18–1.71)           │
+# │  Heterogeneity: I²=34.2%, τ²=0.04, p=0.003     │
+# │  Test for overall effect: Z=3.68, p=0.0002      │
+# └─────────────────────────────────────────────────┘</span>
+
+<span class="comment"># Generate forest plot</span>
+ma.<span class="func">plot_forest</span>(output=<span class="string">"forest_plot.png"</span>, dpi=<span class="num">300</span>)
+
+<span class="comment"># Generate funnel plot for publication bias</span>
+ma.<span class="func">plot_funnel</span>(output=<span class="string">"funnel_plot.png"</span>)
+
+<span class="comment"># Subgroup analysis</span>
+subgroup = ma.<span class="func">subgroup</span>(by=<span class="string">"region"</span>)
+<span class="func">print</span>(subgroup.<span class="func">summary</span>())</code></pre>
+    </div>
+
+    <div class="card">
+      <h3>Using the Workbench (Visual Mode)</h3>
+      <p>In the Workbench, click <strong>"Run Analysis"</strong> after configuring your data. The AI will:</p>
+      <ol style="padding-left:1.5rem;color:var(--muted);font-size:0.9rem;margin-top:0.5rem">
+        <li>Auto-select the appropriate statistical model based on your data characteristics</li>
+        <li>Run heterogeneity tests (Cochran's Q, I², τ²)</li>
+        <li>Generate forest plots, funnel plots, and Galbraith plots</li>
+        <li>Perform sensitivity analysis (leave-one-out)</li>
+        <li>Assess publication bias (Egger's test, Begg's test, trim-and-fill)</li>
+        <li>Generate a PRISMA-compliant report</li>
+      </ol>
+    </div>
+
+    <div class="img-placeholder">
+      <p>📈 Forest Plot Output Screenshot</p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Auto-generated forest plot with pooled estimates, prediction intervals, and heterogeneity statistics.</p>
+    </div>
+  </div>
+
+  <!-- Step 4: Understanding Results -->
+  <div class="section" id="understanding-results">
+    <h2 class="section-title"><span class="step-num">4</span> Understanding Results</h2>
+    <p class="section-desc">Learn to interpret the key outputs of your meta-analysis.</p>
+
+    <div class="card">
+      <h3>Forest Plot Interpretation</h3>
+      <table>
+        <tr><th>Element</th><th>Meaning</th></tr>
+        <tr><td><strong>Squares</strong></td><td>Individual study effect sizes. Larger squares = larger study weight.</td></tr>
+        <tr><td><strong>Horizontal lines</strong></td><td>95% confidence interval for each study.</td></tr>
+        <tr><td><strong>Diamond</strong></td><td>Pooled effect estimate. Width = 95% CI of the pooled estimate.</td></tr>
+        <tr><td><strong>Favors left/right</strong></td><td>Direction of effect. Line of no-effect (OR=1, SMD=0) shown as dashed vertical.</td></tr>
+        <tr><td><strong>Prediction interval</strong></td><td>Dashed diamond showing the range of true effects in future studies.</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Heterogeneity Metrics</h3>
+      <table>
+        <tr><th>Metric</th><th>Interpretation</th></tr>
+        <tr><td><strong>I² &lt; 25%</strong></td><td>Low heterogeneity — studies are consistent.</td></tr>
+        <tr><td><strong>I² 25–75%</strong></td><td>Moderate heterogeneity — explore with subgroup or meta-regression.</td></tr>
+        <tr><td><strong>I² &gt; 75%</strong></td><td>High heterogeneity — investigate sources; consider if pooling is appropriate.</td></tr>
+        <tr><td><strong>Cochran's Q</strong></td><td>Chi-squared test. p &lt; 0.10 suggests significant heterogeneity.</td></tr>
+        <tr><td><strong>τ² (tau-squared)</strong></td><td>Between-study variance. Higher values = more variability in true effects.</td></tr>
+      </table>
+      <div class="tip">
+        <strong>Tip:</strong> I² alone can be misleading with few studies. Always report Q, τ², and prediction intervals alongside I².
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Publication Bias Assessment</h3>
+      <p>MetaForge automatically runs multiple tests:</p>
+      <table>
+        <tr><th>Test</th><th>When to Use</th></tr>
+        <tr><td><strong>Egger's regression</strong></td><td>Continuous outcomes with ≥10 studies.</td></tr>
+        <tr><td><strong>Begg's rank test</strong></td><td>Non-parametric alternative; robust with smaller samples.</td></tr>
+        <tr><td><strong>Trim-and-fill</strong></td><td>Estimates number of missing studies and adjusts the pooled effect.</td></tr>
+        <tr><td><strong>Funnel plot</strong></td><td>Visual inspection for asymmetry (subjective but essential).</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 5: Exporting Reports -->
+  <div class="section" id="exporting">
+    <h2 class="section-title"><span class="step-num">5</span> Exporting Reports</h2>
+    <p class="section-desc">Export your results in multiple formats for publication, collaboration, or further analysis.</p>
+
+    <div class="card">
+      <h3>CSV Export</h3>
+      <pre><code><span class="comment"># Export study-level data and pooled results</span>
+results.<span class="func">export_csv</span>(<span class="string">"my_meta_analysis.csv"</span>)
+
+<span class="comment"># Output columns: study, TE, seTE, lower, upper, weight, z, p</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h3>JSON Export</h3>
+      <pre><code><span class="comment"># Full structured output for programmatic use</span>
+results.<span class="func">export_json</span>(<span class="string">"results.json"</span>, pretty=<span class="keyword">True</span>)
+
+<span class="comment"># Includes: pooled_effect, ci_lower, ci_upper, heterogeneity,</span>
+<span class="comment"># publication_bias_tests, study_details, subgroup_results</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h3>PDF / LaTeX Report</h3>
+      <pre><code><span class="comment"># Generate a PRISMA-compliant PDF report</span>
+results.<span class="func">export_report</span>(
+    format=<span class="string">"pdf"</span>,
+    template=<span class="string">"prisma"</span>,        <span class="comment"># "prisma", "cochrane", "jama"</span>
+    include_plots=<span class="keyword">True</span>,
+    language=<span class="string">"en"</span>             <span class="comment"># "en" or "zh"</span>
+)
+
+<span class="comment"># Export LaTeX source for journal submission</span>
+results.<span class="func">export_report</span>(format=<span class="string">"latex"</span>, output=<span class="string">"report.tex"</span>)</code></pre>
+      <div class="tip">
+        <strong>Tip:</strong> PDF reports include forest plots, funnel plots, PRISMA flow diagram, risk of bias summary, and all statistical tables — ready for supplementary material submission.
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 6: API Usage -->
+  <div class="section" id="api-usage">
+    <h2 class="section-title"><span class="step-num">6</span> API Usage</h2>
+    <p class="section-desc">Use the REST API to integrate MetaForge into your automated pipelines.</p>
+
+    <div class="card">
+      <h3>Start a Search</h3>
+      <pre><code><span class="cmd">curl</span> <span class="flag">-X</span> POST http://localhost:8501/api/search \
+  <span class="flag">-H</span> <span class="string">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="string">'{
+    "query": "SGLT2 inhibitors heart failure",
+    "databases": ["pubmed", "cochrane"],
+    "date_range": ["2015-01-01", "2025-12-31"],
+    "study_types": ["RCT"]
+  }'</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h3>Screen Studies</h3>
+      <pre><code><span class="cmd">curl</span> <span class="flag">-X</span> POST http://localhost:8501/api/screen \
+  <span class="flag">-H</span> <span class="string">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="string">'{
+    "search_id": "srch_abc123",
+    "criteria": {
+      "include": ["adults", "heart failure", "SGLT2i", "RCT"],
+      "exclude": ["pediatric", "observational", "case report"]
+    },
+    "model": "gpt-4o"
+  }'</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h3>Run Statistical Analysis</h3>
+      <pre><code><span class="cmd">curl</span> <span class="flag">-X</span> POST http://localhost:8501/api/analyze \
+  <span class="flag">-H</span> <span class="string">"Content-Type: application/json"</span> \
+  <span class="flag">-d</span> <span class="string">'{
+    "project_id": "proj_xyz789",
+    "method": "random",
+    "model": "DL",
+    "measure": "HR",
+    "subgroup_variable": "region",
+    "sensitivity": true,
+    "publication_bias": ["egger", "begg", "trim_fill"]
+  }'</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h3>Generate Plots</h3>
+      <pre><code><span class="cmd">curl</span> <span class="flag">-X</span> GET http://localhost:8501/api/plots/proj_xyz789/forest \
+  <span class="flag">-H</span> <span class="string">"Accept: image/png"</span> <span class="flag">-o</span> forest.png
+
+<span class="cmd">curl</span> <span class="flag">-X</span> GET http://localhost:8501/api/plots/proj_xyz789/funnel \
+  <span class="flag">-H</span> <span class="string">"Accept: image/svg+xml"</span> <span class="flag">-o</span> funnel.svg</code></pre>
+    </div>
+
+    <div class="card">
+      <h3>Export Results</h3>
+      <pre><code><span class="comment"># Export as JSON</span>
+<span class="cmd">curl</span> <span class="flag">-X</span> GET http://localhost:8501/api/export/proj_xyz789?format=json \
+  <span class="flag">-o</span> results.json
+
+<span class="comment"># Export as PDF report</span>
+<span class="cmd">curl</span> <span class="flag">-X</span> GET http://localhost:8501/api/export/proj_xyz789?format=pdf \
+  <span class="flag">-o</span> report.pdf</code></pre>
+    </div>
+
+    <div class="tip">
+      <strong>Full API reference:</strong> See <a href="api.html" style="color:var(--accent2)">api.html</a> for complete endpoint documentation, authentication, rate limits, and response schemas.
+    </div>
+  </div>
+
+  <!-- Troubleshooting -->
+  <div class="section" id="troubleshooting">
+    <h2 class="section-title"><span class="step-num">⚡</span> Troubleshooting</h2>
+
+    <div class="card">
+      <h3>Common Issues</h3>
+      <table>
+        <tr><th>Problem</th><th>Solution</th></tr>
+        <tr><td><code>ModuleNotFoundError: metaforge</code></td><td>Ensure you're in the correct virtualenv. Run <code>pip install metaforge</code> again.</td></tr>
+        <tr><td><code>OPENAI_API_KEY not set</code></td><td>Export the key: <code>export OPENAI_API_KEY="sk-..."</code></td></tr>
+        <tr><td><code>Port 8501 already in use</code></td><td>Kill the existing process or use a different port: <code>metaforge serve --port 8502</code></td></tr>
+        <tr><td>Forest plot not rendering</td><td>Install matplotlib backend: <code>pip install matplotlib</code> and ensure a display server is available (or use <code>Agg</code> backend for headless).</td></tr>
+        <tr><td>Search returns 0 results</td><td>Check your PICO terms. Try broader keywords. Verify database connectivity with <code>metaforge test-db</code>.</td></tr>
+        <tr><td>Analysis hangs at screening</td><td>Reduce concurrent threads: <code>metaforge serve --threads 4</code>. Check your OpenAI API rate limits.</td></tr>
+        <tr><td><code>MemoryError</code> with large datasets</td><td>Increase system memory or use chunked processing: <code>ma.run(chunk_size=100)</code>.</td></tr>
+      </table>
+    </div>
+
+    <div class="warn">
+      <strong>Need more help?</strong> Open an issue on <a href="https://github.com/MetaForge/metaforge/issues" style="color:var(--warn)">GitHub</a> or email <a href="mailto:support@metaforge.com" style="color:var(--warn)">support@metaforge.com</a>.
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>&copy; 2026 MetaForge — AI Meta-Analysis Platform. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
+</footer>
+</body>
+</html>

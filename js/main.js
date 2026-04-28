@@ -9,10 +9,12 @@ class ParticleSystem {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.particles = [];
+    this.stars = [];
     this.connections = [];
     this.mouse = { x: 0, y: 0 };
     this.resize();
     this.init();
+    this.initStars();
     window.addEventListener('resize', () => this.resize());
     window.addEventListener('mousemove', (e) => {
       this.mouse.x = e.clientX;
@@ -41,8 +43,41 @@ class ParticleSystem {
     }
   }
 
-  update() {
+  initStars() {
+    const starCount = Math.min(150, Math.floor(window.innerWidth / 8));
+    this.stars = [];
+    for (let i = 0; i < starCount; i++) {
+      this.stars.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        radius: Math.random() * 1.5 + 0.3,
+        alpha: Math.random() * 0.8 + 0.1,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        twinklePhase: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  update(time) {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw star field
+    for (const star of this.stars) {
+      const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase) * 0.4 + 0.6;
+      const alpha = star.alpha * twinkle;
+      this.ctx.beginPath();
+      this.ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      this.ctx.fillStyle = `rgba(200, 220, 255, ${alpha})`;
+      this.ctx.fill();
+
+      // Add glow to brighter stars
+      if (star.radius > 1) {
+        this.ctx.beginPath();
+        this.ctx.arc(star.x, star.y, star.radius * 3, 0, Math.PI * 2);
+        this.ctx.fillStyle = `rgba(100, 150, 255, ${alpha * 0.1})`;
+        this.ctx.fill();
+      }
+    }
 
     for (const p of this.particles) {
       p.x += p.vx;
@@ -94,7 +129,7 @@ class ParticleSystem {
       }
     }
 
-    requestAnimationFrame(() => this.update());
+    requestAnimationFrame((t) => this.update(t));
   }
 }
 
@@ -111,7 +146,7 @@ function initScrollReveal() {
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 }
 
-// === Counter Animation ===
+// === Counter Animation with Easing ===
 function animateCounters() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -120,16 +155,29 @@ function animateCounters() {
         const target = parseInt(el.dataset.target);
         const suffix = el.dataset.suffix || '';
         const prefix = el.dataset.prefix || '';
-        let current = 0;
-        const step = target / 60;
-        const timer = setInterval(() => {
-          current += step;
-          if (current >= target) {
-            current = target;
-            clearInterval(timer);
+        const duration = 2000;
+        const startTime = performance.now();
+
+        function easeOutExpo(t) {
+          return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+        }
+
+        function updateCounter(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easedProgress = easeOutExpo(progress);
+          const current = Math.floor(easedProgress * target);
+
+          el.textContent = prefix + current.toLocaleString() + suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+          } else {
+            el.textContent = prefix + target.toLocaleString() + suffix;
           }
-          el.textContent = prefix + Math.floor(current).toLocaleString() + suffix;
-        }, 16);
+        }
+
+        requestAnimationFrame(updateCounter);
         observer.unobserve(el);
       }
     });
@@ -323,15 +371,112 @@ function initSmoothScroll() {
   });
 }
 
-// === Comparison Table Hover ===
+// === Comparison Table Filter ===
+function initComparisonFilters() {
+  const filterBtns = document.querySelectorAll('.comp-filter-btn');
+  const rows = document.querySelectorAll('.comparison-table tbody tr[data-category]');
+
+  if (!filterBtns.length || !rows.length) return;
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+
+      // Update active button
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Filter rows
+      rows.forEach(row => {
+        if (filter === 'all' || row.dataset.category === filter) {
+          row.classList.remove('hidden-row');
+          row.style.display = '';
+        } else {
+          row.classList.add('hidden-row');
+          row.style.display = 'none';
+        }
+      });
+    });
+  });
+}
+
+// === Hero Typing Effect ===
+function initHeroTyping() {
+  const el = document.getElementById('hero-typing');
+  if (!el) return;
+
+  const text = 'MetaForge 是全球首个端到端AI循证医学研究平台。6大AI Agent自主协作，自动完成检索、筛选、提取、评价、统计、写作全流程，输出可溯源、可复现的规范结果。';
+  let i = 0;
+  const speed = 30;
+
+  function type() {
+    if (i < text.length) {
+      el.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    } else {
+      el.classList.add('done');
+    }
+  }
+
+  // Start typing when visible
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      setTimeout(type, 600);
+      observer.disconnect();
+    }
+  }, { threshold: 0.3 });
+  observer.observe(el);
+}
+
+// === Social Proof Progress Bars ===
+function initSocialProofBars() {
+  const bars = document.querySelectorAll('.social-stat-fill');
+  if (!bars.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animated');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  bars.forEach(bar => observer.observe(bar));
+}
+
+// === Workflow Step Scroll Animation ===
+function initWorkflowSteps() {
+  const steps = document.querySelectorAll('.workflow-step');
+  if (!steps.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, index) => {
+      if (entry.isIntersecting) {
+        // Stagger the animation
+        setTimeout(() => {
+          entry.target.classList.add('step-visible');
+        }, index * 150);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  steps.forEach(step => observer.observe(step));
+}
+
+// === Comparison Table Hover Enhancement ===
 function initComparison() {
   const rows = document.querySelectorAll('.comparison-table tbody tr');
   rows.forEach(row => {
     row.addEventListener('mouseenter', () => {
       row.style.background = 'rgba(59, 130, 246, 0.05)';
+      row.style.transform = 'scale(1.01)';
     });
     row.addEventListener('mouseleave', () => {
       row.style.background = '';
+      row.style.transform = '';
     });
   });
 }
@@ -342,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('hero-canvas');
   if (canvas) {
     const ps = new ParticleSystem(canvas);
-    ps.update();
+    ps.update(0);
   }
 
   initScrollReveal();
@@ -352,4 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initSmoothScroll();
   initComparison();
+  initComparisonFilters();
+  initHeroTyping();
+  initSocialProofBars();
+  initWorkflowSteps();
 });
