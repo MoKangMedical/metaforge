@@ -387,24 +387,127 @@
     <div class="container">
       <div class="reveal" style="text-align: center;">
         <span class="section-label">⚡ 实时演示</span>
-        <h2 class="section-title">看MetaForge<span class="gradient">如何工作</span></h2>
+        <h2 class="section-title">在线体验 <span class="gradient">Meta分析</span></h2>
         <p class="section-desc" style="margin: 0 auto;">
-          以下是一个真实的Meta分析项目执行过程。从初始化到报告生成，全程不到1小时。
+          直接在页面上输入研究数据，一键运行完整的Meta分析流程。无需安装任何软件。
         </p>
       </div>
-      <div class="demo-terminal reveal" id="demo-terminal">
-        <div class="demo-terminal-header">
-          <span class="demo-dot red"></span>
-          <span class="demo-dot yellow"></span>
-          <span class="demo-dot green"></span>
-          <span class="demo-terminal-title">MetaForge CLI — PD-1抑制剂联合化疗Meta分析</span>
+      <div class="demo-interactive reveal" style="margin-top:32px">
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;background:var(--surface,#111827);border:1px solid var(--border,#1e293b);border-radius:16px;overflow:hidden">
+          <!-- Left: Data Input -->
+          <div style="padding:20px;border-right:1px solid var(--border,#1e293b)">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text,#e2e8f0)">📋 输入研究数据</h3>
+            <div style="display:flex;gap:6px;margin-bottom:12px">
+              <select id="demo-measure" style="flex:1;padding:6px 8px;background:var(--bg,#0a0f1a);border:1px solid var(--border,#1e293b);border-radius:6px;color:var(--text,#e2e8f0);font-size:12px">
+                <option value="OR">OR</option><option value="RR">RR</option>
+              </select>
+              <select id="demo-model" style="flex:1;padding:6px 8px;background:var(--bg,#0a0f1a);border:1px solid var(--border,#1e293b);border-radius:6px;color:var(--text,#e2e8f0);font-size:12px">
+                <option value="random">Random</option><option value="fixed">Fixed</option>
+              </select>
+            </div>
+            <div style="font-size:11px;color:var(--muted,#64748b);margin-bottom:6px">示例: PD-1抑制剂+化疗 vs 化疗 (NSCLC)</div>
+            <div id="demo-rows" style="max-height:220px;overflow-y:auto"></div>
+            <button onclick="runDemo()" style="width:100%;padding:10px;margin-top:10px;background:var(--accent,#e94560);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">▶ 运行Meta分析</button>
+          </div>
+          <!-- Right: Results -->
+          <div style="padding:20px" id="demo-results">
+            <div style="text-align:center;padding:40px 20px;color:var(--muted,#64748b)">
+              <div style="font-size:36px;opacity:0.3;margin-bottom:12px">📊</div>
+              <p style="font-size:13px">点击"运行Meta分析"查看结果</p>
+            </div>
+          </div>
         </div>
-        <div class="demo-terminal-body">
-          <!-- Demo lines will be injected by JS -->
-        </div>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <a href="/app" style="color:var(--accent2,#3b82f6);font-size:13px;font-weight:600">打开完整工作台 →</a>
       </div>
     </div>
   </section>
+
+  <style>
+    @media(max-width:768px){.demo-interactive>div{grid-template-columns:1fr!important}}
+    .demo-study-row{display:grid;grid-template-columns:1fr 50px 50px 50px 50px;gap:4px;margin-bottom:4px}
+    .demo-study-row input{padding:4px 5px;background:var(--bg,#0a0f1a);border:1px solid var(--border,#1e293b);border-radius:4px;color:var(--text,#e2e8f0);font-size:11px;font-family:'JetBrains Mono',monospace}
+    .demo-study-row input:first-child{font-family:inherit}
+    .demo-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+    .demo-stat{background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center}
+    .demo-stat .val{font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace}
+    .demo-stat .lbl{font-size:10px;color:var(--muted,#64748b);margin-top:2px}
+  </style>
+
+  <script>
+    const DEMO_DATA = [
+      {name:"Gandhi 2018",e:138,n:292,c:108,m:288},
+      {name:"Paz-Ares 2018",e:171,n:292,c:134,m:291},
+      {name:"West 2019",e:117,n:241,c:89,m:238},
+      {name:"Carbone 2017",e:104,n:199,c:81,m:200},
+      {name:"Reck 2016",e:92,n:185,c:71,m:183},
+      {name:"Herbst 2016",e:69,n:143,c:55,m:141},
+      {name:"Langer 2016",e:48,n:98,c:37,m:97},
+      {name:"Rittmeyer 2017",e:102,n:201,c:78,m:199},
+      {name:"Barlesi 2016",e:88,n:177,c:66,m:176},
+      {name:"Brahmer 2015",e:45,n:131,c:28,m:129},
+    ];
+    (function(){
+      const container = document.getElementById('demo-rows');
+      DEMO_DATA.forEach(d => {
+        const row = document.createElement('div');
+        row.className = 'demo-study-row';
+        row.innerHTML = `<input value="${d.name}" readonly><input value="${d.e}" readonly><input value="${d.n}" readonly><input value="${d.c}" readonly><input value="${d.m}" readonly>`;
+        container.appendChild(row);
+      });
+      const hdr = document.createElement('div');
+      hdr.className = 'demo-study-row';
+      hdr.innerHTML = `<div style="font-size:10px;color:var(--muted,#64748b);font-weight:600">Study</div><div style="font-size:10px;color:var(--muted,#64748b)">E evt</div><div style="font-size:10px;color:var(--muted,#64748b)">E n</div><div style="font-size:10px;color:var(--muted,#64748b)">C evt</div><div style="font-size:10px;color:var(--muted,#64748b)">C n</div>`;
+      container.insertBefore(hdr, container.firstChild);
+    })();
+
+    async function runDemo() {
+      const btn = event.target;
+      btn.disabled = true; btn.textContent = '分析中...';
+      const studies = DEMO_DATA.map(d => ({name:d.name,e_events:d.e,e_total:d.n,c_events:d.c,c_total:d.m,data_type:"dichotomous"}));
+      const model = document.getElementById('demo-model').value;
+      const em = document.getElementById('demo-measure').value;
+      try {
+        const [analysisRes, biasRes] = await Promise.all([
+          fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({studies,model,effect_measure:em})}),
+          fetch('/api/bias',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({studies})}),
+        ]);
+        if (!analysisRes.ok) throw new Error('API not available. Start the server: python3 -m uvicorn app.main:app');
+        const data = await analysisRes.json();
+        const bias = biasRes.ok ? await biasRes.json() : null;
+        const res = document.getElementById('demo-results');
+        let html = `<div class="demo-stats">
+          <div class="demo-stat"><div class="val" style="color:#3b82f6">${data.pooled_effect.toFixed(3)}</div><div class="lbl">合并${em} [${data.pooled_ci_lower.toFixed(2)}, ${data.pooled_ci_upper.toFixed(2)}]</div></div>
+          <div class="demo-stat"><div class="val" style="color:#22c55e">${data.p_value<0.001?'<0.001':data.p_value.toFixed(4)}</div><div class="lbl">P值</div></div>
+          <div class="demo-stat"><div class="val" style="color:#f59e0b">${data.i_squared.toFixed(1)}%</div><div class="lbl">I² 异质性</div></div>
+        </div>`;
+        html += `<div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:10px;margin-bottom:12px;overflow-x:auto">${data.forest_plot_svg}</div>`;
+        if (bias) {
+          html += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--muted,#64748b)">Egger检验</div>
+              <div style="font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;color:${bias.egger_test.p_value<0.05?'#e94560':'#22c55e'}">p=${bias.egger_test.p_value.toFixed(3)}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--muted,#64748b)">Begg检验</div>
+              <div style="font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;color:${bias.begg_test.p_value<0.05?'#e94560':'#22c55e'}">p=${bias.begg_test.p_value.toFixed(3)}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border,#1e293b);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--muted,#64748b)">Trim-Fill</div>
+              <div style="font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace">${bias.trim_and_fill.estimated_missing}篇缺失</div>
+            </div>
+          </div>`;
+        }
+        html += `<div style="text-align:center;font-size:11px;color:var(--muted,#64748b)">模型: ${model==='random'?'Random Effects (D-L)':'Fixed Effect (M-H)'} | 效应量: ${em} | ${data.studies.length}个研究</div>`;
+        res.innerHTML = html;
+      } catch(e) {
+        document.getElementById('demo-results').innerHTML = `<div style="text-align:center;padding:40px;color:#e94560"><p>${e.message}</p><a href="/app" style="color:#3b82f6;font-size:13px;margin-top:10px;display:inline-block">打开工作台 →</a></div>`;
+      } finally {
+        btn.disabled = false; btn.textContent = '▶ 运行Meta分析';
+      }
+    }
+  </script>
 
   <!-- ====== FIGURES GALLERY ====== -->
   <section class="section figures-section page-section" id="figures">
