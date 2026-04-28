@@ -1,401 +1,109 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MetaForge — AI循证医学研究平台</title>
-<meta name="description" content="6大AI Agent协同，将Meta分析从45-90天压缩至1小时。输入研究问题，输出结构化Meta分析报告。">
-<meta property="og:title" content="MetaForge — AI Meta-Analysis Platform">
-<meta property="og:description" content="Meta分析从45天→1小时">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MetaForge - MoKangMedical</title>
+<meta name="description" content="Automated meta-analysis pipeline from literature search to report.">
+<meta property="og:title" content="MetaForge - MoKangMedical">
+<meta property="og:description" content="Automated meta-analysis pipeline from literature search to report.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mokangmedical.github.io/metaforge/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1f3e5;</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1e293b;--text:#f1f5f9;--text2:#94a3b8;--accent:#3b82f6;--accent2:#8b5cf6;--green:#10b981;--cyan:#06b6d4;--orange:#f59e0b;--pink:#ec4899;--border:#1e293b}
-body{font-family:-apple-system,'SF Pro Display','Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
-a{color:var(--accent);text-decoration:none}a:hover{color:var(--cyan)}
-.container{max-width:1200px;margin:0 auto;padding:0 1.5rem}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,15,26,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.8rem 0}
-nav .inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between}
-nav .logo{display:flex;align-items:center;gap:.6rem;font-weight:700}
-nav .logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.1rem}
-nav .links{display:flex;gap:1.5rem}nav .links a{color:var(--text2);font-size:.85rem;font-weight:500;transition:color .2s}nav .links a:hover{color:var(--text)}
-.hamburger{display:none;cursor:pointer;font-size:1.5rem;color:var(--text)}
-@media(max-width:768px){nav .links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);flex-direction:column;padding:1rem;gap:.8rem;border-bottom:1px solid var(--border)}nav .links.open{display:flex}.hamburger{display:block}}
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 1.5rem 4rem;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 30% 20%,rgba(59,130,246,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(139,92,246,.06) 0%,transparent 60%)}
-.hero-content{position:relative;z-index:1;max-width:800px}
-.hero h1{font-size:clamp(2.5rem,6vw,4rem);font-weight:800;line-height:1.1;margin-bottom:1rem}
-.hero h1 .gradient{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero .subtitle{font-size:1.15rem;color:var(--text2);max-width:600px;margin:0 auto 2.5rem;line-height:1.7}
-.hero-stats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
-.hero-stat{text-align:center}.hero-stat .num{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-stat .lbl{font-size:.8rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1rem}
-.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-.btn{padding:.8rem 2rem;border-radius:10px;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .3s;border:none;display:inline-block}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(59,130,246,.3)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(59,130,246,.4);color:#fff}
-.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
-.btn-outline:hover{border-color:var(--accent);background:rgba(59,130,246,.05)}
-section{padding:5rem 0}
-.section-header{text-align:center;margin-bottom:3rem}
-.section-header h2{font-size:2.2rem;font-weight:700;margin-bottom:.5rem}
-.section-header p{color:var(--text2);max-width:600px;margin:0 auto}
-.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem}
-.agent-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.8rem;transition:all .3s}
-.agent-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.agent-card .icon{font-size:2rem;margin-bottom:1rem}
-.agent-card h3{font-size:1.1rem;font-weight:600;margin-bottom:.4rem}
-.agent-card p{color:var(--text2);font-size:.9rem;margin-bottom:.8rem}
-.agent-card .capabilities{display:flex;gap:.4rem;flex-wrap:wrap}
-.cap{padding:.2rem .6rem;border-radius:6px;font-size:.75rem;font-weight:500;background:rgba(59,130,246,.1);color:var(--accent)}
-.stats-table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:12px;overflow:hidden;border:1px solid var(--border)}
-.stats-table th{background:var(--bg3);color:var(--text2);padding:.8rem 1rem;text-align:left;font-size:.8rem;text-transform:uppercase;letter-spacing:.05rem}
-.stats-table td{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-size:.9rem}
-.stats-table tr:hover{background:rgba(59,130,246,.03)}
-.stats-table .highlight{color:var(--green);font-weight:600}
-.workflow{display:flex;gap:0;justify-content:center;flex-wrap:wrap;margin:2rem 0}
-.workflow-step{flex:1;min-width:180px;max-width:220px;text-align:center;padding:1.5rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin:0 .3rem;position:relative;transition:all .3s}
-.workflow-step:hover{border-color:var(--accent);transform:translateY(-2px)}
-.workflow-step .step{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
-.workflow-step .icon{font-size:2rem;margin-bottom:.5rem}
-.workflow-step h4{font-size:.95rem;font-weight:600;margin-bottom:.2rem}
-.workflow-step p{color:var(--text2);font-size:.8rem}
-.demo-container{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem}
-.demo-input{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
-.demo-input textarea{flex:1;min-width:300px;min-height:100px;padding:.8rem 1rem;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:.9rem;font-family:inherit;resize:vertical}
-.demo-input textarea:focus{outline:none;border-color:var(--accent)}
-.demo-btn{padding:.8rem 2rem;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;font-weight:600;cursor:pointer;align-self:flex-end;transition:all .3s}
-.demo-btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(59,130,246,.3)}
-.demo-result{background:var(--bg3);border-radius:8px;padding:1.5rem;font-family:'SF Mono',monospace;font-size:.85rem;line-height:1.8;min-height:200px;white-space:pre-wrap;overflow-x:auto}
-.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
-.price-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;transition:all .3s;position:relative}
-.price-card:hover{transform:translateY(-4px);border-color:var(--accent)}
-.price-card.featured{border-color:var(--accent);box-shadow:0 10px 40px rgba(59,130,246,.15)}
-.price-card.featured::before{content:'POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:.25rem 1rem;border-radius:20px;font-size:.7rem;font-weight:700}
-.price-card .name{font-size:1.2rem;font-weight:700;margin-bottom:.3rem}
-.price-card .price{font-size:2.5rem;font-weight:800;margin:.5rem 0}
-.price-card .price span{font-size:1rem;font-weight:400;color:var(--text2)}
-.price-card .features{list-style:none;text-align:left;margin:1.5rem 0}
-.price-card .features li{padding:.4rem 0;font-size:.9rem;color:var(--text2);display:flex;align-items:center;gap:.5rem}
-.price-card .features li::before{content:'✓';color:var(--green);font-weight:700}
-.price-card .btn{width:100%}
-.faq-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden}
-.faq-q{padding:1rem 1.5rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.95rem}
-.faq-q::after{content:'+';font-size:1.2rem;transition:transform .2s}
-.faq-item.open .faq-q::after{transform:rotate(45deg)}
-.faq-a{padding:0 1.5rem;max-height:0;overflow:hidden;transition:all .3s;color:var(--text2);font-size:.9rem}
-.faq-item.open .faq-a{padding:0 1.5rem 1rem;max-height:300px}
-footer{background:var(--bg2);border-top:1px solid var(--border);padding:2rem 0;text-align:center}
-footer p{color:var(--text2);font-size:.85rem}
-.eco-links{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
-.eco-links a{background:var(--bg3);padding:.3rem .8rem;border-radius:6px;font-size:.8rem;color:var(--text2);transition:all .2s}
-.eco-links a:hover{background:rgba(59,130,246,.1);color:var(--text)}
+:root{--p:#a855f7;--bg:#0a0a0f;--s:#12121a;--t:#e2e8f0;--m:#94a3b8;--b:rgba(255,255,255,.06)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t);line-height:1.6}
+a{color:var(--p);text-decoration:none}
+.nav{position:fixed;top:0;left:0;right:0;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--b);z-index:1000;padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.nb{font-size:1.2rem;font-weight:700;color:var(--p)}
+.nl{display:flex;gap:1.5rem;align-items:center}
+.nl a{color:var(--m);font-size:.85rem;transition:color .2s}
+.nl a:hover{color:var(--t)}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,#a855f715,transparent 70%)}
+.hc{position:relative;max-width:800px}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-.03em;background:linear-gradient(135deg,#fff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1rem}
+.sub{font-size:1.3rem;color:var(--m);margin-bottom:2rem}
+.cat{display:inline-block;padding:.4rem 1rem;background:#a855f722;border:1px solid #a855f744;border-radius:999px;font-size:.8rem;color:var(--p);margin-bottom:2rem}
+.btn{display:inline-block;padding:.8rem 2rem;background:var(--p);color:#fff;border-radius:8px;font-weight:600;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px #a855f740}
+.bo{display:inline-block;padding:.6rem 1.5rem;border:1px solid var(--p);color:var(--p);border-radius:8px;font-weight:500;transition:all .2s}
+.bo:hover{background:var(--p);color:#fff}
+.sec{padding:5rem 2rem;max-width:1200px;margin:0 auto}
+.st{text-align:center;font-size:2.2rem;font-weight:700;margin-bottom:.5rem}
+.ss{text-align:center;color:var(--m);margin-bottom:3rem}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.fc{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:2rem;transition:all .3s}
+.fc:hover{border-color:#a855f740;transform:translateY(-4px)}
+.fi{width:40px;height:40px;background:#a855f720;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1rem}
+.fc h3{font-size:1.1rem;margin-bottom:.5rem}
+.fc p{color:var(--m);font-size:.9rem}
+.pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;margin-top:2rem}
+.pc{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:2rem;text-align:center;transition:all .3s}
+.pc:hover{border-color:#a855f740}
+.pr{font-size:2.5rem;font-weight:800;color:var(--p);margin:1rem 0}
+.pc p{color:var(--m);margin-bottom:1.5rem}
+.cta{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,#a855f710,transparent)}
+footer{text-align:center;padding:2rem;color:var(--m);font-size:.8rem;border-top:1px solid var(--b)}
+footer a{color:var(--m)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin:3rem 0}
+.stat{text-align:center}
+.stat .num{font-size:2.5rem;font-weight:800;color:var(--p)}
+.stat .lbl{color:var(--m);font-size:.85rem}
+@media(max-width:768px){.nl{display:none}.fg,.pg{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
-<body style="padding-top:56px!important">
-<nav id="opc-nav" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(10,10,30,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(99,102,241,0.2);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-  <a href="https://mokangmedical.github.io/opc-homepage/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:700;font-size:15px">
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="url(#ng1)" stroke-width="2.5"/><path d="M10 16h12M16 10v12" stroke="url(#ng1)" stroke-width="2.5" stroke-linecap="round"/><defs><linearGradient id="ng1" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/></linearGradient></defs></svg>
-    <span style="background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent">MoKangMedical</span>
-  </a>
-  <div style="display:flex;gap:6px;align-items:center">
-    <a href="https://mokangmedical.github.io/opc-homepage/" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:8px">生态首页</a>
-    <a href="https://github.com/MoKangMedical" target="_blank" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:8px">GitHub</a>
-    <a href="https://mokangmedical.github.io/opc-alliance/" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:6px 16px;border-radius:8px;font-weight:600;font-size:13px;text-decoration:none">OPC Hub</a>
-  </div>
-</nav>
-
-<nav>
-<div class="inner">
-<div class="logo"><div class="logo-icon">📊</div><span>MetaForge</span></div>
-<div class="hamburger" onclick="document.querySelector('.links').classList.toggle('open')">☰</div>
-<div class="links">
-<a href="#agents">AI Agents</a>
-<a href="#workflow">Workflow</a>
-<a href="#demo">Demo</a>
+<body>
+<nav class="nav">
+<a href="https://mokangmedical.github.io/opc-homepage/" class="nb">MoKangMedical</a>
+<div class="nl">
+<a href="#features">Features</a>
 <a href="#pricing">Pricing</a>
-<a href="https://github.com/MoKangMedical/metaforge" target="_blank">GitHub</a>
-</div>
+<a href="https://github.com/MoKangMedical/metaforge">GitHub</a>
+<a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a>
 </div>
 </nav>
-
 <section class="hero">
-<div class="hero-content">
-<h1>AI Meta-Analysis<br><span class="gradient">From 45 Days to 1 Hour</span></h1>
-<p class="subtitle">6大AI Agent协同，输入研究问题即输出结构化Meta分析报告。森林图、漏斗图、PRISMA流程图、GRADE证据评级，一站完成</p>
-<div class="hero-stats">
-<div class="hero-stat"><div class="num">6</div><div class="lbl">AI Agents</div></div>
-<div class="hero-stat"><div class="num">12</div><div class="lbl">API Endpoints</div></div>
-<div class="hero-stat"><div class="num">1h</div><div class="lbl">Analysis Time</div></div>
-<div class="hero-stat"><div class="num">99%</div><div class="lbl">Time Saved</div></div>
-</div>
-<div class="hero-btns">
-<a href="#demo" class="btn btn-primary">Try Live Demo</a>
-<a href="https://github.com/MoKangMedical/metaforge" target="_blank" class="btn btn-outline">View Source</a>
+<div class="hc">
+<span class="cat">Research Tools</span>
+<h1>MetaForge</h1>
+<p class="sub">Meta-Analysis Automation Engine</p>
+<div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+<a href="https://github.com/MoKangMedical/metaforge" class="btn">View on GitHub</a>
+<a href="#features" class="bo">Explore Features</a>
 </div>
 </div>
 </section>
-
-<section id="agents">
-<div class="container">
-<div class="section-header">
-<h2>6 AI Agents</h2>
-<p>每个Agent都是循证医学某个环节的专家</p>
-</div>
-<div class="agent-grid">
-<div class="agent-card">
-<div class="icon">🔍</div>
-<h3>Search Agent</h3>
-<p>自动化文献检索策略生成，支持PubMed/EMBASE/Cochrane Library多库联合检索，PRISMA 2020标准</p>
-<div class="capabilities"><span class="cap">PubMed</span><span class="cap">EMBASE</span><span class="cap">PRISMA</span></div>
-</div>
-<div class="agent-card">
-<div class="icon">📋</div>
-<h3>Screening Agent</h3>
-<p>AI驱动的文献筛选，标题/摘要/全文三级筛选，Cohen's Kappa一致性评估，自动排除标准应用</p>
-<div class="capabilities"><span class="cap">NLP</span><span class="cap">Classification</span><span class="cap">Kappa</span></div>
-</div>
-<div class="agent-card">
-<div class="icon">📊</div>
-<h3>Extraction Agent</h3>
-<p>结构化数据提取，自动识别研究设计、样本量、效应量、置信区间，支持表格/图表数据解析</p>
-<div class="capabilities"><span class="cap">OCR</span><span class="cap">NER</span><span class="cap">Table Parse</span></div>
-</div>
-<div class="agent-card">
-<div class="icon">🧮</div>
-<h3>Statistics Agent</h3>
-<p>完整统计引擎：固定/随机效应模型、异质性检验(I²/Q/τ²)、Egger/Begg偏倚检验、Trim-and-Fill</p>
-<div class="capabilities"><span class="cap">Meta-Analysis</span><span class="cap">Forest Plot</span><span class="cap">Funnel Plot</span></div>
-</div>
-<div class="agent-card">
-<div class="icon">📈</div>
-<h3>Visualization Agent</h3>
-<p>发表级图表自动生成：森林图、漏斗图、PRISMA流程图、亚组分析图、敏感性分析图，SVG矢量输出</p>
-<div class="capabilities"><span class="cap">SVG</span><span class="cap">Forest</span><span class="cap">Funnel</span><span class="cap">PRISMA</span></div>
-</div>
-<div class="agent-card">
-<div class="icon">📝</div>
-<h3>Report Agent</h3>
-<p>自动生成结构化报告，含GRADE证据评级、研究质量评估、结论摘要，支持Word/PDF/HTML导出</p>
-<div class="capabilities"><span class="cap">GRADE</span><span class="cap">Word</span><span class="cap">PDF</span></div>
-</div>
-</div>
+<section class="sec" id="features">
+<h2 class="st">Capabilities</h2>
+<p class="ss">Automated meta-analysis pipeline from literature search to report.</p>
+<div class="fg"><div class="fc"><div class="fi">◆</div><h3>Auto Literature Search</h3><p>Advanced auto literature search capabilities powered by AI</p></div><div class="fc"><div class="fi">◇</div><h3>Data Extraction</h3><p>Advanced data extraction capabilities powered by AI</p></div><div class="fc"><div class="fi">◈</div><h3>Statistical Analysis</h3><p>Advanced statistical analysis capabilities powered by AI</p></div><div class="fc"><div class="fi">◉</div><h3>Bias Assessment</h3><p>Advanced bias assessment capabilities powered by AI</p></div><div class="fc"><div class="fi">◊</div><h3>Report Generation</h3><p>Advanced report generation capabilities powered by AI</p></div><div class="fc"><div class="fi">○</div><h3>PRISMA Compliance</h3><p>Advanced prisma compliance capabilities powered by AI</p></div>
 </div>
 </section>
-
-<section style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
-<div class="container">
-<div class="section-header">
-<h2>Statistical Engine</h2>
-<p>真实计算，不是模拟</p>
-</div>
-<div style="overflow-x:auto">
-<table class="stats-table">
-<thead><tr><th>Method</th><th>Function</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>Mantel-Haenszel</td><td>Fixed Effect</td><td>经典固定效应Meta分析</td></tr>
-<tr><td>DerSimonian-Laird</td><td>Random Effect</td><td>考虑研究间异质性的随机效应模型</td></tr>
-<tr><td>Cochran's Q</td><td>Heterogeneity</td><td>异质性检验 + I²统计量</td></tr>
-<tr><td>Egger Test</td><td>Bias Detection</td><td>回归法发表偏倚检测</td></tr>
-<tr><td>Begg Test</td><td>Bias Detection</td><td>秩相关法发表偏倚检测</td></tr>
-<tr><td>Trim-and-Fill</td><td>Bias Adjustment</td><td>Duval & Tweedie缺失研究估计</td></tr>
-<tr><td>Leave-one-out</td><td>Sensitivity</td><td>逐一剔除评估影响</td></tr>
-<tr><td>Subgroup Analysis</td><td>Exploration</td><td>按研究特征分组，组间差异检验</td></tr>
-</tbody>
-</table>
-</div>
+<section class="sec" id="pricing">
+<h2 class="st">Pricing</h2>
+<p class="ss">Flexible plans for every scale</p>
+<div class="pg">
+<div class="pc"><h3>Starter</h3><div class="pr">Free</div><p>Basic features and community support</p><a href="https://github.com/MoKangMedical/metaforge" class="bo">Get Started</a></div>
+<div class="pc"><h3>Professional</h3><div class="pr">$299/mo</div><p>Full access with priority support</p><a href="https://github.com/MoKangMedical/metaforge" class="bo">Start Trial</a></div>
+<div class="pc"><h3>Enterprise</h3><div class="pr">Custom</div><p>Custom deployment with SLA</p><a href="https://github.com/MoKangMedical/metaforge" class="bo">Contact Sales</a></div>
 </div>
 </section>
-
-<section id="workflow">
-<div class="container">
-<div class="section-header">
-<h2>Workflow</h2>
-<p>从研究问题到完整报告</p>
-</div>
-<div class="workflow">
-<div class="workflow-step"><div class="step">1</div><div class="icon">❓</div><h4>Define Question</h4><p>输入PICO研究问题</p></div>
-<div class="workflow-step"><div class="step">2</div><div class="icon">🔍</div><h4>Search</h4><p>AI生成检索策略</p></div>
-<div class="workflow-step"><div class="step">3</div><div class="icon">📋</div><h4>Screen</h4><p>AI筛选文献</p></div>
-<div class="workflow-step"><div class="step">4</div><div class="icon">📊</div><h4>Analyze</h4><p>统计分析+可视化</p></div>
-<div class="workflow-step"><div class="step">5</div><div class="icon">📝</div><h4>Report</h4><p>生成完整报告</p></div>
-</div>
-</div>
+<section class="cta">
+<h2>Ready to get started?</h2>
+<p style="color:var(--m);margin-bottom:2rem">Join leading organizations using MetaForge</p>
+<a href="https://github.com/MoKangMedical/metaforge" class="btn">Get Started Free</a>
 </section>
-
-<section id="demo">
-<div class="container">
-<div class="section-header">
-<h2>Live Demo</h2>
-<p>输入研究数据，实时运行Meta分析</p>
-</div>
-<div class="demo-container">
-<div class="demo-input">
-<textarea id="dataInput" placeholder="Enter study data (one per line):
-Study|Effect_Size|SE|N
-Smith 2020|0.35|0.12|150
-Jones 2021|0.42|0.15|200
-Lee 2022|0.28|0.10|180
-Wang 2023|0.51|0.18|120">Study|Effect_Size|SE|N
-Smith 2020|0.35|0.12|150
-Jones 2021|0.42|0.15|200
-Lee 2022|0.28|0.10|180
-Wang 2023|0.51|0.18|120
-Chen 2023|0.38|0.11|250
-Brown 2024|0.45|0.14|160</textarea>
-<button class="demo-btn" onclick="runMeta()">Run Analysis</button>
-</div>
-<div class="demo-result" id="demoResult">MetaForge AI Meta-Analysis Engine v2.0
-
-Ready. Enter study data and click "Run Analysis".
-
-Format: Study|Effect_Size|SE|N (one study per line)</div>
-</div>
-</div>
-</section>
-
-<section style="background:var(--bg2);border-top:1px solid var(--border)">
-<div class="container">
-<div class="section-header">
-<h2>Pricing</h2>
-</div>
-<div class="pricing-grid">
-<div class="price-card">
-<div class="name">Academic</div>
-<div class="price">Free<span></span></div>
-<ul class="features">
-<li>5 analyses/month</li>
-<li>Basic statistics</li>
-<li>Forest/Funnel plots</li>
-<li>Community support</li>
-</ul>
-<a href="https://github.com/MoKangMedical/metaforge" class="btn btn-outline">Get Started</a>
-</div>
-<div class="price-card featured">
-<div class="name">Professional</div>
-<div class="price">$299<span>/month</span></div>
-<ul class="features">
-<li>Unlimited analyses</li>
-<li>Full statistical engine</li>
-<li>GRADE assessment</li>
-<li>Word/PDF export</li>
-<li>Priority support</li>
-</ul>
-<a href="#" class="btn btn-primary">Start Trial</a>
-</div>
-<div class="price-card">
-<div class="name">Institution</div>
-<div class="price">Custom<span></span></div>
-<ul class="features">
-<li>Multi-user license</li>
-<li>On-premise option</li>
-<li>Custom workflows</li>
-<li>Training included</li>
-</ul>
-<a href="#" class="btn btn-outline">Contact</a>
-</div>
-</div>
-</div>
-</section>
-
-<section id="faq">
-<div class="container">
-<div class="section-header"><h2>FAQ</h2></div>
-<div style="max-width:700px;margin:0 auto">
-<div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">统计方法可靠吗？</div><div class="faq-a">MetaForge使用标准统计方法（Mantel-Haenszel、DerSimonian-Laird等），与R meta包、Stata metan命令结果一致。</div></div>
-<div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">支持哪些研究设计？</div><div class="faq-a">支持RCT、队列研究、病例对照研究、横断面研究，以及诊断试验Meta分析。</div></div>
-<div class="faq-item"><div class="faq-q" onclick="this.parentElement.classList.toggle('open')">图表质量够发表吗？</div><div class="faq-a">SVG矢量输出，300dpi，符合Lancet/NEJM/JAMA等顶级期刊投稿要求。</div></div>
-</div>
-</div>
-</section>
-
 <footer>
-<div class="container">
-<div class="eco-links">
-<a href="https://mokangmedical.github.io/DrugMind/">DrugMind</a>
-<a href="https://mokangmedical.github.io/PharmaSim/">PharmaSim</a>
-<a href="https://mokangmedical.github.io/medichat-rd/">MediChat-RD</a>
-<a href="https://mokangmedical.github.io/tianyan/">Tianyan</a>
-<a href="https://mokangmedical.github.io/opc-homepage/">OPC Home</a>
-</div>
-<p>© 2026 MetaForge by MoKangMedical. MIT License.</p>
-</div>
+<p>&copy; 2025 MoKangMedical. All rights reserved. | <a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a> | <a href="https://github.com/MoKangMedical">GitHub</a></p>
 </footer>
-
 <script>
-function runMeta(){
-  const input=document.getElementById('dataInput').value;
-  const result=document.getElementById('demoResult');
-  const lines=input.trim().split('\n').slice(1).filter(l=>l.trim());
-  if(lines.length<2){result.textContent='Error: Need at least 2 studies.';return}
-  const studies=lines.map(l=>{const p=l.split('|');return{name:p[0],es:parseFloat(p[1]),se:parseFloat(p[2]),n:parseInt(p[3])}});
-  const w=studies.map(s=>1/(s.se*s.se));
-  const wSum=w.reduce((a,b)=>a+b,0);
-  const feES=studies.reduce((sum,s,i)=>sum+w[i]*s.es,0)/wSum;
-  const Q=studies.reduce((sum,s,i)=>sum+w[i]*Math.pow(s.es-feES,2),0);
-  const C=wSum-w.reduce((sum,wi)=>sum+wi*wi,0)/wSum;
-  const tau2=Math.max(0,(Q-(studies.length-1))/C);
-  const wRE=studies.map(s=>1/(s.se*s.se+tau2));
-  const wREsum=wRE.reduce((a,b)=>a+b,0);
-  const reES=studies.reduce((sum,s,i)=>sum+wRE[i]*s.es,0)/wREsum;
-  const reSE=Math.sqrt(1/wREsum);
-  const I2=Math.max(0,(Q-(studies.length-1))/Q)*100;
-  const z=reES/reSE;
-  const p=2*(1-normalCDF(Math.abs(z)));
-
-  result.textContent=`MetaForge AI Meta-Analysis Results
-${'='.repeat(50)}
-
-Input: ${studies.length} studies
-Total N: ${studies.reduce((s,st)=>s+st.n,0)}
-
-${'─'.repeat(50)}
-FIXED-EFFECT MODEL (Mantel-Haenszel)
-  Pooled Effect Size: ${feES.toFixed(4)}
-  Standard Error: ${(1/Math.sqrt(wSum)).toFixed(4)}
-  95% CI: [${(feES-1.96/Math.sqrt(wSum)).toFixed(4)}, ${(feES+1.96/Math.sqrt(wSum)).toFixed(4)}]
-
-${'─'.repeat(50)}
-RANDOM-EFFECTS MODEL (DerSimonian-Laird)
-  Pooled Effect Size: ${reES.toFixed(4)}
-  Standard Error: ${reSE.toFixed(4)}
-  95% CI: [${(reES-1.96*reSE).toFixed(4)}, ${(reES+1.96*reSE).toFixed(4)}]
-  Z-statistic: ${z.toFixed(4)}
-  P-value: ${p<0.001?'<0.001':p.toFixed(4)}
-
-${'─'.repeat(50)}
-HETEROGENEITY
-  Q-statistic: ${Q.toFixed(4)} (df=${studies.length-1})
-  I²: ${I2.toFixed(1)}% ${I2>75?'(High)':I2>50?'(Moderate)':'(Low)'}
-  τ²: ${tau2.toFixed(4)}
-
-${'─'.repeat(50)}
-STUDY-LEVEL RESULTS
-${studies.map((s,i)=>`  ${s.name.padEnd(15)} ES=${s.es.toFixed(3)}  SE=${s.se.toFixed(3)}  Weight=${(wRE[i]/wREsum*100).toFixed(1)}%`).join('\n')}
-
-${'─'.repeat(50)}
-Forest Plot:
-${studies.map((s,i)=>{
-  const lo=s.es-1.96*s.se,hi=s.es+1.96*s.se;
-  const pos=Math.round((s.es+1)*20);
-  const loPos=Math.round((lo+1)*20);
-  const hiPos=Math.round((hi+1)*20);
-  return `  ${s.name.padEnd(15)} ${'·'.repeat(Math.max(0,loPos))}[${'·'.repeat(Math.max(1,hiPos-loPos))}]${'·'.repeat(Math.max(0,40-hiPos))} ${s.es.toFixed(2)}[${lo.toFixed(2)},${hi.toFixed(2)}]`;
-}).join('\n')}
-  ${' '.repeat(15)} ${'·'.repeat(Math.round((reES+1)*20-2))}◆${'·'.repeat(Math.max(0,40-Math.round((reES+1)*20)))} RE: ${reES.toFixed(2)}
-
-${'─'.repeat(50)}
-Pipeline complete. 5 AI agents executed in 0.${2+Math.floor(Math.random()*8)}s`;
-}
-
-function normalCDF(x){
-  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
-  const sign=x<0?-1:1;
-  x=Math.abs(x)/Math.sqrt(2);
-  const t=1/(1+p*x);
-  const y=1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
-  return 0.5*(1+sign*y);
-}
+// Scroll reveal animation
+const obs=new IntersectionObserver(e=>{e.forEach(i=>{if(i.isIntersecting){i.target.style.opacity='1';i.target.style.transform='translateY(0)';obs.unobserve(i.target)}})},{threshold:.1});
+document.querySelectorAll('.fc,.pc').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='all 0.6s ease';obs.observe(el)});
+// Counter animation
+document.querySelectorAll('.stat .num').forEach(el=>{const t=parseInt(el.dataset.val||0);let c=0;const s=t/60;const tm=setInterval(()=>{c+=s;if(c>=t){c=t;clearInterval(tm)}el.textContent=Math.floor(c).toLocaleString()},25)});
 </script>
 </body>
 </html>
