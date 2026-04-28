@@ -894,6 +894,38 @@ projects_db: Dict[str, dict] = {}
 engine = MetaAnalysisEngine()
 
 # ============================================================
+# User System & AI Simulation — In-Memory Stores
+# ============================================================
+
+# users_db[username] = {username, email, password_hash, created_at}
+users_db: Dict[str, dict] = {}
+
+# sessions_db[token] = {username, created_at}
+sessions_db: Dict[str, dict] = {}
+
+# user_projects_db[project_id] = {id, owner, name, studies, settings, created_at, updated_at}
+user_projects_db: Dict[str, dict] = {}
+
+# shared_links_db[token] = {project_id, created_by, created_at, access_count}
+shared_links_db: Dict[str, dict] = {}
+
+
+def _hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+def _get_current_user(request: Request) -> str:
+    """Extract username from Authorization header (Bearer token). Raises 401 if invalid."""
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(401, "Missing or invalid Authorization header. Use: Bearer <token>")
+    token = auth[7:]
+    session = sessions_db.get(token)
+    if not session:
+        raise HTTPException(401, "Invalid or expired session token")
+    return session["username"]
+
+# ============================================================
 # API 端点
 # ============================================================
 
@@ -1647,6 +1679,418 @@ async function tryDemo(btn) {
 </body>
 </html>"""
     return HTMLResponse(content=docs_html)
+
+
+# ============================================================
+# User System Endpoints
+# ============================================================
+
+
+@app.post("/api/register")
+async def api_register(request: Request):
+    """Register a new user."""
+    body = await request.json()
+    username = body.get("username", "").strip()
+    email = body.get("email", "").strip()
+    password = body.get("password", "")
+
+    if not username or not email or not password:
+        raise HTTPException(400, "username, email, and password are all required")
+    if len(username) < 3:
+        raise HTTPException(400, "Username must be at least 3 characters")
+    if len(password) < 6:
+        raise HTTPException(400, "Password must be at least 6 characters")
+    if "@" not in email:
+        raise HTTPException(400, "Invalid email format")
+    if username in users_db:
+        raise HTTPException(409, "Username already exists")
+
+    users_db[username] = {
+        "username": username,
+        "email": email,
+        "password_hash": _hash_password(password),
+        "created_at": datetime.now().isoformat(),
+    }
+    return {"message": "User registered successfully", "username": username}
+
+
+@app.post("/api/login")
+async def api_login(request: Request):
+    """Login and receive a session token."""
+    body = await request.json()
+    username = body.get("username", "").strip()
+    password = body.get("password", "")
+
+    if not username or not password:
+        raise HTTPException(400, "username and password are required")
+
+    user = users_db.get(username)
+    if not user or user["password_hash"] != _hash_password(password):
+        raise HTTPException(401, "Invalid username or password")
+
+    token = str(uuid.uuid4())
+    sessions_db[token] = {
+        "username": username,
+        "created_at": datetime.now().isoformat(),
+    }
+    return {"message": "Login successful", "token": token, "username": username}
+
+
+@app.post("/api/projects/save")
+async def api_project_save(request: Request):
+    """Save a meta-analysis project (requires auth)."""
+    username = _get_current_user(request)
+    body = await request.json()
+
+    project_name = body.get("name", "").strip()
+    studies = body.get("studies", [])
+    settings = body.get("settings", {})
+    project_id = body.get("id")  # If provided, update existing
+
+    if not project_name:
+        raise HTTPException(400, "Project name is required")
+    if not studies or len(studies) < 1:
+        raise HTTPException(400, "At least 1 study is required")
+
+    if not project_id:
+        project_id = str(uuid.uuid4())
+
+    now = datetime.now().isoformat()
+    existing = user_projects_db.get(project_id)
+
+    user_projects_db[project_id] = {
+        "id": project_id,
+        "owner": username,
+        "name": project_name,
+        "studies": studies,
+        "settings": settings,
+        "created_at": existing["created_at"] if existing else now,
+        "updated_at": now,
+    }
+
+    return {"message": "Project saved", "project_id": project_id}
+
+
+@app.get("/api/projects/list")
+async def api_projects_list(request: Request):
+    """List all projects for the authenticated user."""
+    username = _get_current_user(request)
+    projects = [
+        {"id": p["id"], "name": p["name"], "created_at": p["created_at"], "updated_at": p["updated_at"]}
+        for p in user_projects_db.values()
+        if p["owner"] == username
+    ]
+    projects.sort(key=lambda x: x["updated_at"], reverse=True)
+    return {"projects": projects, "count": len(projects)}
+
+
+@app.get("/api/projects/{project_id}")
+async def api_project_get(project_id: str, request: Request):
+    """Get a specific project by ID (owner only)."""
+    username = _get_current_user(request)
+    project = user_projects_db.get(project_id)
+    if not project:
+        raise HTTPException(404, "Project not found")
+    if project["owner"] != username:
+        raise HTTPException(403, "Access denied: you do not own this project")
+    return project
+
+
+# ============================================================
+# AI Simulation Endpoints
+# ============================================================
+
+
+@app.post("/api/ai/search")
+async def api_ai_search(request: Request):
+    """Simulate AI-powered literature search. Returns mock PubMed-style results."""
+    body = await request.json()
+    query = body.get("query", "").strip()
+    max_results = body.get("max_results", 10)
+
+    if not query:
+        raise HTTPException(400, "query is required")
+
+    # Generate deterministic mock results seeded by the query
+    query_seed = int(hashlib.md5(query.encode()).hexdigest()[:8], 16)
+    rng = np.random.RandomState(query_seed)
+
+    journals = [
+        "The Lancet", "NEJM", "JAMA", "BMJ", "Annals of Internal Medicine",
+        "PLOS Medicine", "Nature Medicine", "JAMA Internal Medicine",
+        "European Heart Journal", "Chest", "Lung Cancer", "Thorax",
+    ]
+    topics = query.lower().split()
+    n_results = min(max_results, 20)
+
+    results = []
+    base_year = 2015 + rng.randint(0, 8)
+    for i in range(n_results):
+        year = base_year - rng.randint(0, 5)
+        n_authors = rng.randint(2, 6)
+        first_author_last = ["Smith", "Chen", "Patel", "Kim", "Garcia", "Müller",
+                             "Tanaka", "Lee", "Williams", "Johnson",
+                             "Liu", "Zhang", "Wang", "Brown", "Davis"][rng.randint(0, 15)]
+        author_str = f"{first_author_last} et al."
+        sample_size = rng.randint(50, 2000)
+        journal = journals[rng.randint(0, len(journals))]
+
+        title_words = [w.capitalize() for w in topics[:3]]
+        title_templates = [
+            f"{' '.join(title_words)}: A Randomized Controlled Trial",
+            f"Effect of {' '.join(title_words[:2])} on Clinical Outcomes: A Meta-Analysis",
+            f"{' '.join(title_words)} in Adult Patients: A Systematic Review",
+            f"Comparing {' '.join(title_words[:2])} — Multicenter Study (n={sample_size})",
+            f"Long-term Outcomes of {' '.join(title_words)}: Prospective Cohort Study",
+        ]
+        title = title_templates[rng.randint(0, len(title_templates))]
+
+        pmid = 25000000 + rng.randint(0, 8000000)
+        results.append({
+            "pmid": str(pmid),
+            "title": title,
+            "authors": author_str,
+            "journal": journal,
+            "year": year,
+            "abstract": f"This study investigated {' '.join(topics)} in {sample_size} participants. "
+                        f"Results showed statistically significant findings (p<0.05) "
+                        f"favoring the intervention group.",
+            "sample_size": sample_size,
+            "doi": f"10.{1000 + rng.randint(0, 8999)}/{journal.lower().replace(' ', '.')}.{year}.{pmid}",
+            "relevance_score": round(rng.uniform(0.65, 0.98), 2),
+        })
+
+    results.sort(key=lambda x: x["relevance_score"], reverse=True)
+    return {
+        "query": query,
+        "total_found": rng.randint(50, 5000),
+        "results_returned": len(results),
+        "results": results,
+    }
+
+
+@app.post("/api/ai/screen")
+async def api_ai_screen(request: Request):
+    """Simulate AI-powered study screening.
+
+    Takes a list of studies and inclusion/exclusion criteria, returns screening decisions.
+    """
+    body = await request.json()
+    studies = body.get("studies", [])
+    inclusion_criteria = body.get("inclusion_criteria", [])
+    exclusion_criteria = body.get("exclusion_criteria", [])
+
+    if not studies:
+        raise HTTPException(400, "studies list is required")
+
+    screened = []
+    for i, study in enumerate(studies):
+        title = study.get("title", "").lower()
+        abstract = study.get("abstract", "").lower()
+        combined = title + " " + abstract
+
+        # Simple keyword-based scoring simulation
+        include_score = 0.0
+        matched_criteria = []
+        for criterion in inclusion_criteria:
+            keywords = criterion.lower().split()
+            matches = sum(1 for kw in keywords if kw in combined)
+            if matches > 0:
+                include_score += matches / len(keywords)
+                matched_criteria.append(criterion)
+
+        exclude_hit = False
+        exclude_reasons = []
+        for criterion in exclusion_criteria:
+            keywords = criterion.lower().split()
+            if any(kw in combined for kw in keywords):
+                exclude_hit = True
+                exclude_reasons.append(criterion)
+
+        # Normalize score
+        max_possible = len(inclusion_criteria) if inclusion_criteria else 1
+        confidence = round(min(include_score / max_possible, 1.0), 2)
+
+        if exclude_hit:
+            decision = "excluded"
+            reason = f"Matched exclusion criteria: {'; '.join(exclude_reasons)}"
+        elif confidence >= 0.3 or not inclusion_criteria:
+            decision = "included"
+            reason = f"Matched inclusion criteria: {'; '.join(matched_criteria)}" if matched_criteria else "Passed screening"
+        else:
+            decision = "uncertain"
+            reason = "Low confidence match — manual review recommended"
+
+        screened.append({
+            "index": i,
+            "title": study.get("title", f"Study {i+1}"),
+            "decision": decision,
+            "confidence": confidence,
+            "reason": reason,
+        })
+
+    included_count = sum(1 for s in screened if s["decision"] == "included")
+    excluded_count = sum(1 for s in screened if s["decision"] == "excluded")
+    uncertain_count = sum(1 for s in screened if s["decision"] == "uncertain")
+
+    return {
+        "total_screened": len(screened),
+        "included": included_count,
+        "excluded": excluded_count,
+        "uncertain": uncertain_count,
+        "screening_results": screened,
+    }
+
+
+@app.post("/api/ai/extract")
+async def api_ai_extract(request: Request):
+    """Simulate AI-powered data extraction from study text.
+
+    Takes text (simulated PDF text) and returns structured extracted data.
+    """
+    body = await request.json()
+    text = body.get("text", "").strip()
+    study_name = body.get("study_name", "Unknown Study")
+
+    if not text:
+        raise HTTPException(400, "text is required")
+
+    text_lower = text.lower()
+
+    # Simulate extraction with regex-like pattern matching
+    import re
+
+    # Try to find sample size
+    size_match = re.search(r'(?:n\s*=\s*|sample\s*size\s*(?:of|:)?\s*|enrolled\s+|included\s+|recruited\s+)(\d+)', text_lower)
+    sample_size = int(size_match.group(1)) if size_match else None
+
+    # Try to find event counts
+    event_matches = re.findall(r'(\d+)\s*(?:patients?|participants?|subjects?)\s*(?:had|experienced|developed|with)\s*(\w+)', text_lower)
+
+    # Try to find effect measures
+    or_match = re.search(r'(?:odds\s+ratio|OR)\s*(?:of|:|=)?\s*(\d+\.?\d*)', text_lower)
+    rr_match = re.search(r'(?:risk\s+ratio|relative\s+risk|RR|HR)\s*(?:of|:|=)?\s*(\d+\.?\d*)', text_lower)
+    ci_match = re.search(r'(\d+\.?\d*)\s*[-–]\s*(\d+\.?\d*)\s*(?:\)|]|$)', text_lower)
+    p_match = re.search(r'p\s*[=<>]\s*(\d*\.?\d+)', text_lower)
+
+    # Try to find follow-up duration
+    followup_match = re.search(r'(?:follow[- ]?up|median|duration)\s*(?:of|:)?\s*(\d+)\s*(months?|years?|weeks?|days?)', text_lower)
+
+    extracted = {
+        "study_name": study_name,
+        "text_length": len(text),
+        "extracted_data": {
+            "sample_size": sample_size,
+            "intervention": None,
+            "control": None,
+            "primary_outcome": None,
+            "effect_measure": None,
+            "effect_value": None,
+            "confidence_interval": None,
+            "p_value": None,
+            "follow_up_duration": None,
+            "adverse_events": None,
+        },
+        "extraction_confidence": round(np.random.uniform(0.7, 0.95), 2),
+        "warnings": [],
+    }
+
+    # Fill in what we found
+    if or_match:
+        extracted["extracted_data"]["effect_measure"] = "OR"
+        extracted["extracted_data"]["effect_value"] = float(or_match.group(1))
+    elif rr_match:
+        extracted["extracted_data"]["effect_measure"] = "RR"
+        extracted["extracted_data"]["effect_value"] = float(rr_match.group(1))
+
+    if p_match:
+        extracted["extracted_data"]["p_value"] = float(p_match.group(1))
+
+    if followup_match:
+        extracted["extracted_data"]["follow_up_duration"] = f"{followup_match.group(1)} {followup_match.group(2)}"
+
+    if not sample_size:
+        extracted["warnings"].append("Could not detect sample size — manual entry required")
+    if not extracted["extracted_data"]["effect_measure"]:
+        extracted["warnings"].append("No effect measure (OR/RR/HR) detected in text")
+    if not extracted["extracted_data"]["p_value"]:
+        extracted["warnings"].append("No p-value detected — manual extraction needed")
+
+    # Flag low confidence
+    if extracted["extraction_confidence"] < 0.8:
+        extracted["warnings"].append("Low extraction confidence — please verify all values")
+
+    return extracted
+
+
+# ============================================================
+# Sharing Endpoints
+# ============================================================
+
+
+@app.post("/api/share")
+async def api_create_share(request: Request):
+    """Create a shareable link for a project."""
+    username = _get_current_user(request)
+    body = await request.json()
+    project_id = body.get("project_id", "").strip()
+
+    if not project_id:
+        raise HTTPException(400, "project_id is required")
+
+    project = user_projects_db.get(project_id)
+    if not project:
+        raise HTTPException(404, "Project not found")
+    if project["owner"] != username:
+        raise HTTPException(403, "Access denied: you do not own this project")
+
+    # Check if already shared — reuse token
+    for token, link in shared_links_db.items():
+        if link["project_id"] == project_id:
+            return {
+                "message": "Project already shared",
+                "share_token": token,
+                "share_url": f"/api/shared/{token}",
+            }
+
+    share_token = str(uuid.uuid4())[:12]
+    shared_links_db[share_token] = {
+        "project_id": project_id,
+        "created_by": username,
+        "created_at": datetime.now().isoformat(),
+        "access_count": 0,
+    }
+
+    return {
+        "message": "Share link created",
+        "share_token": share_token,
+        "share_url": f"/api/shared/{share_token}",
+    }
+
+
+@app.get("/api/shared/{share_token}")
+async def api_view_shared(share_token: str):
+    """View a shared project by its share token (no auth required)."""
+    link = shared_links_db.get(share_token)
+    if not link:
+        raise HTTPException(404, "Shared link not found or expired")
+
+    project = user_projects_db.get(link["project_id"])
+    if not project:
+        raise HTTPException(404, "Project no longer exists")
+
+    link["access_count"] += 1
+
+    return {
+        "project": {
+            "name": project["name"],
+            "studies": project["studies"],
+            "settings": project["settings"],
+            "created_at": project["created_at"],
+        },
+        "shared_by": link["created_by"],
+        "access_count": link["access_count"],
+    }
 
 
 # ============================================================
