@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>API Documentation — MetaForge</title>
+<meta name="description" content="MetaForge REST API documentation. 30+ endpoints for meta-analysis, visualization, NMA, and more.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0f1a;--surface:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#64748b;--accent:#e94560;--accent2:#3b82f6;--success:#22c55e;--warn:#f59e0b;--purple:#a855f7}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.6}
+.topnav{position:sticky;top:0;z-index:100;background:rgba(10,15,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{color:var(--accent);font-weight:800;font-size:1.2rem;text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{background:var(--accent)!important;color:#fff!important;padding:6px 14px;border-radius:6px;font-weight:600!important}
+.container{max-width:1000px;margin:0 auto;padding:2rem}
+.hero{text-align:center;padding:3rem 2rem 2rem;background:linear-gradient(135deg,#0a0f1a 0%,#1a1a2e 100%)}
+.hero h1{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;margin-bottom:0.5rem}
+.hero h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);max-width:600px;margin:0 auto;font-size:0.95rem}
+.endpoint{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:1rem;overflow:hidden}
+.ep-header{padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.2s}
+.ep-header:hover{background:rgba(255,255,255,0.02)}
+.method{font-size:0.7rem;font-weight:700;padding:3px 8px;border-radius:4px;min-width:50px;text-align:center}
+.method-get{background:var(--accent2);color:#fff}
+.method-post{background:var(--success);color:#fff}
+.method-put{background:var(--warn);color:#000}
+.method-delete{background:var(--accent);color:#fff}
+.path{font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:var(--text)}
+.desc{color:var(--muted);font-size:0.8rem;margin-left:auto}
+.ep-body{display:none;padding:16px;border-top:1px solid var(--border);background:rgba(0,0,0,0.2)}
+.ep-body.open{display:block}
+.ep-body p{color:var(--muted);font-size:0.85rem;margin-bottom:0.8rem}
+.param-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin:0.8rem 0}
+.param-table th{text-align:left;color:var(--muted);font-size:0.7rem;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--border)}
+.param-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.param-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--accent2);font-size:0.8rem}
+.code-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text);overflow-x:auto;white-space:pre;margin:0.8rem 0}
+.try-btn{background:var(--success);color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;margin-top:0.5rem}
+.try-btn:hover{background:#1a7a3a}
+.response{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--success);max-height:300px;overflow:auto;margin-top:0.5rem;display:none;white-space:pre-wrap}
+.category{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:1.5rem 0 0.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)}
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem;border-top:1px solid var(--border);margin-top:2rem}
+footer a{color:var(--accent2);text-decoration:none}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">MetaForge</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="api.html">API</a>
+    <a href="about.html">About</a>
+    <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge">GitHub</a>
+    <a href="https://mokangmedical.github.io/metaforge/app" class="btn-nav">Try Workbench</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>API <span class="grad">Documentation</span></h1>
+  <p>30+ REST endpoints for programmatic meta-analysis. Base URL: <code style="color:var(--accent2)">/api</code></p>
+</div>
+
+<div class="container">
+
+<div class="category">Core Analysis</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-get">GET</span>
+    <span class="path">/api/health</span>
+    <span class="desc">Health check</span>
+  </div>
+  <div class="ep-body">
+    <p>Returns server status, version, and timestamp.</p>
+    <button class="try-btn" onclick="tryApi('GET','/api/health',null,this)">Try it</button>
+    <div class="response"></div>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/analyze</span>
+    <span class="desc">Run complete meta-analysis</span>
+  </div>
+  <div class="ep-body">
+    <p>Execute a full meta-analysis with forest plot, funnel plot, subgroup, and sensitivity analyses.</p>
+    <table class="param-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+      <tr><td>studies</td><td>array</td><td>List of study objects: name, e_events, e_total, c_events, c_total, subgroup, data_type</td></tr>
+      <tr><td>model</td><td>string</td><td>"fixed" or "random" (default: "random")</td></tr>
+      <tr><td>effect_measure</td><td>string</td><td>"OR", "RR", "SMD" (default: "OR")</td></tr>
+    </table>
+    <div class="code-block">{
+  "studies": [
+    {"name": "Study 1", "e_events": 30, "e_total": 100, "c_events": 20, "c_total": 100},
+    {"name": "Study 2", "e_events": 45, "e_total": 120, "c_events": 35, "c_total": 110}
+  ],
+  "model": "random",
+  "effect_measure": "OR"
+}</div>
+    <button class="try-btn" onclick="tryDemo(this)">Try demo</button>
+    <div class="response"></div>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/demo</span>
+    <span class="desc">Run demo analysis</span>
+  </div>
+  <div class="ep-body">
+    <p>Run a complete meta-analysis with built-in NSCLC PD-1 demo dataset (10 studies). No parameters needed.</p>
+    <button class="try-btn" onclick="tryApi('POST','/api/demo',{},this)">Try it</button>
+    <div class="response"></div>
+  </div>
+</div>
+
+<div class="category">Visualization</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/forest</span>
+    <span class="desc">Generate forest plot SVG</span>
+  </div>
+  <div class="ep-body">
+    <p>Generate a publication-quality forest plot. Parameters: studies (array), effect_measure (string).</p>
+    <button class="try-btn" onclick="tryApi('POST','/api/forest',{studies:[{name:'A',e_events:30,e_total:100,c_events:20,c_total:100},{name:'B',e_events:45,e_total:120,c_events:35,c_total:110}],effect_measure:'OR'},this)">Try it</button>
+    <div class="response"></div>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/funnel</span>
+    <span class="desc">Generate funnel plot SVG</span>
+  </div>
+  <div class="ep-body">
+    <p>Generate a funnel plot for publication bias assessment.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/galbraith</span>
+    <span class="desc">Generate Galbraith (radial) plot</span>
+  </div>
+  <div class="ep-body">
+    <p>Galbraith plot showing z-statistics vs precision. Useful for visualizing heterogeneity.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/labbe</span>
+    <span class="desc">Generate L'Abbe plot</span>
+  </div>
+  <div class="ep-body">
+    <p>L'Abbe plot showing event rates in treatment vs control groups. Useful for visual assessment of treatment effects.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/prisma</span>
+    <span class="desc">Generate PRISMA 2020 flow diagram</span>
+  </div>
+  <div class="ep-body">
+    <p>Generate a PRISMA 2020 compliant flow diagram. Parameters: total_found, after_dedup, after_screen, included.</p>
+  </div>
+</div>
+
+<div class="category">Bias & Sensitivity</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/bias</span>
+    <span class="desc">Publication bias tests</span>
+  </div>
+  <div class="ep-body">
+    <p>Run Egger's regression test, Begg's rank correlation test, and Trim-and-fill analysis. Requires at least 3 studies.</p>
+    <button class="try-btn" onclick="tryApi('POST','/api/bias',{studies:[{name:'A',e_events:30,e_total:100,c_events:20,c_total:100},{name:'B',e_events:45,e_total:120,c_events:35,c_total:110},{name:'C',e_events:25,e_total:80,c_events:15,c_total:85}]},this)">Try it</button>
+    <div class="response"></div>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/cumulative</span>
+    <span class="desc">Cumulative meta-analysis</span>
+  </div>
+  <div class="ep-body">
+    <p>Progressive meta-analysis adding studies one at a time. Shows how the pooled estimate evolves.</p>
+  </div>
+</div>
+
+<div class="category">Advanced Statistics</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/meta_regression</span>
+    <span class="desc">Meta-regression analysis</span>
+  </div>
+  <div class="ep-body">
+    <p>Regress effect sizes on a covariate (e.g., sample size, publication year, drug dose). Parameters: studies, covariate (array of floats), covariate_name.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/dose_response</span>
+    <span class="desc">Dose-response meta-analysis</span>
+  </div>
+  <div class="ep-body">
+    <p>Fit linear and restricted cubic spline models of effect vs dose. Parameters: studies, doses (array of floats), num_points.</p>
+  </div>
+</div>
+
+<div class="category">Network Meta-Analysis</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/nma/analyze</span>
+    <span class="desc">Full NMA analysis</span>
+  </div>
+  <div class="ep-body">
+    <p>Run Network Meta-Analysis. Computes direct, indirect, and network estimates, consistency assessment, SUCRA ranking, and generates network diagram and league table SVGs.</p>
+    <table class="param-table"><tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+      <tr><td>comparisons</td><td>array</td><td>List of comparisons: treatment_a, treatment_b, effect, ci_lower, ci_upper</td></tr>
+    </table>
+    <button class="try-btn" onclick="tryApi('GET','/api/nma/demo',null,this)">Try NMA demo</button>
+    <div class="response"></div>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-get">GET</span>
+    <span class="path">/api/nma/demo</span>
+    <span class="desc">NMA demo with oncology data</span>
+  </div>
+  <div class="ep-body">
+    <p>Run NMA with 5 immunotherapy treatments vs chemotherapy vs best supportive care. No parameters needed.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/nma/network</span>
+    <span class="desc">NMA network diagram</span>
+  </div>
+  <div class="ep-body">
+    <p>Generate an SVG network diagram showing treatment nodes and comparison edges.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/nma/league</span>
+    <span class="desc">NMA league table</span>
+  </div>
+  <div class="ep-body">
+    <p>Generate an SVG league table showing all pairwise treatment comparisons with effect sizes and confidence intervals.</p>
+  </div>
+</div>
+
+<div class="category">Export</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/export/csv</span>
+    <span class="desc">Export results as CSV</span>
+  </div>
+  <div class="ep-body">
+    <p>Download meta-analysis results as a CSV file with all study-level and pooled estimates.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/export/json</span>
+    <span class="desc">Export results as JSON</span>
+  </div>
+  <div class="ep-body">
+    <p>Download meta-analysis results as a structured JSON file.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/upload/csv</span>
+    <span class="desc">Upload CSV and analyze</span>
+  </div>
+  <div class="ep-body">
+    <p>Upload a CSV file with study data and run meta-analysis. Expected columns: name, e_events, e_total, c_events, c_total, subgroup.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/report/pdf</span>
+    <span class="desc">Generate printable HTML report</span>
+  </div>
+  <div class="ep-body">
+    <p>Generate a complete meta-analysis report as printable HTML with all figures, tables, and statistical summaries.</p>
+  </div>
+</div>
+
+<div class="category">AI Agents</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/ai/search</span>
+    <span class="desc">AI literature search</span>
+  </div>
+  <div class="ep-body">
+    <p>Simulated AI-powered literature search across academic databases. Returns structured results with PMIDs, titles, abstracts.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/ai/screen</span>
+    <span class="desc">AI screening</span>
+  </div>
+  <div class="ep-body">
+    <p>Simulated AI-powered PICOS-based literature screening with inclusion/exclusion decisions.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/ai/extract</span>
+    <span class="desc">AI data extraction</span>
+  </div>
+  <div class="ep-body">
+    <p>Simulated AI-powered data extraction from study PDFs with confidence scores.</p>
+  </div>
+</div>
+
+<div class="category">User System & Collaboration</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/register</span>
+    <span class="desc">Register new user</span>
+  </div>
+  <div class="ep-body">
+    <p>Create a new user account. Parameters: username, email, password.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/login</span>
+    <span class="desc">User login</span>
+  </div>
+  <div class="ep-body">
+    <p>Authenticate and receive a session token. Parameters: username, password.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/projects/save</span>
+    <span class="desc">Save project</span>
+  </div>
+  <div class="ep-body">
+    <p>Save a meta-analysis project (requires authentication). Parameters: name, studies, settings.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-get">GET</span>
+    <span class="path">/api/projects/list</span>
+    <span class="desc">List user projects</span>
+  </div>
+  <div class="ep-body">
+    <p>List all projects for the authenticated user.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-post">POST</span>
+    <span class="path">/api/share</span>
+    <span class="desc">Create share link</span>
+  </div>
+  <div class="ep-body">
+    <p>Generate a shareable link for a project. Returns a share token.</p>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="ep-header" onclick="toggle(this)">
+    <span class="method method-get">GET</span>
+    <span class="path">/api/shared/{share_token}</span>
+    <span class="desc">Access shared project</span>
+  </div>
+  <div class="ep-body">
+    <p>Access a shared project by its token. No authentication required.</p>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <p>&copy; 2026 MetaForge — AI Meta-Analysis Platform. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
+</footer>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+async function tryApi(method, path, body, btn) {
+  const respDiv = btn.nextElementSibling;
+  btn.disabled = true; btn.textContent = 'Loading...';
+  respDiv.style.display = 'block';
+  try {
+    const opts = {method, headers:{'Content-Type':'application/json'}};
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(path, opts);
+    const data = await r.json();
+    respDiv.textContent = JSON.stringify(data, null, 2).substring(0, 3000);
+  } catch(e) {
+    respDiv.textContent = 'Error: ' + e.message + '\n\nNote: API must be running locally.\nStart with: python3 -m uvicorn app.main:app --port 8000';
+    respDiv.style.color = '#e94560';
+  }
+  btn.disabled = false; btn.textContent = 'Try it';
+}
+
+async function tryDemo(btn) {
+  const studies = [
+    {name:'Gandhi 2018',e_events:138,e_total:292,c_events:108,c_total:288},
+    {name:'Paz-Ares 2018',e_events:171,e_total:292,c_events:134,c_total:291},
+    {name:'West 2019',e_events:117,e_total:241,c_events:89,c_total:238},
+  ];
+  await tryApi('POST','/api/analyze',{studies,model:'random',effect_measure:'OR'},btn);
+}
+</script>
+</body>
+</html>

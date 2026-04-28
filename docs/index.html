@@ -1,13 +1,311 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MetaForge — Meta-Analysis Platform — MoKangMedical</title><meta name="description" content="End-to-end meta-analysis workflow automation">
-<link rel="stylesheet" href="https://mokangmedical.github.io/opc-homepage/shared-design-system.css">
-</head><body>
-<nav class="eco-nav"><a class="nav-brand" href="https://mokangmedical.github.io/opc-homepage/">MoKangMedical</a>
-<div class="nav-links"><a href="https://github.com/MoKangMedical/metaforge">GitHub</a><a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div></nav>
-<section class="hero"><div class="badge">EBM Platform</div><h1>MetaForge — Meta-Analysis Platform</h1><p class="subtitle">End-to-end meta-analysis workflow automation</p>
-<div class="btn-group"><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary">View on GitHub</a><a href="#features" class="btn btn-outline">Explore Features</a></div></section>
-<section class="section" id="stats"><div class="stats"><div><div class="stat-num">5+</div><div class="stat-label">Analysis Types</div></div><div><div class="stat-num">PRISMA</div><div class="stat-label">Compliant</div></div><div><div class="stat-num">Multi</div><div class="stat-label">Format Import</div></div><div><div class="stat-num">One-Click</div><div class="stat-label">Report</div></div></div></section>
-<section class="section" id="features"><h2 class="section-title">Key Features</h2><p class="section-desc">Powerful capabilities for medical professionals</p><div class="card-grid"><div class="card fade-up"><div class="card-icon">📥</div><h3>Data Import</h3><p>Import from RevMan, Covidence, R, Stata, and CSV formats</p></div><div class="card fade-up"><div class="card-icon">📊</div><h3>Analysis Engine</h3><p>Fixed/random effects, network meta-analysis, dose-response, and diagnostic accuracy</p></div><div class="card fade-up"><div class="card-icon">🔍</div><h3>Heterogeneity</h3><p>I-squared, prediction intervals, meta-regression, and influence analysis</p></div><div class="card fade-up"><div class="card-icon">📈</div><h3>Publication Plots</h3><p>Forest, funnel, Galbraith, L'Abbe, and Baujat plots</p></div><div class="card fade-up"><div class="card-icon">📝</div><h3>Report Generator</h3><p>One-click PRISMA-compliant report with all figures and tables</p></div><div class="card fade-up"><div class="card-icon">🤝</div><h3>Collaboration</h3><p>Multi-analyst projects with version control and audit trails</p></div></div></section>
-<section class="section" id="pricing"><h2 class="section-title">Pricing</h2><p class="section-desc">Choose your plan</p><div class="pricing-grid"><div class="price-card "><h3>Academic</h3><div class="price-tag">$49/mo</div><ul><li>Basic analyses</li><li>3 projects</li><li>Community support</li></ul><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a></div><div class="price-card featured"><div class="price-badge">Most Popular</div><h3>Pro</h3><div class="price-tag">$149/mo</div><ul><li>All analyses</li><li>Unlimited projects</li><li>API access</li></ul><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a></div><div class="price-card "><h3>Institution</h3><div class="price-tag">$499/mo</div><ul><li>Site license</li><li>Custom methods</li><li>Training</li></ul><a href="https://github.com/MoKangMedical/metaforge" class="btn btn-primary" style="width:100%;justify-content:center">Get Started</a></div></div></section>
-<footer class="footer"><div class="footer-links"><a href="https://mokangmedical.github.io/opc-homepage/">Ecosystem</a><a href="https://github.com/MoKangMedical">GitHub</a></div><p>&copy; 2025 MoKangMedical</p></footer>
-</body></html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaForge — AI Meta-Analysis Platform</title>
+  <meta name="description" content="MetaForge: AI-powered meta-analysis platform. 6 AI Agents automate literature screening, data extraction, quality assessment, and statistical analysis in 1 hour.">
+  <meta property="og:title" content="MetaForge — AI Meta-Analysis Platform">
+  <meta property="og:description" content="Transform 45-90 day meta-analyses into 1-hour automated workflows">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mokangmedical.github.io/metaforge/">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0f1a'/><text x='50' y='72' font-size='60' text-anchor='middle' fill='%23e94560'>M</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/docs.css">
+<meta name="theme-color" content="#0a0a0f">
+<style>
+@media(max-width:768px){
+  .nav-links,.nl,.links{display:none!important}
+  .features-grid,.fg,.p-grid,.pricing-grid,.pg{grid-template-columns:1fr!important}
+  .stats,.row{grid-template-columns:1fr!important}
+  .hero h1{font-size:2rem!important}
+  .container{padding:0 16px!important}
+}
+@media(max-width:480px){
+  .hero{padding:4rem 1rem!important}
+  .section,.sec{padding:2rem 1rem!important}
+}
+</style>
+<link rel="canonical" href="https://mokangmedical.github.io/metaforge/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"MetaForge — AI Meta-Analysis Platform","description":"MetaForge: AI-powered meta-analysis platform. 6 AI Agents automate literature screening, data extraction, quality assessment, and statistical analysis in 1 hour.","url":"https://mokangmedical.github.io/metaforge/","provider":{"@type":"Organization","name":"MetaForge — AI Meta-Analysis Platform"}}
+</script>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="6" fill="#e94560"/>
+        <path d="M7 20V8h4l4 6 4-6h4v12h-3.5v-7.5L15 17l-4.5-6.5V20H7z" fill="#fff"/>
+      </svg>
+      MetaForge
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html" class="active">Overview</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="api.html">API Docs</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge" class="btn btn-secondary btn-sm">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+      <a href="https://mokangmedical.github.io/metaforge/app/" class="btn btn-primary btn-sm">Try Workbench</a>
+    </div>
+    <button class="mobile-menu-btn" onclick="document.getElementById('navLinks').classList.toggle('open')">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge animate-in">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><circle cx="7" cy="7" r="3"/><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/></svg>
+      AI-Powered Evidence-Based Medicine
+    </div>
+    <h1 class="animate-in delay-1">
+      Meta-Analysis<br>
+      <span class="gradient">Reimagined by AI</span>
+    </h1>
+    <p class="subtitle animate-in delay-2">
+      6 specialized AI Agents automate the entire meta-analysis workflow -- literature screening, data extraction, quality assessment, and statistical analysis -- compressing 45-90 days of work into a single hour.
+    </p>
+    <div class="hero-buttons animate-in delay-3">
+      <a href="https://mokangmedical.github.io/metaforge/app/" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Try Workbench
+      </a>
+      <a href="features.html" class="btn btn-secondary btn-lg">
+        Explore Features
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge" class="btn btn-outline btn-lg">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View Source
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="container">
+  <div class="stats-row">
+    <div class="stat-box animate-in">
+      <div class="num">6</div>
+      <div class="label">AI Agents</div>
+    </div>
+    <div class="stat-box animate-in delay-1">
+      <div class="num">15+</div>
+      <div class="label">API Endpoints</div>
+    </div>
+    <div class="stat-box animate-in delay-2">
+      <div class="num">5</div>
+      <div class="label">Plot Types</div>
+    </div>
+    <div class="stat-box animate-in delay-3">
+      <div class="num">1hr</div>
+      <div class="label">Full Analysis</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Features Grid -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">Core Capabilities</div>
+      <h2>Everything You Need for Meta-Analysis</h2>
+      <p>From data import to publication-ready reports, powered by statistical rigor and AI automation.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card animate-in">
+        <div class="card-icon blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <h3>Multi-Format Import</h3>
+        <p>Import data from RevMan, Covidence, R, Stata, and CSV. Automatic column detection and data validation.</p>
+      </div>
+      <div class="card animate-in delay-1">
+        <div class="card-icon red">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3>Forest & Funnel Plots</h3>
+        <p>Publication-quality forest plots, funnel plots, Galbraith, L'Abbe, and Baujat plots with customizable styling.</p>
+      </div>
+      <div class="card animate-in delay-2">
+        <div class="card-icon purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Multiple Models</h3>
+        <p>Fixed-effect and random-effects models (DerSimonian-Laird, REML, Paule-Mandel, HKSJ adjustment).</p>
+      </div>
+      <div class="card animate-in delay-1">
+        <div class="card-icon green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <h3>Bias Assessment</h3>
+        <p>Cochrane RoB 2, ROBINS-I, Newcastle-Ottawa Scale. Automated risk-of-bias summary plots.</p>
+      </div>
+      <div class="card animate-in delay-2">
+        <div class="card-icon cyan">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        </div>
+        <h3>PRISMA Reports</h3>
+        <p>One-click PRISMA 2020 compliant reports with all figures, tables, and statistical summaries in bilingual format.</p>
+      </div>
+      <div class="card animate-in delay-3">
+        <div class="card-icon orange">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </div>
+        <h3>Advanced Analytics</h3>
+        <p>Meta-regression, dose-response analysis, cumulative meta-analysis, network meta-analysis, and sensitivity analysis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Pricing Preview -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="badge">Pricing</div>
+      <h2>Plans for Every Research Team</h2>
+      <p>From individual researchers to enterprise institutions.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Starter</h3>
+        <div class="price-tag">&#165;299<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted)">/mo</span></div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> 3 meta-analysis projects/month</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> PubMed + Cochrane databases</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Basic statistical analysis</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> PRISMA report generation</li>
+        </ul>
+        <a href="pricing.html" class="btn btn-outline" style="width:100%;justify-content:center">Learn More</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Most Popular</div>
+        <h3>Professional</h3>
+        <div class="price-tag">&#165;999<span style="font-size:0.9rem;font-weight:400;color:var(--text-muted)">/mo</span></div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Unlimited projects</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> All 15+ database connections</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Network Meta + Meta-regression</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> API access + 5 team members</li>
+        </ul>
+        <a href="pricing.html" class="btn btn-primary" style="width:100%;justify-content:center">Learn More</a>
+      </div>
+      <div class="price-card">
+        <h3>Enterprise</h3>
+        <div class="price-tag" style="font-size:2rem">Custom</div>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> All Professional features</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Unlimited team members</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> On-premise deployment</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Dedicated support & SLA</li>
+        </ul>
+        <a href="pricing.html" class="btn btn-outline" style="width:100%;justify-content:center">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="section" style="text-align:center">
+  <div class="container">
+    <h2 style="font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;margin-bottom:16px;">Ready to Accelerate Your Research?</h2>
+    <p style="color:var(--text-secondary);max-width:500px;margin:0 auto 32px;">Start your first AI-powered meta-analysis today. No credit card required.</p>
+    <div class="hero-buttons">
+      <a href="https://mokangmedical.github.io/metaforge/app/" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Launch Workbench
+      </a>
+      <a href="api.html" class="btn btn-secondary btn-lg">API Documentation</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+
+<section style="text-align:center;padding:4rem 2rem;background:linear-gradient(135deg,rgba(99,102,241,.1),transparent)">
+<h2 style="font-size:1.8rem;margin-bottom:1rem">Ready to get started?</h2>
+<p style="color:#94a3b8;margin-bottom:2rem">Join leading organizations using metaforge</p>
+<a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge" style="display:inline-block;padding:.8rem 2rem;background:#6366f1;color:#fff;border-radius:8px;font-weight:600;text-decoration:none">Get Started Free</a>
+</section>
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3 style="display:flex;align-items:center;gap:8px;">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#e94560"/><path d="M7 20V8h4l4 6 4-6h4v12h-3.5v-7.5L15 17l-4.5-6.5V20H7z" fill="#fff"/></svg>
+          MetaForge
+        </h3>
+        <p>AI-powered meta-analysis platform by MetaForge — AI Meta-Analysis Platform. Part of the OPC Ecosystem for evidence-based medicine research.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="features.html">Features</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="api.html">API Docs</a>
+        <a href="https://mokangmedical.github.io/metaforge/app/">Workbench</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge">GitHub Repo</a>
+        <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge/wiki">Documentation</a>
+        <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge/issues">Issue Tracker</a>
+      </div>
+      <div class="footer-col">
+        <h4>OPC Ecosystem</h4>
+        <a href="https://mokangmedical.github.io/opc-homepage/">OPC Homepage</a>
+        <a href="https://github.com/MetaForge — AI Meta-Analysis Platform">MetaForge — AI Meta-Analysis Platform</a>
+        <a href="about.html">About Us</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 MetaForge — AI Meta-Analysis Platform. All rights reserved.</span>
+      <span>Built for Evidence-Based Medicine</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Simple scroll animation observer
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.animate-in').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

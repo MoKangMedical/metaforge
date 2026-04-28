@@ -64,6 +64,11 @@ class StudyInput:
     c_total: int = 0        # 对照组总人数
     subgroup: str = ""
     data_type: str = "dichotomous"
+    # Continuous data fields
+    e_mean: float = 0.0     # 实验组均值
+    e_sd: float = 0.0       # 实验组标准差
+    c_mean: float = 0.0     # 对照组均值
+    c_sd: float = 0.0       # 对照组标准差
 
 @dataclass
 class StudyResult:
@@ -109,20 +114,30 @@ class MetaAnalysisEngine:
         if len(studies) < 2:
             raise ValueError("至少需要2个研究")
 
+        # Detect data type from first study (or use explicit parameter)
+        data_type = studies[0].data_type if studies else "dichotomous"
+
+        # For continuous data, default effect measure to SMD if not specified
+        if data_type == "continuous" and effect_measure in ("OR", "RR"):
+            effect_measure = "SMD"
+
         # Step 1: 计算每个研究的效应量
         study_results = []
         for s in studies:
             if s.data_type == "dichotomous":
                 sr = self._calc_dichotomous(s, effect_measure)
+            elif s.data_type == "continuous":
+                sr = self._calc_continuous(s, effect_measure)
             else:
                 continue
             study_results.append(sr)
 
         # Step 2: 合并效应量
+        use_log = data_type != "continuous"
         if model == "fixed":
-            pooled = self._fixed_effect(study_results)
+            pooled = self._fixed_effect(study_results, use_log_scale=use_log)
         else:
-            pooled = self._random_effects(study_results)
+            pooled = self._random_effects(study_results, use_log_scale=use_log)
 
         # Step 3: 异质性检验
         het = self._heterogeneity(study_results)
@@ -182,22 +197,91 @@ class MetaAnalysisEngine:
             weight=weight, log_effect=log_effect, log_se=log_se, subgroup=s.subgroup
         )
 
-    def _fixed_effect(self, studies: List[StudyResult]) -> dict:
+    def _calc_continuous(self, s: StudyInput, measure: str = "SMD") -> StudyResult:
+        """Calculate continuous data effect size.
+
+        SMD = Standardized Mean Difference (Hedges' g with small-sample correction)
+        WMD = Weighted Mean Difference (raw difference in means)
+        """
+        n_e = s.e_total
+        n_c = s.c_total
+        m_e = s.e_mean
+        m_d = s.c_mean
+        sd_e = s.e_sd
+        sd_c = s.c_sd
+
+        if n_e < 1 or n_c < 1:
+            raise ValueError(f"Study '{s.name}': sample sizes must be >= 1 for continuous data")
+
+        if measure == "SMD":
+            # Pooled standard deviation
+            df = n_e + n_c - 2
+            if df <= 0:
+                df = 1
+            sp = math.sqrt(((n_e - 1) * sd_e**2 + (n_c - 1) * sd_c**2) / df)
+
+            # Cohen's d
+            if sp < 1e-12:
+                d = 0.0
+            else:
+                d = (m_e - m_d) / sp
+
+            # Hedges' g correction factor (small-sample bias correction)
+            # J = 1 - 3 / (4*df - 1)
+            j = 1.0 - 3.0 / (4.0 * df - 1.0) if (4.0 * df - 1.0) != 0 else 1.0
+            g = d * j
+
+            # SE of Hedges' g
+            # SE(g) = sqrt(n_e+n_c)/(n_e*n_c) + g^2 / (2*(n_e+n_c))
+            se_g = math.sqrt((n_e + n_c) / (n_e * n_c) + g**2 / (2.0 * (n_e + n_c)))
+
+            effect = g
+            log_effect = g        # For SMD, log_effect stores the SMD itself
+            log_se = se_g
+            ci_lower = g - 1.96 * se_g
+            ci_upper = g + 1.96 * se_g
+
+        else:  # WMD
+            # Weighted Mean Difference (raw difference)
+            diff = m_e - m_d
+            se_diff = math.sqrt(sd_e**2 / n_e + sd_c**2 / n_c) if (n_e > 0 and n_c > 0) else 0.0
+
+            effect = diff
+            log_effect = diff     # For WMD, log_effect stores the raw difference
+            log_se = se_diff
+            ci_lower = diff - 1.96 * se_diff
+            ci_upper = diff + 1.96 * se_diff
+
+        weight = 1.0 / (log_se ** 2) if log_se > 1e-12 else 0.0
+
+        return StudyResult(
+            name=s.name, effect=effect, ci_lower=ci_lower, ci_upper=ci_upper,
+            weight=weight, log_effect=log_effect, log_se=log_se, subgroup=s.subgroup
+        )
+
+    def _fixed_effect(self, studies: List[StudyResult], use_log_scale: bool = True) -> dict:
         """固定效应模型 (Mantel-Haenszel / Inverse Variance)"""
         total_w = sum(s.weight for s in studies)
-        pooled_log = sum(s.weight * s.log_effect for s in studies) / total_w
+        pooled_est = sum(s.weight * s.log_effect for s in studies) / total_w
         pooled_se = math.sqrt(1.0 / total_w)
-        pooled_effect = math.exp(pooled_log)
-        ci_lower = math.exp(pooled_log - 1.96 * pooled_se)
-        ci_upper = math.exp(pooled_log + 1.96 * pooled_se)
-        z = pooled_log / pooled_se
+
+        if use_log_scale:
+            pooled_effect = math.exp(pooled_est)
+            ci_lower = math.exp(pooled_est - 1.96 * pooled_se)
+            ci_upper = math.exp(pooled_est + 1.96 * pooled_se)
+        else:
+            pooled_effect = pooled_est
+            ci_lower = pooled_est - 1.96 * pooled_se
+            ci_upper = pooled_est + 1.96 * pooled_se
+
+        z = pooled_est / pooled_se
         p_value = 2 * (1 - sp_stats.norm.cdf(abs(z)))
         return {"effect": pooled_effect, "ci_lower": ci_lower, "ci_upper": ci_upper, "p_value": p_value}
 
-    def _random_effects(self, studies: List[StudyResult]) -> dict:
+    def _random_effects(self, studies: List[StudyResult], use_log_scale: bool = True) -> dict:
         """随机效应模型 (DerSimonian-Laird)"""
         # First get fixed effect estimate
-        fe = self._fixed_effect(studies)
+        fe = self._fixed_effect(studies, use_log_scale=use_log_scale)
         total_w = sum(s.weight for s in studies)
 
         # Q statistic
@@ -217,9 +301,16 @@ class MetaAnalysisEngine:
         total_w_re = sum(w for _, w, _ in re_studies)
         pooled_log = sum(le * w for le, w, _ in re_studies) / total_w_re
         pooled_se = math.sqrt(1.0 / total_w_re)
-        pooled_effect = math.exp(pooled_log)
-        ci_lower = math.exp(pooled_log - 1.96 * pooled_se)
-        ci_upper = math.exp(pooled_log + 1.96 * pooled_se)
+
+        if use_log_scale:
+            pooled_effect = math.exp(pooled_log)
+            ci_lower = math.exp(pooled_log - 1.96 * pooled_se)
+            ci_upper = math.exp(pooled_log + 1.96 * pooled_se)
+        else:
+            pooled_effect = pooled_log
+            ci_lower = pooled_log - 1.96 * pooled_se
+            ci_upper = pooled_log + 1.96 * pooled_se
+
         z = pooled_log / pooled_se
         p_value = 2 * (1 - sp_stats.norm.cdf(abs(z)))
 
@@ -252,8 +343,12 @@ class MetaAnalysisEngine:
         for g, group_studies in groups.items():
             if len(group_studies) < 2:
                 continue
-            srs = [self._calc_dichotomous(s, measure) for s in group_studies]
-            pooled = self._fixed_effect(srs)
+            if group_studies[0].data_type == "continuous":
+                srs = [self._calc_continuous(s, measure) for s in group_studies]
+                pooled = self._fixed_effect(srs, use_log_scale=False)
+            else:
+                srs = [self._calc_dichotomous(s, measure) for s in group_studies]
+                pooled = self._fixed_effect(srs)
             het = self._heterogeneity(srs)
             results[g] = {
                 "n_studies": len(group_studies),
@@ -270,8 +365,12 @@ class MetaAnalysisEngine:
         results = []
         for i in range(len(studies)):
             subset = [s for j, s in enumerate(studies) if j != i]
-            srs = [self._calc_dichotomous(s, measure) for s in subset]
-            pooled = self._fixed_effect(srs)
+            if subset[0].data_type == "continuous":
+                srs = [self._calc_continuous(s, measure) for s in subset]
+                pooled = self._fixed_effect(srs, use_log_scale=False)
+            else:
+                srs = [self._calc_dichotomous(s, measure) for s in subset]
+                pooled = self._fixed_effect(srs)
             results.append({
                 "excluded": studies[i].name,
                 "pooled_effect": round(pooled["effect"], 3),
@@ -350,18 +449,29 @@ class MetaAnalysisEngine:
         the evolving pooled estimate at each step.
         """
         if sort_by == "effect":
-            sorted_studies = sorted(
-                studies,
-                key=lambda s: self._calc_dichotomous(s, effect_measure).log_effect,
-            )
+            if studies[0].data_type == "continuous":
+                sorted_studies = sorted(
+                    studies,
+                    key=lambda s: self._calc_continuous(s, effect_measure).log_effect,
+                )
+            else:
+                sorted_studies = sorted(
+                    studies,
+                    key=lambda s: self._calc_dichotomous(s, effect_measure).log_effect,
+                )
         else:
             sorted_studies = list(studies)
 
         results = []
         for i in range(2, len(sorted_studies) + 1):
             subset = sorted_studies[:i]
-            srs = [self._calc_dichotomous(s, effect_measure) for s in subset]
-            pooled = self._random_effects(srs) if model == "random" else self._fixed_effect(srs)
+            if subset[0].data_type == "continuous":
+                srs = [self._calc_continuous(s, effect_measure) for s in subset]
+                use_log = False
+            else:
+                srs = [self._calc_dichotomous(s, effect_measure) for s in subset]
+                use_log = True
+            pooled = self._random_effects(srs, use_log_scale=use_log) if model == "random" else self._fixed_effect(srs, use_log_scale=use_log)
             het = self._heterogeneity(srs)
             results.append({
                 "step": i,
@@ -847,6 +957,193 @@ class MetaAnalysisEngine:
         svg += '</svg>'
         return svg
 
+    def _galbraith_plot(self, studies: List[StudyResult], pooled: dict) -> str:
+        """Generate Galbraith (radial) plot SVG.
+
+        X-axis: 1 / SE (precision)
+        Y-axis: effect / SE (z-statistic)
+        The reference line through the origin with slope = pooled effect.
+        Studies far from the line may be sources of heterogeneity.
+        """
+        w, h = 560, 460
+        margin = 50
+        plot_w = w - 2 * margin
+        plot_h = h - 2 * margin
+
+        precisions = [1.0 / s.log_se for s in studies if s.log_se > 1e-12]
+        z_stats = [s.log_effect / s.log_se for s in studies if s.log_se > 1e-12]
+
+        if not precisions:
+            return f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}"><text x="{w//2}" y="{h//2}" text-anchor="middle" fill="#8b949e">No data</text></svg>'
+
+        prec_arr = np.array(precisions)
+        z_arr = np.array(z_stats)
+
+        # Pooled effect (slope of reference line)
+        pooled_log = math.log(pooled["effect"]) if pooled["effect"] > 0 else 0.0
+        # For continuous data, the pooled "effect" may be negative or non-logarithmic
+        # We use log_effect from the pooled calculation if available
+        # Use the weighted mean of log_effects as the slope
+        total_w = sum(s.weight for s in studies)
+        if total_w > 0:
+            pooled_slope = sum(s.weight * s.log_effect for s in studies) / total_w
+        else:
+            pooled_slope = 0.0
+
+        # Data ranges
+        prec_max = float(np.max(prec_arr)) * 1.15
+        prec_min = 0.0
+        z_abs_max = max(float(np.max(np.abs(z_arr))), abs(pooled_slope) * prec_max) * 1.15
+
+        def map_x(prec):
+            return margin + (prec - prec_min) / (prec_max - prec_min) * plot_w if prec_max > prec_min else margin + plot_w / 2
+
+        def map_y(z_val):
+            return margin + plot_h - (z_val - (-z_abs_max)) / (2 * z_abs_max) * plot_h
+
+        svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
+        svg += f'<rect width="{w}" height="{h}" fill="#0d1117"/>'
+        svg += f'<text x="{w//2}" y="28" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="bold" font-family="Inter,sans-serif">Galbraith Plot (Radial)</text>'
+
+        # Grid lines
+        for tick in np.linspace(prec_min, prec_max, 6):
+            tx = map_x(float(tick))
+            svg += f'<line x1="{tx}" y1="{margin}" x2="{tx}" y2="{margin+plot_h}" stroke="#21262d" stroke-width="1"/>'
+        for tick in np.linspace(-z_abs_max, z_abs_max, 7):
+            ty = map_y(float(tick))
+            svg += f'<line x1="{margin}" y1="{ty}" x2="{margin+plot_w}" y2="{ty}" stroke="#21262d" stroke-width="1"/>'
+
+        # Axes
+        svg += f'<line x1="{margin}" y1="{margin+plot_h}" x2="{margin+plot_w}" y2="{margin+plot_h}" stroke="#30363d" stroke-width="1.5"/>'
+        svg += f'<line x1="{margin}" y1="{margin}" x2="{margin}" y2="{margin+plot_h}" stroke="#30363d" stroke-width="1.5"/>'
+
+        # Reference line (through origin, slope = pooled effect)
+        line_x1 = 0.0
+        line_y1 = 0.0
+        line_x2 = prec_max
+        line_y2 = pooled_slope * prec_max
+        svg += f'<line x1="{map_x(line_x1)}" y1="{map_y(line_y1)}" x2="{map_x(line_x2)}" y2="{map_y(line_y2)}" stroke="#f0883e" stroke-width="2"/>'
+
+        # 95% CI reference lines (at ±1.96)
+        svg += f'<line x1="{map_x(0)}" y1="{map_y(1.96)}" x2="{map_x(prec_max)}" y2="{map_y(pooled_slope*prec_max + 1.96)}" stroke="#484f58" stroke-width="1" stroke-dasharray="4,3"/>'
+        svg += f'<line x1="{map_x(0)}" y1="{map_y(-1.96)}" x2="{map_x(prec_max)}" y2="{map_y(pooled_slope*prec_max - 1.96)}" stroke="#484f58" stroke-width="1" stroke-dasharray="4,3"/>'
+
+        # Plot studies
+        for prec, z_val in zip(precisions, z_stats):
+            cx_pt = map_x(prec)
+            cy_pt = map_y(z_val)
+            svg += f'<circle cx="{cx_pt}" cy="{cy_pt}" r="5" fill="#58a6ff" opacity="0.85"/>'
+
+        # Axis labels
+        svg += f'<text x="{margin + plot_w//2}" y="{h - 8}" text-anchor="middle" fill="#8b949e" font-size="12" font-family="Inter,sans-serif">Precision (1/SE)</text>'
+        svg += f'<text x="14" y="{margin + plot_h//2}" text-anchor="middle" fill="#8b949e" font-size="12" font-family="Inter,sans-serif" transform="rotate(-90,14,{margin + plot_h//2})">z = Effect / SE</text>'
+
+        # Tick labels
+        for tick in np.linspace(prec_min, prec_max, 6):
+            tx = map_x(float(tick))
+            svg += f'<text x="{tx}" y="{margin+plot_h+16}" text-anchor="middle" fill="#8b949e" font-size="10" font-family="JetBrains Mono,monospace">{float(tick):.1f}</text>'
+        for tick in np.linspace(-z_abs_max, z_abs_max, 7):
+            ty = map_y(float(tick))
+            svg += f'<text x="{margin-8}" y="{ty+4}" text-anchor="end" fill="#8b949e" font-size="10" font-family="JetBrains Mono,monospace">{float(tick):.1f}</text>'
+
+        svg += '</svg>'
+        return svg
+
+    def _labbe_plot(self, studies: List[StudyResult], studies_input: List[StudyInput],
+                    pooled: dict) -> str:
+        """Generate L'Abbe plot SVG.
+
+        For dichotomous data: plots event rate in treatment vs control groups.
+        For continuous data: plots mean in treatment vs control groups.
+        The diagonal line (y=x) represents no treatment effect.
+        """
+        w, h = 500, 500
+        margin = 60
+        plot_w = w - 2 * margin
+        plot_h = h - 2 * margin
+
+        if not studies_input:
+            return f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}"><text x="{w//2}" y="{h//2}" text-anchor="middle" fill="#8b949e">No data</text></svg>'
+
+        is_continuous = studies_input[0].data_type == "continuous"
+
+        if is_continuous:
+            x_vals = [s.c_mean for s in studies_input]
+            y_vals = [s.e_mean for s in studies_input]
+            x_label = "Control Group Mean"
+            y_label = "Experimental Group Mean"
+        else:
+            x_vals = []
+            y_vals = []
+            for s in studies_input:
+                c_rate = s.c_events / s.c_total if s.c_total > 0 else 0.0
+                e_rate = s.e_events / s.e_total if s.e_total > 0 else 0.0
+                x_vals.append(c_rate)
+                y_vals.append(e_rate)
+            x_label = "Control Group Event Rate"
+            y_label = "Experimental Group Event Rate"
+
+        x_arr = np.array(x_vals, dtype=float)
+        y_arr = np.array(y_vals, dtype=float)
+
+        x_min = max(0, float(np.min(x_arr)) * 0.85)
+        x_max = float(np.max(x_arr)) * 1.15
+        y_min = max(0, float(np.min(y_arr)) * 0.85)
+        y_max = float(np.max(y_arr)) * 1.15
+
+        # Make axes equal range for visual clarity
+        val_min = min(x_min, y_min)
+        val_max = max(x_max, y_max)
+        x_min = y_min = val_min
+        x_max = y_max = val_max
+
+        def map_x(val):
+            return margin + (val - x_min) / (x_max - x_min) * plot_w if x_max > x_min else margin + plot_w / 2
+
+        def map_y(val):
+            return margin + plot_h - (val - y_min) / (y_max - y_min) * plot_h if y_max > y_min else margin + plot_h / 2
+
+        svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
+        svg += f'<rect width="{w}" height="{h}" fill="#0d1117"/>'
+        svg += f'<text x="{w//2}" y="30" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="bold" font-family="Inter,sans-serif">L\'Abbé Plot</text>'
+
+        # Grid lines
+        for tick in np.linspace(x_min, x_max, 6):
+            tx = map_x(float(tick))
+            svg += f'<line x1="{tx}" y1="{margin}" x2="{tx}" y2="{margin+plot_h}" stroke="#21262d" stroke-width="1"/>'
+            svg += f'<text x="{tx}" y="{margin+plot_h+16}" text-anchor="middle" fill="#8b949e" font-size="10" font-family="JetBrains Mono,monospace">{float(tick):.2f}</text>'
+        for tick in np.linspace(y_min, y_max, 6):
+            ty = map_y(float(tick))
+            svg += f'<line x1="{margin}" y1="{ty}" x2="{margin+plot_w}" y2="{ty}" stroke="#21262d" stroke-width="1"/>'
+            svg += f'<text x="{margin-8}" y="{ty+4}" text-anchor="end" fill="#8b949e" font-size="10" font-family="JetBrains Mono,monospace">{float(tick):.2f}</text>'
+
+        # Axes
+        svg += f'<line x1="{margin}" y1="{margin+plot_h}" x2="{margin+plot_w}" y2="{margin+plot_h}" stroke="#30363d" stroke-width="1.5"/>'
+        svg += f'<line x1="{margin}" y1="{margin}" x2="{margin}" y2="{margin+plot_h}" stroke="#30363d" stroke-width="1.5"/>'
+
+        # Diagonal line (no effect line: y = x)
+        svg += f'<line x1="{map_x(x_min)}" y1="{map_y(y_min)}" x2="{map_x(x_max)}" y2="{map_y(y_max)}" stroke="#f0883e" stroke-width="2" stroke-dasharray="6,3"/>'
+
+        # Plot studies with labels
+        for i, (xv, yv) in enumerate(zip(x_vals, y_vals)):
+            cx_pt = map_x(xv)
+            cy_pt = map_y(yv)
+            svg += f'<circle cx="{cx_pt}" cy="{cy_pt}" r="6" fill="#58a6ff" opacity="0.85"/>'
+            # Add study name label
+            name = studies_input[i].name if i < len(studies_input) else ""
+            if name:
+                svg += f'<text x="{cx_pt+8}" y="{cy_pt-6}" fill="#8b949e" font-size="9" font-family="Inter,sans-serif">{name}</text>'
+
+        # Axis labels
+        svg += f'<text x="{margin + plot_w//2}" y="{h - 8}" text-anchor="middle" fill="#8b949e" font-size="12" font-family="Inter,sans-serif">{x_label}</text>'
+        svg += f'<text x="14" y="{margin + plot_h//2}" text-anchor="middle" fill="#8b949e" font-size="12" font-family="Inter,sans-serif" transform="rotate(-90,14,{margin+plot_h//2})">{y_label}</text>'
+
+        # No-effect legend
+        svg += f'<text x="{margin + plot_w - 5}" y="{margin + 15}" text-anchor="end" fill="#f0883e" font-size="10" font-family="Inter,sans-serif">No effect (y=x)</text>'
+
+        svg += '</svg>'
+        return svg
+
 
 # ============================================================
 # PRISMA 流程图生成
@@ -1022,8 +1319,14 @@ async def api_forest(request: Request):
     effect_measure = body.get("effect_measure", "OR")
 
     studies = [StudyInput(**s) for s in studies_data]
-    srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
-    pooled = engine._fixed_effect(srs)
+    is_continuous = studies and studies[0].data_type == "continuous"
+    if is_continuous:
+        if effect_measure in ("OR", "RR"):
+            effect_measure = "SMD"
+        srs = [engine._calc_continuous(s, effect_measure) for s in studies]
+    else:
+        srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
+    pooled = engine._fixed_effect(srs, use_log_scale=not is_continuous)
     svg = engine._forest_plot(srs, pooled, effect_measure)
     return {"svg": svg, "pooled": pooled}
 
@@ -1036,9 +1339,71 @@ async def api_funnel(request: Request):
     effect_measure = body.get("effect_measure", "OR")
 
     studies = [StudyInput(**s) for s in studies_data]
-    srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
-    pooled = engine._fixed_effect(srs)
+    is_continuous = studies and studies[0].data_type == "continuous"
+    if is_continuous:
+        if effect_measure in ("OR", "RR"):
+            effect_measure = "SMD"
+        srs = [engine._calc_continuous(s, effect_measure) for s in studies]
+    else:
+        srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
+    pooled = engine._fixed_effect(srs, use_log_scale=not is_continuous)
     svg = engine._funnel_plot(srs, pooled)
+    return {"svg": svg}
+
+
+@app.post("/api/galbraith")
+async def api_galbraith(request: Request):
+    """Generate Galbraith (radial) plot SVG.
+
+    Body JSON:
+      studies: list of study dicts
+      effect_measure: "OR", "RR", "SMD", or "WMD"
+    """
+    body = await request.json()
+    studies_data = body.get("studies", [])
+    effect_measure = body.get("effect_measure", "OR")
+
+    if len(studies_data) < 2:
+        raise HTTPException(400, "At least 2 studies required for Galbraith plot")
+
+    studies = [StudyInput(**s) for s in studies_data]
+    is_continuous = studies and studies[0].data_type == "continuous"
+    if is_continuous:
+        if effect_measure in ("OR", "RR"):
+            effect_measure = "SMD"
+        srs = [engine._calc_continuous(s, effect_measure) for s in studies]
+    else:
+        srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
+    pooled = engine._fixed_effect(srs, use_log_scale=not is_continuous)
+    svg = engine._galbraith_plot(srs, pooled)
+    return {"svg": svg}
+
+
+@app.post("/api/labbe")
+async def api_labbe(request: Request):
+    """Generate L'Abbe plot SVG.
+
+    Body JSON:
+      studies: list of study dicts
+      effect_measure: "OR", "RR", "SMD", or "WMD"
+    """
+    body = await request.json()
+    studies_data = body.get("studies", [])
+    effect_measure = body.get("effect_measure", "OR")
+
+    if len(studies_data) < 2:
+        raise HTTPException(400, "At least 2 studies required for L'Abbe plot")
+
+    studies = [StudyInput(**s) for s in studies_data]
+    is_continuous = studies and studies[0].data_type == "continuous"
+    if is_continuous:
+        if effect_measure in ("OR", "RR"):
+            effect_measure = "SMD"
+        srs = [engine._calc_continuous(s, effect_measure) for s in studies]
+    else:
+        srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
+    pooled = engine._fixed_effect(srs, use_log_scale=not is_continuous)
+    svg = engine._labbe_plot(srs, studies, pooled)
     return {"svg": svg}
 
 
@@ -1053,6 +1418,12 @@ async def list_models():
         "effect_measures": [
             {"key": "OR", "name": "Odds Ratio", "description": "二分类数据效应量"},
             {"key": "RR", "name": "Risk Ratio", "description": "相对风险"},
+            {"key": "SMD", "name": "Standardized Mean Difference", "description": "连续数据标准化均数差 (Hedges' g)"},
+            {"key": "WMD", "name": "Weighted Mean Difference", "description": "连续数据加权均数差"},
+        ],
+        "data_types": [
+            {"key": "dichotomous", "name": "Dichotomous", "description": "Binary/event count data"},
+            {"key": "continuous", "name": "Continuous", "description": "Mean/SD data"},
         ],
     }
 
@@ -1068,7 +1439,12 @@ async def api_bias(request: Request):
         raise HTTPException(400, "At least 3 studies required for bias tests")
 
     studies = [StudyInput(**s) for s in studies_data]
-    srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
+    if studies and studies[0].data_type == "continuous":
+        if effect_measure in ("OR", "RR"):
+            effect_measure = "SMD"
+        srs = [engine._calc_continuous(s, effect_measure) for s in studies]
+    else:
+        srs = [engine._calc_dichotomous(s, effect_measure) for s in studies]
 
     egger = engine.egger_test(srs)
     begg = engine.begg_test(srs)
@@ -1181,7 +1557,7 @@ async def api_upload_csv(file: UploadFile = File(...)):
     """Upload a CSV file and run meta-analysis.
 
     Expected CSV columns: name, e_events, e_total, c_events, c_total
-    Optional: subgroup, data_type
+    Optional: subgroup, data_type, e_mean, e_sd, c_mean, c_sd
     """
     content = await file.read()
     text = content.decode("utf-8")
@@ -1197,13 +1573,19 @@ async def api_upload_csv(file: UploadFile = File(...)):
             c_total=int(row.get("c_total", 0)),
             subgroup=row.get("subgroup", ""),
             data_type=row.get("data_type", "dichotomous"),
+            e_mean=float(row.get("e_mean", 0)),
+            e_sd=float(row.get("e_sd", 0)),
+            c_mean=float(row.get("c_mean", 0)),
+            c_sd=float(row.get("c_sd", 0)),
         ))
 
     if len(studies) < 2:
         raise HTTPException(400, "CSV must contain at least 2 studies")
 
     try:
-        result = engine.analyze(studies, model="random", effect_measure="OR")
+        # Auto-detect effect measure from data type
+        effect_measure = "SMD" if studies[0].data_type == "continuous" else "OR"
+        result = engine.analyze(studies, model="random", effect_measure=effect_measure)
         return asdict(result)
     except Exception as e:
         raise HTTPException(500, str(e))
@@ -2092,6 +2474,522 @@ async def api_view_shared(share_token: str):
         "access_count": link["access_count"],
     }
 
+
+
+
+# ============================================================
+# Network Meta-Analysis (NMA) Engine
+# ============================================================
+
+class NMAEngine:
+    """Network Meta-Analysis using frequentist graph-theoretical approach.
+    
+    Supports indirect comparison via Bucher method and network estimation
+    combining direct + indirect evidence.
+    """
+
+    def __init__(self):
+        self.treatments = []
+        self.comparisons = []
+        self.n_treatments = 0
+
+    def analyze(self, comparisons: List[dict]) -> dict:
+        """Run complete NMA analysis.
+        
+        Parameters
+        ----------
+        comparisons : list of dict
+            Each dict: {treatment_a, treatment_b, effect, ci_lower, ci_upper, weight}
+            where effect is OR/RR/HR, ci are 95% CI bounds.
+            
+        Returns
+        -------
+        dict with network_stats, direct_estimates, indirect_estimates,
+        network_estimates, consistency, ranking, network_svg, league_svg
+        """
+        self.comparisons = comparisons
+        
+        # Extract unique treatments
+        treatments_set = set()
+        for c in comparisons:
+            treatments_set.add(c["treatment_a"])
+            treatments_set.add(c["treatment_b"])
+        self.treatments = sorted(treatments_set)
+        self.n_treatments = len(self.treatments)
+        
+        if self.n_treatments < 3:
+            return {"error": "NMA requires at least 3 treatments"}
+        
+        # Build adjacency and effect matrices
+        adj_matrix, effect_matrix, se_matrix = self._build_matrices()
+        
+        # Direct estimates (from pairwise comparisons)
+        direct = self._direct_estimates()
+        
+        # Indirect estimates (Bucher method)
+        indirect = self._indirect_estimates(adj_matrix, effect_matrix, se_matrix)
+        
+        # Network estimates (combining direct + indirect)
+        network = self._network_estimates(adj_matrix, effect_matrix, se_matrix)
+        
+        # Consistency assessment
+        consistency = self._assess_consistency(direct, indirect)
+        
+        # SUCRA ranking
+        ranking = self._calculate_sucra(network)
+        
+        # Generate visualizations
+        network_svg = self._network_diagram_svg(adj_matrix)
+        league_svg = self._league_table_svg(network)
+        
+        return {
+            "n_treatments": self.n_treatments,
+            "n_comparisons": len(comparisons),
+            "treatments": self.treatments,
+            "direct_estimates": direct,
+            "indirect_estimates": indirect,
+            "network_estimates": network,
+            "consistency": consistency,
+            "ranking": ranking,
+            "network_svg": network_svg,
+            "league_svg": league_svg,
+        }
+
+    def _build_matrices(self):
+        """Build adjacency, effect, and SE matrices."""
+        n = self.n_treatments
+        t_idx = {t: i for i, t in enumerate(self.treatments)}
+        
+        adj = np.zeros((n, n), dtype=int)
+        eff = np.zeros((n, n))
+        se = np.zeros((n, n))
+        
+        for c in self.comparisons:
+            i = t_idx[c["treatment_a"]]
+            j = t_idx[c["treatment_b"]]
+            adj[i, j] = adj[j, i] = 1
+            
+            log_eff = math.log(c["effect"]) if c["effect"] > 0 else 0
+            log_upper = math.log(c["ci_upper"]) if c["ci_upper"] > 0 else 0
+            log_lower = math.log(c["ci_lower"]) if c["ci_lower"] > 0 else 0
+            se_val = (log_upper - log_lower) / (2 * 1.96)
+            
+            eff[i, j] = log_eff
+            eff[j, i] = -log_eff
+            se[i, j] = se[j, i] = max(se_val, 0.001)
+        
+        return adj, eff, se
+
+    def _direct_estimates(self):
+        """Extract direct pairwise estimates."""
+        results = []
+        for c in self.comparisons:
+            log_eff = math.log(c["effect"]) if c["effect"] > 0 else 0
+            se_val = (math.log(c["ci_upper"]) - math.log(c["ci_lower"])) / (2 * 1.96) if c["ci_lower"] > 0 and c["ci_upper"] > 0 else 0.1
+            results.append({
+                "treatment_a": c["treatment_a"],
+                "treatment_b": c["treatment_b"],
+                "effect": round(c["effect"], 4),
+                "ci_lower": round(c["ci_lower"], 4),
+                "ci_upper": round(c["ci_upper"], 4),
+                "log_effect": round(log_eff, 4),
+                "se": round(se_val, 4),
+                "weight": round(1.0 / (se_val ** 2), 2) if se_val > 0 else 0,
+                "source": "direct",
+            })
+        return results
+
+    def _indirect_estimates(self, adj, eff, se):
+        """Calculate indirect estimates via Bucher method for all possible indirect paths."""
+        results = []
+        n = self.n_treatments
+        
+        for i in range(n):
+            for j in range(i + 1, n):
+                if adj[i, j]:
+                    continue  # Skip direct comparisons
+                
+                # Find all indirect paths of length 2 (through a common comparator)
+                for k in range(n):
+                    if adj[i, k] and adj[k, j]:
+                        # Indirect: i -> k -> j
+                        indirect_eff = eff[i, k] + eff[k, j]
+                        indirect_se = math.sqrt(se[i, k]**2 + se[k, j]**2)
+                        
+                        ci_lower = math.exp(indirect_eff - 1.96 * indirect_se)
+                        ci_upper = math.exp(indirect_eff + 1.96 * indirect_se)
+                        p_value = 2 * (1 - sp_stats.norm.cdf(abs(indirect_eff / indirect_se))) if indirect_se > 0 else 1.0
+                        
+                        results.append({
+                            "treatment_a": self.treatments[i],
+                            "treatment_b": self.treatments[j],
+                            "via": self.treatments[k],
+                            "effect": round(math.exp(indirect_eff), 4),
+                            "ci_lower": round(ci_lower, 4),
+                            "ci_upper": round(ci_upper, 4),
+                            "log_effect": round(indirect_eff, 4),
+                            "se": round(indirect_se, 4),
+                            "p_value": round(p_value, 4),
+                            "source": "indirect",
+                        })
+                        break  # Use first available indirect path
+        
+        return results
+
+    def _network_estimates(self, adj, eff, se):
+        """Combine direct + indirect estimates using inverse-variance weighting."""
+        n = self.n_treatments
+        results = []
+        
+        for i in range(n):
+            for j in range(i + 1, n):
+                direct_eff = None
+                direct_se = None
+                indirect_eff = None
+                indirect_se = None
+                
+                # Direct evidence
+                if adj[i, j]:
+                    direct_eff = eff[i, j]
+                    direct_se = se[i, j]
+                
+                # Indirect evidence (first available path)
+                for k in range(n):
+                    if adj[i, k] and adj[k, j]:
+                        indirect_eff = eff[i, k] + eff[k, j]
+                        indirect_se = math.sqrt(se[i, k]**2 + se[k, j]**2)
+                        break
+                
+                # Combine
+                if direct_eff is not None and indirect_eff is not None:
+                    # Inverse-variance weighted combination
+                    w_d = 1.0 / (direct_se**2)
+                    w_i = 1.0 / (indirect_se**2)
+                    combined_eff = (w_d * direct_eff + w_i * indirect_eff) / (w_d + w_i)
+                    combined_se = math.sqrt(1.0 / (w_d + w_i))
+                    source = "combined"
+                elif direct_eff is not None:
+                    combined_eff = direct_eff
+                    combined_se = direct_se
+                    source = "direct_only"
+                elif indirect_eff is not None:
+                    combined_eff = indirect_eff
+                    combined_se = indirect_se
+                    source = "indirect_only"
+                else:
+                    continue
+                
+                ci_lower = math.exp(combined_eff - 1.96 * combined_se)
+                ci_upper = math.exp(combined_eff + 1.96 * combined_se)
+                p_value = 2 * (1 - sp_stats.norm.cdf(abs(combined_eff / combined_se))) if combined_se > 0 else 1.0
+                
+                results.append({
+                    "treatment_a": self.treatments[i],
+                    "treatment_b": self.treatments[j],
+                    "effect": round(math.exp(combined_eff), 4),
+                    "ci_lower": round(ci_lower, 4),
+                    "ci_upper": round(ci_upper, 4),
+                    "log_effect": round(combined_eff, 4),
+                    "se": round(combined_se, 4),
+                    "p_value": round(p_value, 4),
+                    "source": source,
+                })
+        
+        return results
+
+    def _assess_consistency(self, direct, indirect):
+        """Assess consistency between direct and indirect evidence."""
+        inconsistencies = []
+        
+        # Build lookup for indirect estimates
+        indirect_lookup = {}
+        for ind in indirect:
+            key = tuple(sorted([ind["treatment_a"], ind["treatment_b"]]))
+            indirect_lookup[key] = ind
+        
+        for d in direct:
+            key = tuple(sorted([d["treatment_a"], d["treatment_b"]]))
+            if key in indirect_lookup:
+                ind = indirect_lookup[key]
+                # Calculate difference (inconsistency)
+                diff = d["log_effect"] - ind["log_effect"]
+                se_diff = math.sqrt(d["se"]**2 + ind["se"]**2)
+                z = diff / se_diff if se_diff > 0 else 0
+                p = 2 * (1 - sp_stats.norm.cdf(abs(z)))
+                
+                inconsistencies.append({
+                    "comparison": f"{key[0]} vs {key[1]}",
+                    "direct_effect": d["effect"],
+                    "indirect_effect": ind["effect"],
+                    "difference": round(diff, 4),
+                    "se_difference": round(se_diff, 4),
+                    "z_statistic": round(z, 4),
+                    "p_value": round(p, 4),
+                    "consistent": p > 0.05,
+                })
+        
+        overall_p = 1.0
+        if inconsistencies:
+            chi2 = sum(inc["z_statistic"]**2 for inc in inconsistencies)
+            df = len(inconsistencies)
+            overall_p = 1 - sp_stats.chi2.cdf(chi2, df) if df > 0 else 1.0
+        
+        return {
+            "loop_comparisons": inconsistencies,
+            "n_inconsistency_tests": len(inconsistencies),
+            "overall_chi2": round(sum(inc["z_statistic"]**2 for inc in inconsistencies), 4) if inconsistencies else 0,
+            "overall_p_value": round(overall_p, 4),
+            "conclusion": "consistent" if overall_p > 0.05 else "inconsistent",
+        }
+
+    def _calculate_sucra(self, network_estimates):
+        """Calculate SUCRA (Surface Under the Cumulative Ranking) for each treatment."""
+        # Build a matrix of log-effects between all treatment pairs
+        n = self.n_treatments
+        eff_matrix = np.zeros((n, n))
+        
+        for est in network_estimates:
+            i = self.treatments.index(est["treatment_a"])
+            j = self.treatments.index(est["treatment_b"])
+            eff_matrix[i, j] = est["log_effect"]
+            eff_matrix[j, i] = -est["log_effect"]
+        
+        # For each treatment, calculate probability of being best, 2nd best, etc.
+        # Using pairwise comparison approach
+        ranking_scores = {}
+        
+        for t_idx, treatment in enumerate(self.treatments):
+            # Count how many treatments this one is better than
+            wins = 0
+            total = 0
+            for other_idx in range(n):
+                if t_idx == other_idx:
+                    continue
+                # Positive effect means treatment_a is better
+                if eff_matrix[t_idx, other_idx] > 0:
+                    wins += 1
+                total += 1
+            
+            # Simple SUCRA approximation
+            sucra = wins / total if total > 0 else 0.5
+            ranking_scores[treatment] = {
+                "sucra": round(sucra, 4),
+                "rank": 0,  # Will be assigned below
+            }
+        
+        # Assign ranks
+        sorted_treatments = sorted(ranking_scores.keys(), key=lambda t: ranking_scores[t]["sucra"], reverse=True)
+        for rank, treatment in enumerate(sorted_treatments, 1):
+            ranking_scores[treatment]["rank"] = rank
+        
+        return ranking_scores
+
+    def _network_diagram_svg(self, adj) -> str:
+        """Generate SVG network diagram showing treatment comparisons."""
+        n = self.n_treatments
+        w, h = 600, 500
+        
+        # Position treatments in a circle
+        cx, cy = w // 2, h // 2
+        radius = min(w, h) * 0.35
+        
+        positions = []
+        for i in range(n):
+            angle = 2 * math.pi * i / n - math.pi / 2
+            x = cx + radius * math.cos(angle)
+            y = cy + radius * math.sin(angle)
+            positions.append((x, y))
+        
+        svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
+        svg += f'<rect width="{w}" height="{h}" fill="#0d1117"/>'
+        svg += f'<text x="{w//2}" y="30" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="bold" font-family="Inter,sans-serif">Network Meta-Analysis Network</text>'
+        
+        # Count comparisons per treatment for line thickness
+        max_comparisons = max(sum(adj[i]) for i in range(n)) if n > 0 else 1
+        
+        # Draw edges (comparisons)
+        for i in range(n):
+            for j in range(i + 1, n):
+                if adj[i, j]:
+                    x1, y1 = positions[i]
+                    x2, y2 = positions[j]
+                    # Line thickness based on number of connections
+                    thickness = 1 + (sum(adj[i]) + sum(adj[j])) / (2 * max_comparisons) * 3
+                    svg += f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="#58a6ff" stroke-width="{thickness:.1f}" opacity="0.6"/>'
+                    
+                    # Comparison label
+                    mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+                    # Find the comparison effect
+                    for c in self.comparisons:
+                        if (c["treatment_a"] == self.treatments[i] and c["treatment_b"] == self.treatments[j]) or                            (c["treatment_a"] == self.treatments[j] and c["treatment_b"] == self.treatments[i]):
+                            svg += f'<text x="{mx:.1f}" y="{my:.1f}" text-anchor="middle" fill="#8b949e" font-size="9" font-family="JetBrains Mono,monospace">OR={c["effect"]:.2f}</text>'
+                            break
+        
+        # Draw nodes (treatments)
+        for i, (x, y) in enumerate(positions):
+            node_r = 25 + sum(adj[i]) * 3
+            svg += f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{node_r}" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>'
+            svg += f'<text x="{x:.1f}" y="{y+4:.1f}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="bold" font-family="Inter,sans-serif">{self.treatments[i]}</text>'
+        
+        # Legend
+        svg += f'<text x="20" y="{h-20}" fill="#8b949e" font-size="11" font-family="Inter,sans-serif">Nodes: Treatments | Edges: Direct comparisons | N={self.n_treatments} treatments, E={len(self.comparisons)} comparisons</text>'
+        
+        svg += '</svg>'
+        return svg
+
+    def _league_table_svg(self, network_estimates) -> str:
+        """Generate SVG league table showing all pairwise comparisons."""
+        n = self.n_treatments
+        
+        # Build lookup
+        lookup = {}
+        for est in network_estimates:
+            key = (est["treatment_a"], est["treatment_b"])
+            lookup[key] = est
+            # Add reverse
+            rev_key = (est["treatment_b"], est["treatment_a"])
+            if rev_key not in lookup:
+                lookup[rev_key] = {
+                    "treatment_a": est["treatment_b"],
+                    "treatment_b": est["treatment_a"],
+                    "effect": round(1.0 / est["effect"], 4) if est["effect"] > 0 else 0,
+                    "ci_lower": round(1.0 / est["ci_upper"], 4) if est["ci_upper"] > 0 else 0,
+                    "ci_upper": round(1.0 / est["ci_lower"], 4) if est["ci_lower"] > 0 else 0,
+                }
+        
+        cell_w, cell_h = 100, 40
+        label_w = 100
+        w = label_w + n * cell_w + 20
+        h = label_w + n * cell_h + 60
+        
+        svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">'
+        svg += f'<rect width="{w}" height="{h}" fill="#0d1117"/>'
+        svg += f'<text x="{w//2}" y="25" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="bold" font-family="Inter,sans-serif">League Table — Network Meta-Analysis</text>'
+        
+        # Column headers
+        y_start = 50
+        for j in range(n):
+            x = label_w + j * cell_w + cell_w // 2
+            svg += f'<text x="{x}" y="{y_start}" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="bold" font-family="Inter,sans-serif">{self.treatments[j]}</text>'
+        
+        # Rows
+        for i in range(n):
+            y = y_start + 20 + i * cell_h
+            
+            # Row header
+            svg += f'<text x="10" y="{y + cell_h // 2 + 4}" fill="#58a6ff" font-size="11" font-weight="bold" font-family="Inter,sans-serif">{self.treatments[i]}</text>'
+            
+            for j in range(n):
+                x = label_w + j * cell_w
+                
+                if i == j:
+                    # Diagonal cell
+                    svg += f'<rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" fill="#161b22" stroke="#30363d"/>'
+                    svg += f'<text x="{x + cell_w//2}" y="{y + cell_h//2 + 4}" text-anchor="middle" fill="#484f58" font-size="11">—</text>'
+                else:
+                    # Find estimate
+                    key = (self.treatments[i], self.treatments[j])
+                    if key in lookup:
+                        est = lookup[key]
+                        # Color based on significance
+                        if est.get("ci_lower", 0) > 1 or est.get("ci_upper", 0) < 1:
+                            bg_color = "rgba(34, 197, 94, 0.1)"  # Significant
+                            text_color = "#22c55e"
+                        else:
+                            bg_color = "rgba(255, 255, 255, 0.02)"
+                            text_color = "#e6edf3"
+                        
+                        svg += f'<rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" fill="{bg_color}" stroke="#30363d"/>'
+                        effect_text = f'{est["effect"]:.2f}' if est.get("effect") else "N/A"
+                        ci_text = f'[{est.get("ci_lower", 0):.2f},{est.get("ci_upper", 0):.2f}]' if est.get("ci_lower") else ""
+                        svg += f'<text x="{x + cell_w//2}" y="{y + cell_h//2 - 2}" text-anchor="middle" fill="{text_color}" font-size="11" font-weight="600" font-family="JetBrains Mono,monospace">{effect_text}</text>'
+                        svg += f'<text x="{x + cell_w//2}" y="{y + cell_h//2 + 12}" text-anchor="middle" fill="#8b949e" font-size="8" font-family="JetBrains Mono,monospace">{ci_text}</text>'
+                    else:
+                        svg += f'<rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" fill="#0d1117" stroke="#30363d"/>'
+                        svg += f'<text x="{x + cell_w//2}" y="{y + cell_h//2 + 4}" text-anchor="middle" fill="#484f58" font-size="10">No data</text>'
+        
+        # Legend
+        legend_y = y_start + 20 + n * cell_h + 20
+        svg += f'<text x="20" y="{legend_y}" fill="#22c55e" font-size="10" font-family="Inter,sans-serif">Green: Significant (CI excludes 1.0)</text>'
+        svg += f'<text x="300" y="{legend_y}" fill="#8b949e" font-size="10" font-family="Inter,sans-serif">Row treatment vs Column treatment (OR scale)</text>'
+        
+        svg += '</svg>'
+        return svg
+
+
+nma_engine = NMAEngine()
+
+
+@app.post("/api/nma/analyze")
+async def api_nma_analyze(request: Request):
+    """Run Network Meta-Analysis.
+    
+    Body JSON:
+      comparisons: list of {treatment_a, treatment_b, effect, ci_lower, ci_upper, weight}
+    """
+    body = await request.json()
+    comparisons = body.get("comparisons", [])
+    
+    if len(comparisons) < 2:
+        raise HTTPException(400, "At least 2 comparisons required for NMA")
+    
+    # Validate
+    for c in comparisons:
+        if "treatment_a" not in c or "treatment_b" not in c or "effect" not in c:
+            raise HTTPException(400, "Each comparison needs treatment_a, treatment_b, effect")
+        if "ci_lower" not in c:
+            c["ci_lower"] = c["effect"] * 0.8
+        if "ci_upper" not in c:
+            c["ci_upper"] = c["effect"] * 1.2
+        if "weight" not in c:
+            c["weight"] = 100
+    
+    try:
+        result = nma_engine.analyze(comparisons)
+        if "error" in result:
+            raise HTTPException(400, result["error"])
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@app.post("/api/nma/network")
+async def api_nma_network(request: Request):
+    """Generate NMA network diagram SVG."""
+    body = await request.json()
+    comparisons = body.get("comparisons", [])
+    result = nma_engine.analyze(comparisons)
+    return {"svg": result.get("network_svg", ""), "treatments": result.get("treatments", [])}
+
+
+@app.post("/api/nma/league")
+async def api_nma_league(request: Request):
+    """Generate NMA league table SVG."""
+    body = await request.json()
+    comparisons = body.get("comparisons", [])
+    result = nma_engine.analyze(comparisons)
+    return {"svg": result.get("league_svg", ""), "treatments": result.get("treatments", [])}
+
+
+@app.get("/api/nma/demo")
+async def api_nma_demo():
+    """Run NMA demo with sample oncology data."""
+    demo_comparisons = [
+        {"treatment_a": "Pembrolizumab", "treatment_b": "Chemotherapy", "effect": 0.73, "ci_lower": 0.64, "ci_upper": 0.84},
+        {"treatment_a": "Nivolumab", "treatment_b": "Chemotherapy", "effect": 0.78, "ci_lower": 0.67, "ci_upper": 0.91},
+        {"treatment_a": "Atezolizumab", "treatment_b": "Chemotherapy", "effect": 0.81, "ci_lower": 0.70, "ci_upper": 0.94},
+        {"treatment_a": "Pembrolizumab", "treatment_b": "Nivolumab", "effect": 0.94, "ci_lower": 0.79, "ci_upper": 1.11},
+        {"treatment_a": "Chemotherapy", "treatment_b": "Best_Supportive_Care", "effect": 0.75, "ci_lower": 0.62, "ci_upper": 0.91},
+        {"treatment_a": "Nivolumab", "treatment_b": "Best_Supportive_Care", "effect": 0.60, "ci_lower": 0.48, "ci_upper": 0.75},
+    ]
+    
+    try:
+        result = nma_engine.analyze(demo_comparisons)
+        return result
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 # ============================================================
 # 入口

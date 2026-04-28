@@ -1,92 +1,56 @@
-<<<<<<< HEAD
-# 更新日志
+# Changelog
 
-所有项目的更改都将记录在此文件中。
+All notable changes to MetaForge are documented here.
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
-并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+## [4.0.0] — 2026-04-28
 
-## [未发布]
+### Added
+- **Network Meta-Analysis (NMA) engine** — graph-theoretical approach with Bucher indirect comparison, SUCRA ranking, consistency assessment, network diagram SVG, and league table SVG
+- **Continuous data support** — SMD (Hedges' g) and WMD (Weighted Mean Difference) for mean/SD data
+- **Galbraith (radial) plot** — heterogeneity visualization
+- **L'Abbe plot** — treatment vs control event rate comparison
+- **Comprehensive test suite** — 155 tests (113 engine + 24 NMA + 18 API)
+- **AI Agent endpoints** — /api/ai/search, /api/ai/screen, /api/ai/extract
+- **User system** — registration, login, session management
+- **Project management** — save, list, get projects
+- **Collaboration** — share links with access tracking
+- **4 new NMA API endpoints** — /api/nma/analyze, /api/nma/network, /api/nma/league, /api/nma/demo
+- **2 new visualization endpoints** — /api/galbraith, /api/labbe
+- **GitHub Pages docs** — 5 professional pages (index, features, pricing, api, about)
 
-### 计划中
-- 添加更多功能
-- 性能优化
-- 文档完善
+### Changed
+- API version bumped to v4.0.0
+- Total API endpoints: 12 → 34
+- Total codebase: 10,354 → 14,403 lines
+- README completely rewritten with full feature table and API reference
 
-## [1.0.0] - 2024-01-01
+## [3.0.0] — 2026-04-15
 
-### 新增
-- 初始版本发布
-- 基础功能实现
-- API接口完成
-- 文档编写
-- 测试用例添加
+### Added
+- Meta-regression analysis
+- Dose-response analysis (linear + restricted cubic spline)
+- Trim-and-fill publication bias adjustment
+- Cumulative meta-analysis
+- Printable HTML report generation
+- Interactive API documentation page
 
-### 修复
-- 初始版本，无修复记录
+## [2.0.0] — 2026-04-01
 
-### 变更
-- 初始版本，无变更记录
+### Added
+- Egger's regression test for publication bias
+- Begg's rank correlation test
+- Subgroup analysis
+- Sensitivity analysis (leave-one-out)
+- CSV upload endpoint
+- Web workbench with 3 quick datasets
 
-### 移除
-- 初始版本，无移除记录
+## [1.0.0] — 2026-03-15
 
----
-
-## 版本说明
-
-### 版本号格式
-
-本项目使用语义化版本号：`主版本号.次版本号.修订号`
-
-- **主版本号**：当你做了不兼容的 API 修改
-- **次版本号**：当你做了向下兼容的功能性新增
-- **修订号**：当你做了向下兼容的问题修正
-
-### 发布周期
-
-- **主版本**：重大功能更新或架构变更
-- **次版本**：新功能发布，每月1-2次
-- **修订版**：Bug修复，根据需要发布
-
-### 支持版本
-
-| 版本 | 支持状态 | 说明 |
-|------|----------|------|
-| 1.0.x | ✅ 支持 | 当前稳定版本 |
-| < 1.0 | ❌ 不支持 | 旧版本，请升级 |
-
----
-
-## 贡献
-
-欢迎提交 Pull Request 来完善更新日志。请遵循以下格式：
-
-```markdown
-## [版本号] - YYYY-MM-DD
-
-### 新增
-- 新功能描述
-
-### 修复
-- Bug修复描述
-
-### 变更
-- 变更描述
-
-### 移除
-- 移除功能描述
-```
-
-## 链接
-
-- [GitHub Releases](https://github.com/MoKangMedical/metaforge/releases)
-- [GitHub Issues](https://github.com/MoKangMedical/metaforge/issues)
-- [GitHub Pull Requests](https://github.com/MoKangMedical/metaforge/pulls)
-=======
-# CHANGELOG
-
-## 2026-04-22 — Hermes改进
-- 📐 理论标准化（Harness+红杉+宪法）
-- 🔒 安全规则补全（.gitignore）
->>>>>>> 95d27ab (Hermes: metaforge - CHANGELOG/README补全)
+### Added
+- Initial release
+- Fixed effect (Mantel-Haenszel) and random effects (DerSimonian-Laird) models
+- Forest plot SVG generation
+- Funnel plot SVG generation
+- PRISMA 2020 flow diagram
+- Landing page with dark sci-fi theme
+- CSV/JSON export

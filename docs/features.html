@@ -1,71 +1,179 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>功能特性 - MetaForge</title><style>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Features — MetaForge</title>
+<meta name="description" content="MetaForge features: AI-powered search, screening, extraction, quality assessment, statistical analysis, and report generation.">
+<style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e5e5e5;line-height:1.6}
-.nav{position:sticky;top:0;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:#0a0a0aee;backdrop-filter:blur(10px);border-bottom:1px solid #1a1a1a}
-.nav a{color:#a3a3a3;text-decoration:none;margin:0 0.8rem;font-size:0.9rem;transition:color 0.3s}
-.nav a:hover{color:#fff}
-.nav .brand{color:#fff;font-weight:700;font-size:1.1rem}
-.hero{padding:6rem 2rem 4rem;text-align:center;background:linear-gradient(135deg,#0a0a0a,#1a1a2e)}
-.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;background:linear-gradient(135deg,#0ea5e9,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:#a3a3a3;max-width:700px;margin:1rem auto;font-size:1.15rem}
+:root{--bg:#0a0f1a;--surface:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#64748b;--accent:#e94560;--accent2:#3b82f6;--success:#22c55e;--warn:#f59e0b;--purple:#a855f7}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.6}
+.topnav{position:sticky;top:0;z-index:100;background:rgba(10,15,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{color:var(--accent);font-weight:800;font-size:1.2rem;text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{background:var(--accent)!important;color:#fff!important;padding:6px 14px;border-radius:6px;font-weight:600!important}
 .container{max-width:1100px;margin:0 auto;padding:2rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
-.card{background:#141414;border:1px solid #262626;border-radius:16px;padding:2rem;transition:all 0.3s}
-.card:hover{border-color:#0ea5e944;transform:translateY(-3px)}
-.card h3{color:#fff;margin-bottom:0.5rem;font-size:1.15rem}
-.card p{color:#a3a3a3;font-size:0.95rem}
-.card .icon{font-size:2rem;margin-bottom:1rem}
-.cta{display:inline-block;padding:0.8rem 2rem;background:#0ea5e9;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;transition:all 0.3s}
-.cta:hover{transform:translateY(-2px);box-shadow:0 8px 25px #0ea5e944}
-.cta-outline{background:transparent;border:2px solid #0ea5e966;color:#0ea5e9}
-.price-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
-.price-card{background:#141414;border:1px solid #262626;border-radius:16px;padding:2rem;text-align:center;transition:all 0.3s}
-.price-card.featured{border-color:#0ea5e9;transform:scale(1.03)}
-.price-card h3{color:#fff;margin-bottom:0.5rem}
-.price{font-size:2.2rem;font-weight:800;color:#0ea5e9;margin:0.8rem 0}
-.price span{font-size:0.9rem;color:#737373}
+.hero{text-align:center;padding:4rem 2rem 3rem;background:linear-gradient(135deg,#0a0f1a 0%,#1a1a2e 100%)}
+.hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:0.8rem}
+.hero h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);max-width:600px;margin:0 auto;font-size:1.05rem}
+.section{padding:3rem 0}
+.section-title{text-align:center;font-size:1.8rem;font-weight:700;margin-bottom:0.5rem}
+.section-desc{text-align:center;color:var(--muted);max-width:600px;margin:0 auto 2rem}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;transition:all 0.3s}
+.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.card h3{font-size:1.1rem;margin-bottom:0.5rem}
+.card p{color:var(--muted);font-size:0.9rem}
+.card .icon-box{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1.3rem}
+.icon-blue{background:rgba(59,130,246,0.15);color:var(--accent2)}
+.icon-red{background:rgba(233,69,96,0.15);color:var(--accent)}
+.icon-green{background:rgba(34,197,94,0.15);color:var(--success)}
+.icon-purple{background:rgba(168,85,247,0.15);color:var(--purple)}
+.icon-orange{background:rgba(245,158,11,0.15);color:var(--warn)}
+.icon-cyan{background:rgba(6,182,212,0.15);color:#06b6d4}
+.tag{display:inline-block;font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.05);color:var(--muted);margin:2px}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;transition:all 0.3s}
+.price-card.featured{border-color:var(--accent);transform:scale(1.02);position:relative}
+.price-card.featured::before{content:'POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 12px;border-radius:4px;letter-spacing:1px}
+.price-card h3{font-size:1.2rem;margin-bottom:0.5rem}
+.price-tag{font-size:2.2rem;font-weight:800;color:var(--accent2);margin:0.8rem 0}
+.price-tag span{font-size:0.8rem;color:var(--muted);font-weight:400}
 .price-card ul{list-style:none;text-align:left;margin:1.5rem 0}
-.price-card li{padding:0.4rem 0;color:#a3a3a3;border-bottom:1px solid #1a1a1a;font-size:0.95rem}
-.price-card li::before{content:'✓ ';color:#0ea5e9}
-.section-title{text-align:center;font-size:2rem;margin-bottom:0.5rem;color:#fff}
-.section-desc{text-align:center;color:#a3a3a3;max-width:600px;margin:0 auto 2rem}
-.timeline{position:relative;padding-left:2rem}
-.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#0ea5e944}
-.timeline-item{position:relative;margin-bottom:2rem;padding-left:1.5rem}
-.timeline-item::before{content:'';position:absolute;left:-2.35rem;top:0.5rem;width:12px;height:12px;border-radius:50%;background:#0ea5e9}
-.timeline-item h4{color:#fff;margin-bottom:0.3rem}
-.timeline-item p{color:#a3a3a3;font-size:0.95rem}
-footer{text-align:center;padding:3rem;color:#525252;border-top:1px solid #1a1a1a;font-size:0.85rem;margin-top:4rem}
-footer a{color:#0ea5e9;text-decoration:none}
-.stats{display:flex;justify-content:center;gap:3rem;padding:2rem;flex-wrap:wrap}
-.stat{text-align:center}
-.stat .num{font-size:2rem;font-weight:800;color:#0ea5e9}
-.stat .label{color:#737373;font-size:0.85rem}
-</style></head>
-<body><nav class="nav">
-<a class="brand" href="https://mokangmedical.github.io/opc-homepage/">MoKangMedical</a>
-<div>
-<a href="index.html">首页</a>
-<a href="features.html">功能</a>
-<a href="pricing.html">定价</a>
-<a href="about.html">关于</a>
-<a href="https://github.com/MoKangMedical/metaforge">GitHub</a>
-</div>
+.price-card li{padding:0.4rem 0;color:var(--muted);font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.03)}
+.price-card li::before{content:'\2713 ';color:var(--success);font-weight:700}
+.btn{display:inline-block;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#d63a54}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-outline:hover{border-color:var(--accent2);color:var(--accent2)}
+.faq{max-width:700px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--border);padding:1rem 0}
+.faq-item h4{color:var(--text);font-size:0.95rem;margin-bottom:0.3rem}
+.faq-item p{color:var(--muted);font-size:0.85rem}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th{background:rgba(255,255,255,0.03);color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+tr:hover{background:rgba(255,255,255,0.02)}
+.check{color:var(--success)}
+.cross{color:var(--accent)}
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem;border-top:1px solid var(--border);margin-top:3rem}
+footer a{color:var(--accent2);text-decoration:none}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}.topnav{padding:0 1rem}.nav-links{gap:0.8rem;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">MetaForge</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="api.html">API</a>
+    <a href="about.html">About</a>
+    <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge">GitHub</a>
+    <a href="https://mokangmedical.github.io/metaforge/app" class="btn-nav">Try Workbench</a>
+  </div>
 </nav>
-<div class="hero"><h1>核心功能</h1><p>MetaForge 提供全方位的专业功能，助力您的工作流</p></div>
-<div class="container"><div class="grid">
-<div class="card"><h3>智能分析引擎</h3><p>基于深度学习的智能分析核心，自动处理复杂数据，提供精准洞察</p></div>
-<div class="card"><h3>实时数据处理</h3><p>毫秒级实时数据处理能力，支持大规模并发场景</p></div>
-<div class="card"><h3>可视化报告</h3><p>一键生成专业可视化报告，支持多种导出格式</p></div>
-<div class="card"><h3>API开放平台</h3><p>完整的RESTful API接口，支持第三方系统集成</p></div>
-<div class="card"><h3>团队协作</h3><p>多人实时协作，权限精细化管理，审计日志完整</p></div>
-<div class="card"><h3>安全合规</h3><p>端到端加密，符合GDPR/HIPAA等国际合规标准</p></div>
-<div class="card"><h3>自动化工作流</h3><p>可视化工作流编排，定时任务，事件触发自动化</p></div>
-<div class="card"><h3>多语言支持</h3><p>中英日韩等多语言界面，国际化部署无门槛</p></div>
-<div class="card"><h3>插件生态</h3><p>丰富的插件市场，支持自定义插件开发</p></div>
-</div></div><footer>
-<p>&copy; 2026 MoKangMedical. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
-</footer></body></html>
+
+<div class="hero">
+  <h1>Six <span class="grad">AI-Powered</span> Modules</h1>
+  <p>End-to-end meta-analysis automation. From research question to publication-ready report in under 1 hour.</p>
+</div>
+
+<div class="container">
+  <div class="section">
+    <div class="grid-2">
+      <div class="card">
+        <div class="icon-box icon-blue">S</div>
+        <h3>Smart Search Engine</h3>
+        <p>Connects directly to 15+ academic databases including PubMed, Cochrane Library, Embase, Web of Science, CNKI, and Wanfang. AI automatically constructs search strategies with MeSH expansion, synonym completion, and citation tracking.</p>
+        <div style="margin-top:0.8rem">
+          <span class="tag">PubMed</span><span class="tag">Cochrane</span><span class="tag">Embase</span><span class="tag">WoS</span><span class="tag">CNKI</span><span class="tag">Auto-dedup</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-cyan">F</div>
+        <h3>AI Screening System</h3>
+        <p>GPT-4o powered dual independent screening. NLP understands PICOS criteria, automatically excludes irrelevant literature, parses full-text PDFs, and extracts key information. Supports custom inclusion/exclusion criteria.</p>
+        <div style="margin-top:0.8rem">
+          <span class="tag">PICOS</span><span class="tag">PDF Parse</span><span class="tag">Dual Screen</span><span class="tag">16 Threads</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-purple">E</div>
+        <h3>Automated Data Extraction</h3>
+        <p>Automatically identifies and extracts study characteristics, participant information, interventions, outcomes, effect sizes, and confidence intervals. Supports table/image recognition with cross-validation ensuring 98%+ accuracy.</p>
+        <div style="margin-top:0.8rem">
+          <span class="tag">Table OCR</span><span class="tag">Cross-validation</span><span class="tag">98%+ Accuracy</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-red">Q</div>
+        <h3>Quality Assessment Engine</h3>
+        <p>Built-in Cochrane RoB 2.0, ROBINS-I, NOS, JADAD, and other mainstream assessment tools. AI evaluates bias risk across dimensions, generates visual bias summary plots, and supports custom assessment scales.</p>
+        <div style="margin-top:0.8rem">
+          <span class="tag">RoB 2.0</span><span class="tag">ROBINS-I</span><span class="tag">NOS</span><span class="tag">GRADE</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-green">A</div>
+        <h3>Advanced Statistical Analysis</h3>
+        <p>Fixed/random effects models, subgroup analysis, meta-regression, sensitivity analysis, publication bias (Egger/Begg), network meta-analysis, dose-response analysis. Real-time forest plots, funnel plots, Galbraith plots, L'Abbe plots.</p>
+        <div style="margin-top:0.8rem">
+          <span class="tag">NMA</span><span class="tag">Meta-regression</span><span class="tag">Dose-response</span><span class="tag">Interactive Charts</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="icon-box icon-orange">R</div>
+        <h3>Intelligent Report Generation</h3>
+        <p>Automatically generates PRISMA 2020 compliant structured reports. One-click export to Word/PDF/LaTeX. Built-in GRADE evidence summary tables, PRISMA flow diagrams, and auto-formatted references (AMA/Vancouver/APA).</p>
+        <div style="margin-top:0.8rem">
+          <span class="tag">PRISMA 2020</span><span class="tag">GRADE</span><span class="tag">LaTeX</span><span class="tag">Bilingual</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Feature Comparison</h2>
+    <p class="section-desc">How MetaForge compares to traditional tools</p>
+    <div class="card" style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>MetaForge</th><th>RevMan</th><th>Covidence</th><th>R (metafor)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AI Literature Search</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td><td class="cross">No</td></tr>
+          <tr><td>AI Screening (PICOS)</td><td class="check">Yes</td><td class="cross">No</td><td class="check">Partial</td><td class="cross">No</td></tr>
+          <tr><td>Auto Data Extraction</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td><td class="cross">No</td></tr>
+          <tr><td>Network Meta-Analysis</td><td class="check">Yes</td><td class="check">Yes</td><td class="cross">No</td><td class="check">Yes</td></tr>
+          <tr><td>Dose-Response</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td><td class="check">Yes</td></tr>
+          <tr><td>PRISMA 2020 Flow</td><td class="check">Auto</td><td class="check">Manual</td><td class="check">Partial</td><td class="cross">No</td></tr>
+          <tr><td>Report Generation</td><td class="check">Auto</td><td class="cross">No</td><td class="cross">No</td><td class="cross">No</td></tr>
+          <tr><td>Web Interface</td><td class="check">Yes</td><td class="check">Yes</td><td class="check">Yes</td><td class="cross">CLI</td></tr>
+          <tr><td>API Access</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td><td class="cross">No</td></tr>
+          <tr><td>Learning Curve</td><td>Low</td><td>Medium</td><td>Low</td><td>High</td></tr>
+          <tr><td>Price</td><td>From ¥299/mo</td><td>Free</td><td>$249/mo</td><td>Free</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section" style="text-align:center">
+    <h2 class="section-title">Ready to accelerate your research?</h2>
+    <p class="section-desc">Start your first meta-analysis in minutes</p>
+    <a href="https://mokangmedical.github.io/metaforge/app" class="btn btn-primary" style="margin:0.5rem">Launch Workbench</a>
+    <a href="api.html" class="btn btn-outline" style="margin:0.5rem">View API Docs</a>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2026 MetaForge — AI Meta-Analysis Platform. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
+</footer>
+</body>
+</html>

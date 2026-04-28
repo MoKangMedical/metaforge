@@ -1,74 +1,104 @@
 # MetaForge
 
-> AI循证医学研究平台 — 6大AI Agent协同，将Meta分析从45-90天压缩至1小时
+> AI Evidence-Based Medicine Research Platform — 6 AI Agents collaborate to compress meta-analysis from 45-90 days to 1 hour
 
 [![Python](https://img.shields.io/badge/python-3.9+-green.svg)]()
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-blue.svg)]()
+[![Tests](https://img.shields.io/badge/tests-155%20passed-brightgreen.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)]()
 
-## 一句话定义
+## One-Line Definition
 
-**MetaForge 不卖文献分析工具，卖Meta分析结果。** 输入研究问题，输出结构化Meta分析报告，含森林图、漏斗图、GRADE证据评级。
-
----
-
-## 核心功能
-
-### 完整闭环 — 输入数据即出结果
-
-```
-输入研究数据 → 统计分析 → 森林图/漏斗图/PRISMA → 亚组/敏感性/偏倚检验 → CSV/JSON导出
-```
-
-### 统计引擎 (真实计算)
-
-| 功能 | 方法 | 描述 |
-|------|------|------|
-| **固定效应模型** | Mantel-Haenszel | 经典固定效应Meta分析 |
-| **随机效应模型** | DerSimonian-Laird | 考虑研究间异质性 |
-| **异质性检验** | I², Q, τ² | Cochran's Q检验 |
-| **Egger检验** | 回归法 | 发表偏倚检测 |
-| **Begg检验** | 秩相关法 | 发表偏倚检测 |
-| **Trim-and-Fill** | Duval & Tweedie | 估计缺失研究并调整效应量 |
-| **亚组分析** | 按研究特征分组 | 组间差异检验 |
-| **敏感性分析** | Leave-one-out | 逐一剔除评估影响 |
-| **累积Meta分析** | 逐步添加研究 | 观察效应量演变 |
-| **森林图** | SVG生成 | 发表级图表 |
-| **漏斗图** | SVG生成 | 发表偏倚可视化 |
-| **PRISMA流程图** | SVG生成 | 符合PRISMA 2020标准 |
-
-### 12个API端点
-
-```
-GET  /api/health          健康检查
-POST /api/demo            运行演示数据
-POST /api/analyze         执行Meta分析
-POST /api/bias            发表偏倚检验 (Egger+Begg+TrimFill)
-POST /api/cumulative      累积Meta分析
-POST /api/prisma          PRISMA流程图
-POST /api/forest          森林图
-POST /api/funnel          漏斗图
-GET  /api/models          统计模型列表
-POST /api/export/csv      CSV导出
-POST /api/export/json     JSON导出
-POST /api/upload/csv      CSV上传分析
-```
-
-### Web工作台
-
-- 交互式数据输入表格
-- 3个快捷数据集 (NSCLC PD-1 / 他汀类 / 降压药)
-- CSV数据导入
-- 实时参数切换 (模型/效应量即时更新)
-- 发表偏倚检验面板
-- 累积分析图表
-- CSV/JSON结果导出
-- Ctrl+Enter快捷键
-- Toast通知
+**MetaForge doesn't sell literature analysis tools — it sells meta-analysis results.** Input a research question, get a structured meta-analysis report with forest plots, funnel plots, and GRADE evidence ratings.
 
 ---
 
-## 快速开始
+## Core Capabilities
+
+### Complete Closed Loop — Input Data, Get Results
+
+```
+Input research data → Statistical analysis → Forest/Funnel/PRISMA → Subgroup/Sensitivity/Bias → CSV/JSON/LaTeX export
+```
+
+### Statistical Engine (Real Calculations)
+
+| Feature | Method | Description |
+|---------|--------|-------------|
+| **Fixed Effect Model** | Mantel-Haenszel | Classic fixed effect meta-analysis |
+| **Random Effects Model** | DerSimonian-Laird | Accounts for between-study heterogeneity |
+| **Heterogeneity Test** | I², Q, τ² | Cochran's Q test |
+| **Egger's Test** | Regression | Publication bias detection |
+| **Begg's Test** | Rank correlation | Publication bias detection |
+| **Trim-and-Fill** | Duval & Tweedie | Estimate missing studies and adjust effect |
+| **Subgroup Analysis** | By study characteristics | Between-group difference test |
+| **Sensitivity Analysis** | Leave-one-out | Impact of excluding each study |
+| **Cumulative Meta-Analysis** | Progressive addition | Observe effect size evolution |
+| **Meta-Regression** | Weighted least squares | Effect size vs covariate |
+| **Dose-Response** | Linear + RCS spline | Non-linear dose-response modeling |
+| **Network Meta-Analysis** | Graph-theoretical | Multi-treatment comparison with SUCRA ranking |
+| **Continuous Data** | SMD (Hedges' g) / WMD | Mean difference analysis |
+| **Forest Plot** | SVG generation | Publication-quality |
+| **Funnel Plot** | SVG generation | Publication bias visualization |
+| **Galbraith Plot** | Radial plot | Heterogeneity visualization |
+| **L'Abbe Plot** | Treatment vs control | Event rate comparison |
+| **PRISMA Flow Diagram** | SVG generation | PRISMA 2020 compliant |
+| **Network Diagram** | SVG generation | NMA treatment network |
+| **League Table** | SVG generation | All pairwise NMA comparisons |
+
+### 34 API Endpoints
+
+```
+GET  /api/health              Health check
+POST /api/analyze             Complete meta-analysis
+POST /api/demo                Run demo dataset
+POST /api/bias                Publication bias tests (Egger+Begg+TrimFill)
+POST /api/cumulative          Cumulative meta-analysis
+POST /api/prisma              PRISMA flow diagram
+POST /api/forest              Forest plot
+POST /api/funnel              Funnel plot
+POST /api/galbraith           Galbraith (radial) plot
+POST /api/labbe               L'Abbe plot
+GET  /api/models              Statistical model list
+POST /api/export/csv          CSV export
+POST /api/export/json         JSON export
+POST /api/upload/csv          CSV upload analysis
+POST /api/meta_regression     Meta-regression
+POST /api/dose_response       Dose-response analysis
+POST /api/report/pdf          Printable HTML report
+POST /api/nma/analyze         Network Meta-Analysis
+POST /api/nma/network         NMA network diagram
+POST /api/nma/league          NMA league table
+GET  /api/nma/demo            NMA demo (oncology)
+POST /api/ai/search           AI literature search
+POST /api/ai/screen           AI screening
+POST /api/ai/extract          AI data extraction
+POST /api/register            User registration
+POST /api/login               User login
+POST /api/projects/save       Save project
+GET  /api/projects/list       List projects
+GET  /api/projects/{id}       Get project
+POST /api/share               Create share link
+GET  /api/shared/{token}      Access shared project
+GET  /api/docs                Interactive API docs
+```
+
+### Web Workbench
+
+- Interactive data input table
+- 3 quick datasets (NSCLC PD-1 / Statins / Antihypertensives)
+- CSV data import
+- Real-time parameter switching (model/effect measure)
+- Publication bias test panel
+- Cumulative analysis charts
+- Subgroup + sensitivity analysis
+- CSV/JSON result export
+- Ctrl+Enter shortcut
+- Toast notifications
+
+---
+
+## Quick Start
 
 ```bash
 git clone https://github.com/MoKangMedical/metaforge.git
@@ -77,30 +107,62 @@ pip install -r requirements.txt
 python3 -m uvicorn app.main:app --port 8000
 ```
 
-打开:
+Open:
 - `http://localhost:8000` → Landing Page
-- `http://localhost:8000/app` → Web工作台
+- `http://localhost:8000/app` → Web Workbench
+- `http://localhost:8000/api/docs` → API Documentation
 
 ---
 
-## 技术架构
+## Running Tests
+
+```bash
+pip install pytest httpx
+python3 -m pytest tests/ -v
+```
+
+155 tests covering:
+- Statistical engine (dichotomous + continuous data)
+- All bias tests (Egger, Begg, Trim-and-Fill)
+- Meta-regression and dose-response
+- Network Meta-Analysis
+- All API endpoints
+
+---
+
+## Technical Architecture
 
 ```
 metaforge/
 ├── app/
-│   ├── main.py              # FastAPI后端 (12个API端点 + 统计引擎)
+│   ├── main.py              # FastAPI backend (34 endpoints + full engines)
 │   ├── templates/
-│   │   └── app.html         # Web工作台 (完整交互界面)
-│   ├── agents/              # AI Agent系统
-│   ├── engines/             # Cochrane合规引擎
-│   ├── stats/               # 统计分析模块
-│   └── assessment/          # ROB2偏倚评估
-├── assets/figures/          # 发表级图表库 (6张)
-├── index.html               # Landing Page
-├── css/style.css            # 设计系统
-├── requirements.txt         # 依赖
+│   │   └── app.html         # Web workbench (interactive UI)
+│   ├── agents/              # AI Agent system (Seeker, Filter, Extractor)
+│   ├── engines/             # Cochrane-compliant engines
+│   ├── stats/               # Statistical modules
+│   └── assessment/          # ROB2 bias assessment
+├── tests/
+│   ├── test_engine.py       # 113 unit tests for MetaAnalysisEngine
+│   ├── test_nma.py          # 24 unit tests for NMAEngine
+│   └── test_api.py          # 18 integration tests for API
+├── docs/                    # GitHub Pages documentation
+│   ├── index.html           # Landing page
+│   ├── features.html        # Feature breakdown
+│   ├── pricing.html         # Pricing plans
+│   ├── api.html             # API documentation
+│   └── about.html           # About page
+├── assets/figures/          # Publication-quality charts
+├── css/style.css            # Design system
+├── requirements.txt         # Dependencies
 └── README.md
 ```
+
+---
+
+## GitHub Pages
+
+Documentation: [mokangmedical.github.io/metaforge](https://mokangmedical.github.io/metaforge/)
 
 ---
 

@@ -1,84 +1,202 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>定价方案 - MetaForge</title><style>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pricing — MetaForge</title>
+<meta name="description" content="MetaForge pricing plans for individual researchers, teams, and institutions.">
+<style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e5e5e5;line-height:1.6}
-.nav{position:sticky;top:0;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;background:#0a0a0aee;backdrop-filter:blur(10px);border-bottom:1px solid #1a1a1a}
-.nav a{color:#a3a3a3;text-decoration:none;margin:0 0.8rem;font-size:0.9rem;transition:color 0.3s}
-.nav a:hover{color:#fff}
-.nav .brand{color:#fff;font-weight:700;font-size:1.1rem}
-.hero{padding:6rem 2rem 4rem;text-align:center;background:linear-gradient(135deg,#0a0a0a,#1a1a2e)}
-.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;background:linear-gradient(135deg,#0ea5e9,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:#a3a3a3;max-width:700px;margin:1rem auto;font-size:1.15rem}
+:root{--bg:#0a0f1a;--surface:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#64748b;--accent:#e94560;--accent2:#3b82f6;--success:#22c55e;--warn:#f59e0b;--purple:#a855f7}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.6}
+.topnav{position:sticky;top:0;z-index:100;background:rgba(10,15,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{color:var(--accent);font-weight:800;font-size:1.2rem;text-decoration:none}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.85rem;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{background:var(--accent)!important;color:#fff!important;padding:6px 14px;border-radius:6px;font-weight:600!important}
 .container{max-width:1100px;margin:0 auto;padding:2rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
-.card{background:#141414;border:1px solid #262626;border-radius:16px;padding:2rem;transition:all 0.3s}
-.card:hover{border-color:#0ea5e944;transform:translateY(-3px)}
-.card h3{color:#fff;margin-bottom:0.5rem;font-size:1.15rem}
-.card p{color:#a3a3a3;font-size:0.95rem}
-.card .icon{font-size:2rem;margin-bottom:1rem}
-.cta{display:inline-block;padding:0.8rem 2rem;background:#0ea5e9;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;transition:all 0.3s}
-.cta:hover{transform:translateY(-2px);box-shadow:0 8px 25px #0ea5e944}
-.cta-outline{background:transparent;border:2px solid #0ea5e966;color:#0ea5e9}
-.price-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
-.price-card{background:#141414;border:1px solid #262626;border-radius:16px;padding:2rem;text-align:center;transition:all 0.3s}
-.price-card.featured{border-color:#0ea5e9;transform:scale(1.03)}
-.price-card h3{color:#fff;margin-bottom:0.5rem}
-.price{font-size:2.2rem;font-weight:800;color:#0ea5e9;margin:0.8rem 0}
-.price span{font-size:0.9rem;color:#737373}
+.hero{text-align:center;padding:4rem 2rem 3rem;background:linear-gradient(135deg,#0a0f1a 0%,#1a1a2e 100%)}
+.hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:0.8rem}
+.hero h1 .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);max-width:600px;margin:0 auto;font-size:1.05rem}
+.section{padding:3rem 0}
+.section-title{text-align:center;font-size:1.8rem;font-weight:700;margin-bottom:0.5rem}
+.section-desc{text-align:center;color:var(--muted);max-width:600px;margin:0 auto 2rem}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;transition:all 0.3s}
+.card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+.card h3{font-size:1.1rem;margin-bottom:0.5rem}
+.card p{color:var(--muted);font-size:0.9rem}
+.card .icon-box{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1.3rem}
+.icon-blue{background:rgba(59,130,246,0.15);color:var(--accent2)}
+.icon-red{background:rgba(233,69,96,0.15);color:var(--accent)}
+.icon-green{background:rgba(34,197,94,0.15);color:var(--success)}
+.icon-purple{background:rgba(168,85,247,0.15);color:var(--purple)}
+.icon-orange{background:rgba(245,158,11,0.15);color:var(--warn)}
+.icon-cyan{background:rgba(6,182,212,0.15);color:#06b6d4}
+.tag{display:inline-block;font-size:0.7rem;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,0.05);color:var(--muted);margin:2px}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;transition:all 0.3s}
+.price-card.featured{border-color:var(--accent);transform:scale(1.02);position:relative}
+.price-card.featured::before{content:'POPULAR';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 12px;border-radius:4px;letter-spacing:1px}
+.price-card h3{font-size:1.2rem;margin-bottom:0.5rem}
+.price-tag{font-size:2.2rem;font-weight:800;color:var(--accent2);margin:0.8rem 0}
+.price-tag span{font-size:0.8rem;color:var(--muted);font-weight:400}
 .price-card ul{list-style:none;text-align:left;margin:1.5rem 0}
-.price-card li{padding:0.4rem 0;color:#a3a3a3;border-bottom:1px solid #1a1a1a;font-size:0.95rem}
-.price-card li::before{content:'✓ ';color:#0ea5e9}
-.section-title{text-align:center;font-size:2rem;margin-bottom:0.5rem;color:#fff}
-.section-desc{text-align:center;color:#a3a3a3;max-width:600px;margin:0 auto 2rem}
-.timeline{position:relative;padding-left:2rem}
-.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#0ea5e944}
-.timeline-item{position:relative;margin-bottom:2rem;padding-left:1.5rem}
-.timeline-item::before{content:'';position:absolute;left:-2.35rem;top:0.5rem;width:12px;height:12px;border-radius:50%;background:#0ea5e9}
-.timeline-item h4{color:#fff;margin-bottom:0.3rem}
-.timeline-item p{color:#a3a3a3;font-size:0.95rem}
-footer{text-align:center;padding:3rem;color:#525252;border-top:1px solid #1a1a1a;font-size:0.85rem;margin-top:4rem}
-footer a{color:#0ea5e9;text-decoration:none}
-.stats{display:flex;justify-content:center;gap:3rem;padding:2rem;flex-wrap:wrap}
-.stat{text-align:center}
-.stat .num{font-size:2rem;font-weight:800;color:#0ea5e9}
-.stat .label{color:#737373;font-size:0.85rem}
-</style></head>
-<body><nav class="nav">
-<a class="brand" href="https://mokangmedical.github.io/opc-homepage/">MoKangMedical</a>
-<div>
-<a href="index.html">首页</a>
-<a href="features.html">功能</a>
-<a href="pricing.html">定价</a>
-<a href="about.html">关于</a>
-<a href="https://github.com/MoKangMedical/metaforge">GitHub</a>
-</div>
+.price-card li{padding:0.4rem 0;color:var(--muted);font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.03)}
+.price-card li::before{content:'\2713 ';color:var(--success);font-weight:700}
+.btn{display:inline-block;padding:10px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#d63a54}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-outline:hover{border-color:var(--accent2);color:var(--accent2)}
+.faq{max-width:700px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--border);padding:1rem 0}
+.faq-item h4{color:var(--text);font-size:0.95rem;margin-bottom:0.3rem}
+.faq-item p{color:var(--muted);font-size:0.85rem}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th{background:rgba(255,255,255,0.03);color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+tr:hover{background:rgba(255,255,255,0.02)}
+.check{color:var(--success)}
+.cross{color:var(--accent)}
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:0.8rem;border-top:1px solid var(--border);margin-top:3rem}
+footer a{color:var(--accent2);text-decoration:none}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}.topnav{padding:0 1rem}.nav-links{gap:0.8rem;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html">MetaForge</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="features.html">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="api.html">API</a>
+    <a href="about.html">About</a>
+    <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge">GitHub</a>
+    <a href="https://mokangmedical.github.io/metaforge/app" class="btn-nav">Try Workbench</a>
+  </div>
 </nav>
-<div class="hero"><h1>定价方案</h1><p>灵活的定价策略，满足不同规模团队需求</p></div>
+
+<div class="hero">
+  <h1>Simple, <span class="grad">Transparent</span> Pricing</h1>
+  <p>Choose the plan that fits your research needs. All plans include core statistical engine access.</p>
+</div>
+
 <div class="container">
-<div class="price-cards">
-<div class="price-card">
-<h3>Starter</h3><div class="price">免费<span></span></div>
-<ul><li>基础功能完整</li><li>单用户使用</li><li>社区支持</li><li>5GB存储</li></ul>
-<a class="cta cta-outline" href="https://github.com/MoKangMedical/metaforge">开始使用</a>
+  <div class="section">
+    <div class="grid-3">
+      <div class="price-card">
+        <h3>Starter</h3>
+        <div class="price-tag"><span>¥</span>299<span>/month</span></div>
+        <ul>
+          <li>3 meta-analysis projects per month</li>
+          <li>PubMed + Cochrane database access</li>
+          <li>Basic statistical analysis (fixed/random effects)</li>
+          <li>Forest plot + Funnel plot generation</li>
+          <li>PRISMA flow diagram</li>
+          <li>CSV/JSON export</li>
+          <li>Single user</li>
+          <li>Email support</li>
+        </ul>
+        <a href="https://github.com/MetaForge — AI Meta-Analysis Platform/metaforge" class="btn btn-outline" style="width:100%">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <h3>Professional</h3>
+        <div class="price-tag"><span>¥</span>999<span>/month</span></div>
+        <ul>
+          <li>Unlimited meta-analysis projects</li>
+          <li>All 15+ database connections</li>
+          <li>Network Meta-Analysis + Meta-regression</li>
+          <li>Dose-response analysis</li>
+          <li>Galbraith + L'Abbe plots</li>
+          <li>Bilingual report + LaTeX export</li>
+          <li>5-person team collaboration</li>
+          <li>API access</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="mailto:contact@metaforge.com" class="btn btn-primary" style="width:100%">Upgrade Now</a>
+      </div>
+      <div class="price-card">
+        <h3>Enterprise</h3>
+        <div class="price-tag">Custom</div>
+        <ul>
+          <li>Everything in Professional</li>
+          <li>Unlimited team members</li>
+          <li>Private deployment option</li>
+          <li>Custom AI model training</li>
+          <li>Dedicated account manager</li>
+          <li>SLA service guarantee</li>
+          <li>Training and consulting</li>
+          <li>SSO / SAML integration</li>
+        </ul>
+        <a href="mailto:contact@metaforge.com" class="btn btn-outline" style="width:100%">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Feature Comparison by Plan</h2>
+    <div class="card" style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>Starter</th><th>Professional</th><th>Enterprise</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Meta-analysis projects</td><td>3/month</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td>Database connections</td><td>2 (PubMed, Cochrane)</td><td>15+</td><td>15+ + Custom</td></tr>
+          <tr><td>Statistical models</td><td>Fixed + Random</td><td>All models</td><td>All models</td></tr>
+          <tr><td>Network Meta-Analysis</td><td class="cross">No</td><td class="check">Yes</td><td class="check">Yes</td></tr>
+          <tr><td>Meta-regression</td><td class="cross">No</td><td class="check">Yes</td><td class="check">Yes</td></tr>
+          <tr><td>Dose-response analysis</td><td class="cross">No</td><td class="check">Yes</td><td class="check">Yes</td></tr>
+          <tr><td>Report generation</td><td>Basic</td><td>Full (bilingual)</td><td>Full + Custom</td></tr>
+          <tr><td>Export formats</td><td>CSV, JSON</td><td>CSV, JSON, PDF, LaTeX</td><td>All formats</td></tr>
+          <tr><td>Team members</td><td>1</td><td>5</td><td>Unlimited</td></tr>
+          <tr><td>API access</td><td class="cross">No</td><td class="check">Yes</td><td class="check">Yes</td></tr>
+          <tr><td>Support</td><td>Email</td><td>Priority email</td><td>Dedicated manager</td></tr>
+          <tr><td>SLA</td><td class="cross">No</td><td>99.5%</td><td>99.9%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <h4>What databases does MetaForge connect to?</h4>
+        <p>MetaForge connects to 15+ databases including PubMed, Cochrane Library, Embase, Web of Science, Scopus, CNKI, Wanfang, CINAHL, PsycINFO, ERIC, and more. Starter plans include PubMed and Cochrane; Professional and Enterprise plans include all databases.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Can I export reports in LaTeX format?</h4>
+        <p>Yes. Professional and Enterprise plans support one-click export to LaTeX, PDF, Word, and CSV/JSON. LaTeX output follows journal submission templates and includes properly formatted references.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Is there a free trial?</h4>
+        <p>Yes. You can try the statistical workbench with demo data at no cost. The demo includes a complete meta-analysis workflow with forest plots, funnel plots, and bias tests. No registration required.</p>
+      </div>
+      <div class="faq-item">
+        <h4>How does MetaForge ensure data accuracy?</h4>
+        <p>MetaForge uses a dual-validation architecture: AI extraction is cross-checked by rule-based engines. All data points are traceable to source (PMID + page + table). Confidence scores are assigned to each extraction. The system achieves 98%+ accuracy on benchmark datasets.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Can I cancel my subscription anytime?</h4>
+        <p>Yes. All plans are month-to-month with no long-term commitment. You can cancel anytime from your account settings. Your data remains accessible for 30 days after cancellation.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="text-align:center">
+    <h2 class="section-title">Start your free trial today</h2>
+    <p class="section-desc">No credit card required. Try the workbench with demo data.</p>
+    <a href="https://mokangmedical.github.io/metaforge/app" class="btn btn-primary">Launch Workbench</a>
+  </div>
 </div>
-<div class="price-card featured">
-<h3>Professional</h3><div class="price">¥999<span>/月</span></div>
-<ul><li>全部高级功能</li><li>10人团队</li><li>优先支持</li><li>100GB存储</li><li>API调用</li><li>高级分析</li></ul>
-<a class="cta" href="mailto:contact@mokangmedical.com">立即升级</a>
-</div>
-<div class="price-card">
-<h3>Enterprise</h3><div class="price">定制<span></span></div>
-<ul><li>私有化部署</li><li>无限团队成员</li><li>专属客服</li><li>SLA保障</li><li>定制开发</li><li>培训服务</li></ul>
-<a class="cta cta-outline" href="mailto:contact@mokangmedical.com">商务洽谈</a>
-</div>
-</div>
-<div class="stats" style="margin-top:3rem">
-<div class="stat"><div class="num">500+</div><div class="label">企业客户</div></div>
-<div class="stat"><div class="num">99.9%</div><div class="label">可用性SLA</div></div>
-<div class="stat"><div class="num">24/7</div><div class="label">技术支持</div></div>
-</div>
-</div><footer>
-<p>&copy; 2026 MoKangMedical. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
-</footer></body></html>
+
+<footer>
+  <p>&copy; 2026 MetaForge — AI Meta-Analysis Platform. Part of <a href="https://mokangmedical.github.io/opc-homepage/">OPC Ecosystem</a>.</p>
+</footer>
+</body>
+</html>
