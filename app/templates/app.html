@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaForge — AI Meta分析平台</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--bg2:#0f1629;--bg3:rgba(15,22,41,0.8);--border:rgba(255,255,255,0.06);--border2:rgba(99,179,237,0.2);
+--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--blue:#3b82f6;--cyan:#06b6d4;--purple:#8b5cf6;
+--pink:#ec4899;--green:#10b981;--red:#ef4444;--orange:#f59e0b;--grad:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-decoration:none}
+.container{max-width:1400px;margin:0 auto;padding:0 24px}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:100;padding:14px 0;background:rgba(10,14,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.3rem;color:#fff}
+.logo-icon{width:36px;height:36px;background:var(--grad);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.nav-links{display:flex;gap:24px}
+.nav-links a{color:var(--text2);font-size:0.9rem;font-weight:500;transition:color 0.3s}
+.nav-links a:hover{color:#fff}
+
+/* Steps */
+.steps{display:flex;gap:4px;margin:24px 0}
+.step{flex:1;height:4px;border-radius:2px;background:var(--border);transition:all 0.5s;position:relative}
+.step.active{background:var(--blue);box-shadow:0 0 10px rgba(59,130,246,0.5)}
+.step.done{background:var(--green)}
+.step-label{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:0.65rem;color:var(--text3)}
+
+/* Panels */
+.panel{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:24px}
+.panel-title{font-size:1.3rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.panel-title .badge{padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600}
+.badge-blue{background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3)}
+.badge-green{background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3)}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:0.85rem;font-weight:500;color:var(--text2)}
+input,textarea,select{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--text);font-family:inherit;font-size:0.95rem;transition:border-color 0.3s;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+textarea{min-height:100px;resize:vertical}
+select{cursor:pointer}
+option{background:var(--bg2);color:var(--text)}
+
+/* Button */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:10px;font-weight:600;font-size:1rem;cursor:pointer;border:none;font-family:inherit;transition:all 0.3s}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 4px 20px rgba(59,130,246,0.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(59,130,246,0.5)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--blue);background:rgba(59,130,246,0.1)}
+.btn-sm{padding:8px 20px;font-size:0.85rem}
+.actions{display:flex;gap:12px;margin-top:24px;justify-content:flex-end}
+
+/* Progress */
+.progress-bar{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:16px 0}
+.progress-fill{height:100%;background:var(--grad);border-radius:4px;transition:width 0.5s}
+.step-status{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.step-status:last-child{border-bottom:none}
+.step-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0}
+.step-icon.pending{background:var(--border)}
+.step-icon.running{background:rgba(59,130,246,0.2);animation:pulse 1.5s infinite}
+.step-icon.done{background:rgba(16,185,129,0.2)}
+.step-icon.error{background:rgba(239,68,68,0.2)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.step-info{flex:1}
+.step-name{font-weight:600;font-size:0.95rem}
+.step-detail{font-size:0.8rem;color:var(--text3);margin-top:2px}
+
+/* Results grid */
+.results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.stat-value{font-size:1.8rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat-value.blue{color:#60a5fa}
+.stat-value.green{color:#6ee7b7}
+.stat-value.red{color:#fca5a5}
+.stat-value.purple{color:#c4b5fd}
+.stat-label{font-size:0.8rem;color:var(--text3);margin-top:4px}
+
+/* Tables */
+.data-table{width:100%;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.data-table th{background:rgba(59,130,246,0.1);padding:12px 16px;font-size:0.85rem;font-weight:600;text-align:left;color:var(--text2)}
+.data-table td{padding:10px 16px;font-size:0.85rem;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* Plot containers */
+.plot-container{background:#0d1117;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
+.plot-container .plot-title{padding:16px 20px;font-weight:600;font-size:0.95rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.plot-container .plot-body{min-height:300px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab{padding:10px 20px;font-size:0.9rem;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.3s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Report */
+.report{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:40px;line-height:1.8}
+.report h1{font-size:1.8rem;font-weight:800;margin-bottom:24px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.report h2{font-size:1.3rem;font-weight:700;margin:32px 0 16px;color:var(--text)}
+.report h3{font-size:1.1rem;font-weight:600;margin:24px 0 12px;color:var(--text)}
+.report p{color:var(--text2);margin-bottom:12px}
+.report table{width:100%;border-collapse:collapse;margin:16px 0}
+.report th,.report td{padding:8px 12px;border:1px solid var(--border);font-size:0.85rem;text-align:left}
+.report th{background:rgba(59,130,246,0.1);font-weight:600}
+.report code{background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.85rem}
+.report pre{background:#0d1117;padding:16px;border-radius:8px;overflow-x:auto;margin:12px 0}
+.report pre code{background:none;padding:0}
+.report strong{color:var(--text)}
+.report hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+/* PRISMA */
+.prisma-container{background:var(--bg2);border-radius:12px;padding:20px;overflow-x:auto}
+
+/* Sensitivity */
+.sens-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.sens-bar{flex:1;height:20px;background:var(--border);border-radius:4px;position:relative;overflow:hidden}
+.sens-fill{height:100%;border-radius:4px;transition:width 0.5s}
+
+/* Hidden */
+.hidden{display:none}
+
+/* Responsive */
+@media(max-width:768px){
+  .form-grid{grid-template-columns:1fr}
+  .results-grid{grid-template-columns:repeat(2,1fr)}
+  .steps{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <div class="logo"><div class="logo-icon">⚡</div>MetaForge</div>
+    <div class="nav-links">
+      <a href="#" onclick="showSection('input')">新建分析</a>
+      <a href="#" onclick="loadDemo()">演示</a>
+      <a href="/">首页</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding-top:24px;padding-bottom:60px">
+
+<!-- Progress Steps -->
+<div class="steps" id="stepsBar">
+  <div class="step" id="s0"><div class="step-label">输入</div></div>
+  <div class="step" id="s1"><div class="step-label">检索</div></div>
+  <div class="step" id="s2"><div class="step-label">筛选</div></div>
+  <div class="step" id="s3"><div class="step-label">提取</div></div>
+  <div class="step" id="s4"><div class="step-label">分析</div></div>
+  <div class="step" id="s5"><div class="step-label">可视化</div></div>
+  <div class="step" id="s6"><div class="step-label">报告</div></div>
+</div>
+
+<!-- Section: Input Form -->
+<div id="section-input" class="panel">
+  <div class="panel-title">📋 输入研究方案 <span class="badge badge-blue">PICOS</span></div>
+  <div class="form-grid">
+    <div class="form-group full">
+      <label>研究标题</label>
+      <input id="f-title" placeholder="例: PD-1抑制剂联合化疗治疗晚期NSCLC的Meta分析">
+    </div>
+    <div class="form-group full">
+      <label>研究背景</label>
+      <textarea id="f-background" placeholder="简述研究背景和知识空白..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>检索词 / PubMed检索式</label>
+      <input id="f-query" placeholder="例: PD-1 AND chemotherapy AND NSCLC">
+    </div>
+    <div class="form-group">
+      <label>最大检索数</label>
+      <input id="f-max" type="number" value="300" min="50" max="1000">
+    </div>
+    <div class="form-group">
+      <label>P — 目标人群 (纳入关键词,逗号分隔)</label>
+      <input id="f-pop" placeholder="例: NSCLC, non-small cell lung cancer">
+    </div>
+    <div class="form-group">
+      <label>I — 干预措施 (纳入关键词)</label>
+      <input id="f-int" placeholder="例: PD-1, pembrolizumab, nivolumab">
+    </div>
+    <div class="form-group">
+      <label>效应量类型</label>
+      <select id="f-measure">
+        <option value="OR">OR (Odds Ratio) — 二分类</option>
+        <option value="RR">RR (Risk Ratio) — 二分类</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>统计模型</label>
+      <select id="f-model">
+        <option value="random">随机效应 (DerSimonian-Laird)</option>
+        <option value="fixed">固定效应 (Mantel-Haenszel)</option>
+      </select>
+    </div>
+    <div class="form-group full">
+      <label>纳入研究数据 (JSON格式, 可留空先检索)</label>
+      <textarea id="f-studies" rows="8" placeholder='[
+  {"name":"Gandhi 2018","pmid":"29658856","e_events":69,"e_total":410,"c_events":109,"c_total":206},
+  {"name":"Paz-Ares 2018","pmid":"30280887","e_events":88,"e_total":278,"c_events":118,"c_total":281}
+]'></textarea>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="loadDemo()">📊 加载演示数据</button>
+    <button class="btn btn-primary" id="btnRun" onclick="runAnalysis()">🚀 开始分析</button>
+  </div>
+</div>
+
+<!-- Section: Progress -->
+<div id="section-progress" class="panel hidden">
+  <div class="panel-title">⏳ 分析进行中 <span class="badge badge-blue" id="progressPct">0%</span></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+  <div id="stepList"></div>
+</div>
+
+<!-- Section: Results -->
+<div id="section-results" class="hidden">
+
+<!-- Stats -->
+<div class="results-grid" id="statsGrid"></div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('forest')">🌲 森林图</div>
+  <div class="tab" onclick="switchTab('funnel')">🔄 漏斗图</div>
+  <div class="tab" onclick="switchTab('prisma')">📊 PRISMA</div>
+  <div class="tab" onclick="switchTab('data')">📋 数据表</div>
+  <div class="tab" onclick="switchTab('sensitivity')">🔍 敏感性分析</div>
+  <div class="tab" onclick="switchTab('report')">📝 论文报告</div>
+</div>
+
+<!-- Forest -->
+<div class="tab-content active" id="tab-forest">
+  <div class="plot-container"><div class="plot-body" id="forestPlot"></div></div>
+</div>
+
+<!-- Funnel -->
+<div class="tab-content" id="tab-funnel">
+  <div class="plot-container"><div class="plot-body" id="funnelPlot"></div></div>
+</div>
+
+<!-- PRISMA -->
+<div class="tab-content" id="tab-prisma">
+  <div class="prisma-container" id="prismaBox"></div>
+</div>
+
+<!-- Data Table -->
+<div class="tab-content" id="tab-data">
+  <div class="panel"><div id="dataTable"></div></div>
+</div>
+
+<!-- Sensitivity -->
+<div class="tab-content" id="tab-sensitivity">
+  <div class="panel"><div class="panel-title">🔍 敏感性分析 (Leave-one-out)</div><div id="sensitivityBox"></div></div>
+</div>
+
+<!-- Report -->
+<div class="tab-content" id="tab-report">
+  <div class="report" id="reportBox"></div>
+  <div class="actions">
+    <button class="btn btn-secondary" onclick="downloadReport()">⬇️ 下载 Markdown</button>
+    <button class="btn btn-primary" onclick="switchTab('forest')">🌲 返回图表</button>
+  </div>
+</div>
+
+</div><!-- /section-results -->
+
+</div><!-- /container -->
+
+<script>
+const STEPS = ["queued","searching","fetching","screening","extracting","analyzing","visualizing","reporting","completed"];
+let currentJob = null;
+let pollTimer = null;
+
+function showSection(name){
+  document.getElementById('section-input').classList.toggle('hidden', name!=='input');
+  document.getElementById('section-progress').classList.toggle('hidden', name!=='progress');
+  document.getElementById('section-results').classList.toggle('hidden', name!=='results');
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='forest'&&window._forestData) Plotly.newPlot('forestPlot',window._forestData.data,window._forestData.layout,{responsive:true});
+  if(name==='funnel'&&window._funnelData) Plotly.newPlot('funnelPlot',window._funnelData.data,window._funnelData.layout,{responsive:true});
+}
+
+function loadDemo(){
+  fetch('/api/demo').then(r=>r.json()).then(d=>{
+    showResults(d);
+    document.getElementById('s0').classList.add('done');
+  });
+  showSection('results');
+  // Mark all steps done
+  for(let i=0;i<=6;i++) document.getElementById('s'+i).classList.add('done');
+}
+
+async function runAnalysis(){
+  const params = {
+    title: document.getElementById('f-title').value || 'Meta分析',
+    background: document.getElementById('f-background').value,
+    search_query: document.getElementById('f-query').value,
+    max_results: parseInt(document.getElementById('f-max').value)||300,
+    criteria: {
+      population_include: document.getElementById('f-pop').value,
+      intervention_include: document.getElementById('f-int').value
+    },
+    measure: document.getElementById('f-measure').value,
+    model: document.getElementById('f-model').value,
+    studies_data: [],
+    criteria_text: document.getElementById('f-pop').value ? 
+      `P: ${document.getElementById('f-pop').value}; I: ${document.getElementById('f-int').value}` : ''
+  };
+  
+  // Parse studies if provided
+  const studiesText = document.getElementById('f-studies').value.trim();
+  if(studiesText){
+    try{ params.studies_data = JSON.parse(studiesText); }catch(e){ alert('研究数据JSON格式错误: '+e.message); return; }
+  }
+  
+  document.getElementById('btnRun').disabled = true;
+  document.getElementById('btnRun').textContent = '⏳ 分析中...';
+  showSection('progress');
+  updateProgress(0,'queued');
+  
+  const res = await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)});
+  const data = await res.json();
+  if(!data.success){ alert('启动失败'); return; }
+  currentJob = data.job_id;
+  pollTimer = setInterval(pollStatus, 2000);
+}
+
+async function pollStatus(){
+  if(!currentJob) return;
+  const res = await fetch('/api/status/'+currentJob);
+  const d = await res.json();
+  updateProgress(d.progress, d.step);
+  
+  if(d.step==='completed'){
+    clearInterval(pollTimer);
+    showResults(d);
+    showSection('results');
+    document.getElementById('btnRun').disabled = false;
+    document.getElementById('btnRun').textContent = '🚀 开始分析';
+  }
+  if(d.step==='error'){
+    clearInterval(pollTimer);
+    alert('分析出错: '+(d.error||'未知错误'));
+    document.getElementById('btnRun').disabled = false;
+    document.getElementById('btnRun').textContent = '🚀 开始分析';
+  }
+}
+
+function updateProgress(pct, step){
+  document.getElementById('progressBar').style.width = pct+'%';
+  document.getElementById('progressPct').textContent = pct+'%';
+  
+  const stepNames = {queued:'排队中',searching:'🔍 正在检索PubMed...',fetching:'📥 正在获取文献详情...',
+    screening:'🎯 正在智能筛选...',extracting:'📊 正在提取数据...',analyzing:'🧮 正在统计分析...',
+    visualizing:'📈 正在生成图表...',reporting:'📝 正在撰写报告...',completed:'✅ 分析完成!'};
+  
+  let html = '';
+  STEPS.forEach((s,i)=>{
+    const status = STEPS.indexOf(step)>=i ? (STEPS.indexOf(step)>i?'done':'running') : 'pending';
+    const icon = status==='done'?'✓':status==='running'?'◉':'○';
+    html += `<div class="step-status">
+      <div class="step-icon ${status}">${icon}</div>
+      <div class="step-info"><div class="step-name">${stepNames[s]||s}</div></div>
+    </div>`;
+  });
+  document.getElementById('stepList').innerHTML = html;
+  
+  // Update step bar
+  for(let i=0;i<=6;i++){
+    document.getElementById('s'+i).className = 'step';
+    if(i < STEPS.indexOf(step)) document.getElementById('s'+i).classList.add('done');
+    else if(i === STEPS.indexOf(step)) document.getElementById('s'+i).classList.add('active');
+  }
+}
+
+function showResults(d){
+  const r = d.result;
+  if(!r) return;
+  
+  // Stats
+  const het_color = r.heterogeneity==='low'?'green':r.heterogeneity==='moderate'?'purple':'red';
+  const het_cn = {low:'低度',moderate:'中度',high:'高度'};
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-value blue">${r.pooled_effect.toFixed(3)}</div><div class="stat-label">合并 ${r.measure}</div></div>
+    <div class="stat-card"><div class="stat-value blue">${r.p_value<0.001?'<0.001':r.p_value.toFixed(4)}</div><div class="stat-label">P 值</div></div>
+    <div class="stat-card"><div class="stat-value ${het_color}">${r.i_squared.toFixed(1)}%</div><div class="stat-label">I² 异质性 (${het_cn[r.heterogeneity]||r.heterogeneity})</div></div>
+    <div class="stat-card"><div class="stat-value purple">${r.studies.length}</div><div class="stat-label">纳入研究数</div></div>
+  `;
+  
+  // Forest plot
+  if(d.forest_html){
+    try{ window._forestData = JSON.parse(d.forest_html);
+      setTimeout(()=>Plotly.newPlot('forestPlot',window._forestData.data,window._forestData.layout,{responsive:true}),100);
+    }catch(e){}
+  }
+  
+  // Funnel plot
+  if(d.funnel_html){
+    try{ window._funnelData = JSON.parse(d.funnel_html);
+      setTimeout(()=>Plotly.newPlot('funnelPlot',window._funnelData.data,window._funnelData.layout,{responsive:true}),100);
+    }catch(e){}
+  }
+  
+  // PRISMA
+  if(d.prisma_svg){
+    document.getElementById('prismaBox').innerHTML = d.prisma_svg;
+  }
+  
+  // Data table
+  let tbl = `<table class="data-table"><thead><tr><th>研究</th><th>实验组(事件/总数)</th><th>对照组(事件/总数)</th><th>${r.measure}</th><th>95% CI</th><th>权重</th></tr></thead><tbody>`;
+  r.studies.forEach(s=>{
+    tbl += `<tr><td><strong>${s.name}</strong></td><td>${s.e_events}/${s.e_total}</td><td>${s.c_events}/${s.c_total}</td>
+      <td style="font-family:'JetBrains Mono',monospace">${s.effect.toFixed(3)}</td>
+      <td style="font-family:'JetBrains Mono',monospace">[${s.ci_l.toFixed(3)}, ${s.ci_u.toFixed(3)}]</td>
+      <td style="font-family:'JetBrains Mono',monospace">${s.weight.toFixed(1)}%</td></tr>`;
+  });
+  tbl += '</tbody></table>';
+  document.getElementById('dataTable').innerHTML = tbl;
+  
+  // Sensitivity
+  if(d.sensitivity && d.sensitivity.leave_one_out){
+    let shtml = '';
+    const fullEffect = d.sensitivity.full.pooled_effect;
+    d.sensitivity.leave_one_out.forEach(s=>{
+      const pct = ((s.effect - fullEffect)/fullEffect*100);
+      const color = pct>0?'#ef4444':'#10b981';
+      shtml += `<div class="sens-row">
+        <div style="width:150px;font-size:0.85rem"><strong>${s.excluded}</strong></div>
+        <div class="sens-bar"><div class="sens-fill" style="width:${Math.min(100,Math.abs(pct)*10)}%;background:${color}"></div></div>
+        <div style="width:200px;font-size:0.8rem;font-family:'JetBrains Mono',monospace">
+          ${s.effect.toFixed(3)} [${s.ci_l.toFixed(3)}, ${s.ci_u.toFixed(3)}] ${pct>0?'+':''}${pct.toFixed(1)}%
+        </div>
+      </div>`;
+    });
+    document.getElementById('sensitivityBox').innerHTML = shtml;
+  }
+  
+  // Report
+  if(d.report){
+    document.getElementById('reportBox').innerHTML = marked_simple(d.report);
+    window._reportMd = d.report;
+  }
+  
+  // Show
+  showSection('results');
+  for(let i=0;i<=6;i++) document.getElementById('s'+i).classList.add('done');
+}
+
+// Simple markdown to HTML
+function marked_simple(md){
+  return md
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/```([\s\S]*?)```/g,'<pre><code>$1</code></pre>')
+    .replace(/`(.+?)`/g,'<code>$1</code>')
+    .replace(/^\- (.+)$/gm,'<li>$1</li>')
+    .replace(/\n\n/g,'<br><br>')
+    .replace(/\|(.+)\|/g, (match)=>{
+      if(match.includes('---')) return '';
+      const cells = match.split('|').filter(c=>c.trim());
+      return '<tr>'+cells.map(c=>'<td>'+c.trim()+'</td>').join('')+'</tr>';
+    })
+    .replace(/^(.+)$/gm, (m)=>{
+      if(m.startsWith('<')) return m;
+      return m;
+    });
+}
+
+function downloadReport(){
+  if(!window._reportMd) return;
+  const blob = new Blob([window._reportMd],{type:'text/markdown'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'meta-analysis-report.md'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Init: mark first step
+document.getElementById('s0').classList.add('done');
+</script>
+</body>
+</html>
